@@ -1,0 +1,243 @@
+@font-face {
+  font-family: Orbitron;
+  src: url(Orbitron-Regular.ttf);
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: Orbitron;
+  src: url(Orbitron-Bold.ttf);
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: Orbitron;
+  src: url(Orbitron-ExtraBold.ttf);
+  font-weight: bolder;
+}
+
+@font-face {
+  font-family: Orbitron;
+  src: url(Orbitron-Medium.ttf);
+  font-weight: lighter;
+}
+
+:root {
+  --ion-background-color: #242428;
+  --ion-font-family: Orbitron;
+  --ion-text-color: var(--ion-color-primary);
+  --ion-panel-background-color: #1A1A1E;
+}
+
+ion-toolbar {
+  --background: var(--ion-panel-background-color);
+  --color: var(--ion-color-primary);
+}
+
+ion-input, ion-searchbar {
+  --background: var(--ion-panel-background-color) !important;
+  --color: white !important;
+  --placeholder-color: white !important;
+}
+
+ion-input > input {
+  border: 1px solid white !important;
+  border-radius: 5px !important;
+}
+
+ion-label {
+  --color: var(--ion-color-light) !important;
+}
+
+ion-loading {
+  --background: var(--ion-panel-background-color) !important;
+  color: var(--ion-color-light) !important;
+}
+
+ion-card {
+  --background: #1A1A1E;
+}
+
+.select-interface-option .alert-checkbox-label, .select-interface-option .alert-radio-label {
+  color: white !important;
+}
+
+
+.alert-wrapper.ion-overlay-wrapper.sc-ion-alert-md {
+  --width: 380px !important;
+  --max-width: 380px !important; 
+}
+
+:root {
+	--ion-color-primary: #FF1FEC;
+	--ion-color-primary-rgb: 255,31,236;
+	--ion-color-primary-contrast: #ffffff;
+	--ion-color-primary-contrast-rgb: 255,255,255;
+	--ion-color-primary-shade: #e01bd0;
+	--ion-color-primary-tint: #ff35ee;
+
+	--ion-color-secondary: #FDFD55;
+	--ion-color-secondary-rgb: 253,253,85;
+	--ion-color-secondary-contrast: #000000;
+	--ion-color-secondary-contrast-rgb: 0,0,0;
+	--ion-color-secondary-shade: #dfdf4b;
+	--ion-color-secondary-tint: #fdfd66;
+
+	--ion-color-tertiary: #1BF0FE;
+	--ion-color-tertiary-rgb: 27,240,254;
+	--ion-color-tertiary-contrast: #000000;
+	--ion-color-tertiary-contrast-rgb: 0,0,0;
+	--ion-color-tertiary-shade: #18d3e0;
+	--ion-color-tertiary-tint: #32f2fe;
+
+	--ion-color-success: #2dd36f;
+	--ion-color-success-rgb: 45,211,111;
+	--ion-color-success-contrast: #000000;
+	--ion-color-success-contrast-rgb: 0,0,0;
+	--ion-color-success-shade: #28ba62;
+	--ion-color-success-tint: #42d77d;
+
+	--ion-color-warning: #ffc409;
+	--ion-color-warning-rgb: 255,196,9;
+	--ion-color-warning-contrast: #000000;
+	--ion-color-warning-contrast-rgb: 0,0,0;
+	--ion-color-warning-shade: #e0ac08;
+	--ion-color-warning-tint: #ffca22;
+
+	--ion-color-danger: #eb445a;
+	--ion-color-danger-rgb: 235,68,90;
+	--ion-color-danger-contrast: #ffffff;
+	--ion-color-danger-contrast-rgb: 255,255,255;
+	--ion-color-danger-shade: #cf3c4f;
+	--ion-color-danger-tint: #ed576b;
+
+	--ion-color-medium: #92949c;
+	--ion-color-medium-rgb: 146,148,156;
+	--ion-color-medium-contrast: #000000;
+	--ion-color-medium-contrast-rgb: 0,0,0;
+	--ion-color-medium-shade: #808289;
+	--ion-color-medium-tint: #9d9fa6;
+
+	--ion-color-light: #f4f5f8;
+	--ion-color-light-rgb: 244,245,248;
+	--ion-color-light-contrast: #000000;
+	--ion-color-light-contrast-rgb: 0,0,0;
+	--ion-color-light-shade: #d7d8da;
+  --ion-color-light-tint: #f5f6f9;
+  
+
+  --form-control-color: var(--ion-color-primary);
+
+}
+
+
+.tabulator .tabulator-header .tabulator-col {
+  background: transparent;
+  border: none;
+  color: var(--ion-color-primary);
+}
+
+.tabulator .tabulator-header {
+  background: transparent;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.tabulator {
+  background: transparent;
+  border: none;
+}
+
+.tabulator .tabulator-row {
+  background: transparent;
+  color: var(--ion-color-light);
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.tabulator .tabulator-tableholder .tabulator-table {
+  background: transparent;
+}
+
+.tabulator .tabulator-row .tabulator-cell {
+  border: none;
+}
+
+
+.waryes-checkbox input {
+  color: black;
+  background-color: black;
+}
+
+.tabulator .tabulator-selected {
+  background: rgba(var(--ion-color-primary-rgb), 0.4);
+}
+
+.form-control {
+  font-family: system-ui, sans-serif;
+  font-size: 2rem;
+  font-weight: bold;
+  line-height: 1.1;
+  display: grid;
+  grid-template-columns: 1em auto;
+  gap: 0.5em;
+}
+
+.form-control + .form-control {
+  margin-top: 1em;
+}
+
+.form-control--disabled {
+  color: var(--form-control-disabled);
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  /* Add if not using autoprefixer */
+  -webkit-appearance: none;
+  /* Remove most all native input styles */
+  appearance: none;
+  /* For iOS < 15 */
+  background-color: var(--form-background);
+  /* Not removed via appearance */
+  margin: 0;
+
+  font: inherit;
+  color: var(--ion-color-light);
+  background-color: var(--ion-color-light);
+  width: 1.15em;
+  height: 1.15em;
+  border: 0.15em solid var(--ion-color-light);
+  border-radius: 0.15em;
+  transform: translateY(-0.075em);
+
+  display: grid;
+  place-content: center;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 0.65em;
+  height: 0.65em;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  transform: scale(0);
+  transform-origin: bottom left;
+  transition: 120ms transform ease-in-out;
+  box-shadow: inset 1em 1em var(--form-control-color);
+  /* Windows High Contrast Mode */
+  background-color: var(--ion-color-primary);
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+  background-color: var(--ion-color-primary) !important;
+}
+
+input[type="checkbox"]:indeterminate::before {
+  color: gray;
+  background-color: var(--ion-color-primary) !important;
+}
+
+ion-split-pane {
+  --side-max-width: 256px;
+}

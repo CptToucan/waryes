@@ -2,6 +2,7 @@
 /lib/
 /test/
 custom-elements.json
+/out-tsc/
 # top level source
 my-element.js
 my-element.js.map

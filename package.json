@@ -3,8 +3,8 @@
   "private": true,
   "version": "1.0.2",
   "description": "A simple web component",
-  "main": "my-element.js",
-  "module": "my-element.js",
+  "main": "init.js",
+  "module": "init.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
@@ -23,7 +23,7 @@
     "docs:serve": "wds --root-dir=docs --node-resolve --watch",
     "analyze": "cem analyze --litelement --globs \"src/**/*.ts\"",
     "analyze:watch": "cem analyze --litelement --globs \"src/**/*.ts\" --watch",
-    "serve": "wds --watch",
+    "serve": "wds --node-resolve --app-index index.html --open --watch",
     "serve:prod": "MODE=prod npm run serve",
     "test": "npm run test:dev && npm run test:prod",
     "test:dev": "wtr",
@@ -41,7 +41,10 @@
   "author": "Google LLC",
   "license": "BSD-3-Clause",
   "dependencies": {
-    "lit": "^2.1.0"
+    "@ionic/core": "^6.1.6",
+    "echarts": "^5.3.2",
+    "lit": "^2.1.0",
+    "tabulator-tables": "^5.2.4"
   },
   "devDependencies": {
     "@11ty/eleventy": "^0.12.1",
@@ -53,6 +56,7 @@
     "@rollup/plugin-node-resolve": "^13.0.4",
     "@rollup/plugin-replace": "^3.0.0",
     "@types/mocha": "^9.0.0",
+    "@types/tabulator-tables": "^5.1.2",
     "@typescript-eslint/eslint-plugin": "^4.3.0",
     "@typescript-eslint/parser": "^4.30.0",
     "@web/dev-server": "^0.1.22",
@@ -71,7 +75,7 @@
     "rollup": "^2.70.2",
     "rollup-plugin-summary": "^1.2.3",
     "rollup-plugin-terser": "^7.0.2",
-    "typescript": "^4.3.5"
+    "typescript": "^4.6.3"
   },
   "customElements": "custom-elements.json"
 }
