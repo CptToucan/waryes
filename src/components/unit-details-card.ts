@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {WarnoStatic, WarnoWeapon, WarnoPlatoon} from '../types';
+import {WarnoStatic, WarnoWeapon, WarnoPlatoon, WarnoUnit} from '../types';
 import {humanize} from '../utils/humanize';
 import {modalController} from '@ionic/core';
 import { extractUnitInformation, platoonStats } from "../utils/extract-unit-information";
@@ -140,7 +140,7 @@ export class Unit extends LitElement {
   }
 
   @property()
-  unit?: WarnoStatic;
+  unit?: WarnoUnit;
 
   @state()
   selectedTab = '';
@@ -187,13 +187,16 @@ export class Unit extends LitElement {
     }
 
     for (const weapon of weapons) {
-      weaponTemplateResult.push(
-        html` <ion-segment-button value=${weapon.name}>
-          <ion-label>
-            <ion-text color="light"> ${weapon.name} </ion-text>
-          </ion-label>
-        </ion-segment-button>`
-      );
+      if(weapon.name) {
+        weaponTemplateResult.push(
+          html` <ion-segment-button value=${weapon.name}>
+            <ion-label>
+              <ion-text color="light"> ${weapon.name} </ion-text>
+            </ion-label>
+          </ion-segment-button>`
+        );
+      }
+
     }
 
     const selectedWeapon: WarnoWeapon | undefined = weapons.find(
@@ -201,7 +204,7 @@ export class Unit extends LitElement {
     );
     let weaponDetailsResult: TemplateResult = html``;
 
-    if (selectedWeapon !== undefined) {
+    if (this.selectedTab !== undefined && selectedWeapon) {
       weaponDetailsResult = this.renderWeapon(selectedWeapon);
     }
 
@@ -281,11 +284,14 @@ export class Unit extends LitElement {
   async openSelected() {
     const modal = await modalController.create({
       component: 'selected-units-modal',
+      componentProps: {
+        selectedUnits: [this.unit],
+      }
     });
 
     modal.componentProps = {
-      parentModal: modal,
-      selectedUnits: [this.unit],
+      ...modal.componentProps,
+      parentModal: modal
     };
     modal.present();
   }
@@ -293,7 +299,6 @@ export class Unit extends LitElement {
   render() {
 
     if(this.unit) {
-      console.log(this.unit);
       const {
         staticInformation,
         allWeaponsInformation,
@@ -303,7 +308,6 @@ export class Unit extends LitElement {
         allWeaponsInformation: WarnoWeapon[];
         platoonInformation: WarnoPlatoon;
       } = extractUnitInformation(this.unit);
-  
   
   
       if (this.unit) {

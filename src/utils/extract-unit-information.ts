@@ -46,27 +46,14 @@ export const staticStats = [
 ]
 
 export function extractUnitInformation(unit: WarnoUnit) {
-  const weaponOneInformation: WarnoWeapon = {};
-  const weaponTwoInformation: WarnoWeapon = {};
-  const weaponThreeInformation: WarnoWeapon = {};
   const allWeaponsInformation: WarnoWeapon[] = [
-    weaponOneInformation,
-    weaponTwoInformation,
-    weaponThreeInformation,
   ];
   const platoonInformation: WarnoPlatoon = {};
   const staticInformation: WarnoStatic = {};
 
   for (const attribute in unit) {
-    if (attribute.startsWith('weaponOne')) {
-      weaponOneInformation[attribute.replace('weaponOne_', '')] =
-        unit[attribute];
-    } else if (attribute.startsWith('weaponTwo')) {
-      weaponTwoInformation[attribute.replace('weaponTwo_', '')] =
-        unit[attribute];
-    } else if (attribute.startsWith('weaponThree')) {
-      weaponThreeInformation[attribute.replace('weaponThree_', '')] =
-        unit[attribute];
+    if(attribute === "weaponOne" || attribute === "weaponTwo" || attribute === "weaponThree") {
+      allWeaponsInformation.push(unit[attribute]);
     } else if (platoonStats.includes(attribute)) {
       platoonInformation[attribute] = unit[attribute];
     } else {

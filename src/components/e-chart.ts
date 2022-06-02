@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import {css, html, LitElement, TemplateResult} from 'lit';
+import {css, html, LitElement} from 'lit';
 import {customElement, query, property} from 'lit/decorators.js';
 
 @customElement('e-chart')
