@@ -1,4 +1,5 @@
 import {IonMenu} from '@ionic/core/components/ion-menu';
+import {IonModal} from '@ionic/core/components/ion-modal';
 import {css, html, LitElement} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {UnitService} from '../services/unit';
@@ -13,12 +14,16 @@ export class Application extends LitElement {
   @query('ion-menu')
   menu!: IonMenu;
 
+  @query('ion-modal')
+  modal?: IonModal;
+
   protected createRenderRoot() {
     return this;
   }
 
   private routeDidChange() {
     this.menu.close();
+    this.modal?.dismiss()
   }
 
   @state()
@@ -37,6 +42,10 @@ export class Application extends LitElement {
         <ion-route
           url="/unit/:unitId"
           component="unit-details-route"
+        ></ion-route>
+        <ion-route
+          url="/workspace"
+          component="workspace-route"
         ></ion-route>
       </ion-router>
 
@@ -69,7 +78,7 @@ export class Application extends LitElement {
                   </ion-item>
                 </ion-router-link>
 
-                <ion-router-link href="/">
+                <ion-router-link href="/workspace">
                   <ion-item>
                     <ion-icon
                       name="bar-chart-outline"
@@ -88,6 +97,13 @@ export class Application extends LitElement {
               <ion-toolbar>
                 <ion-buttons slot="start">
                   <ion-menu-button></ion-menu-button>
+                </ion-buttons>
+                <ion-buttons slot="end">
+                  <ion-router-link href="https://discord.gg/gqBgvgGj8H" target="_blank">
+                    <ion-button>
+                      <ion-icon name="logo-discord"></ion-icon>
+                    </ion-button>
+                  </ion-router-link>
                 </ion-buttons>
 
                 <img height="43" src="/waryes-transparent.png" />

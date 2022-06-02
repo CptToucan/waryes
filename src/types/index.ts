@@ -6,8 +6,16 @@ type WarnoPlatoon = {
   [key: string]: string;
 }
 
-type WarnoUnit = {
+
+interface WarnoUnitType {
   [key: string]: string;
+}
+
+type WarnoUnit = WarnoUnitType & {
+  id: string
+  weaponOne: WarnoWeapon
+  weaponTwo: WarnoWeapon
+  weaponThree: WarnoWeapon
 }
 
 type WarnoStatic = {

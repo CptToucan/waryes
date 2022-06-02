@@ -3,6 +3,7 @@ import "./routes/application";
 import "./routes/index";
 import "./routes/units-list";
 import "./routes/unit-details";
+import "./routes/workspace";
 
 /** Components */
 import "./components/unit-details-card";

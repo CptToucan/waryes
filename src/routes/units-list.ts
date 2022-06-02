@@ -7,6 +7,8 @@ import {humanize} from '../utils/humanize';
 import {IonModal} from '@ionic/core/components/ion-modal';
 import {modalController} from '@ionic/core';
 
+import { platoonStats, staticStats } from '../utils/extract-unit-information';
+
 @customElement('units-list-route')
 export class UnitsListRoute extends LitElement {
   static get styles() {
@@ -24,9 +26,7 @@ export class UnitsListRoute extends LitElement {
 
   async firstUpdated() {
     const units: WarnoUnit[] = UnitService.units;
-
-    const firstUnit: WarnoUnit = units[0];
-
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const columns: any[] = [
       {
@@ -39,11 +39,10 @@ export class UnitsListRoute extends LitElement {
       }
     ];
 
-    for (const columnName in firstUnit) {
+    for (const columnName of [...platoonStats, ...staticStats]) {
       if(columnName !== "name") {
         columns.push({title: humanize(columnName), field: columnName});
       }
-
     }
 
     this.table = new Tabulator('#units-table', {
@@ -57,11 +56,15 @@ export class UnitsListRoute extends LitElement {
   async openSelected() {
     const modal = await modalController.create({
       component: 'selected-units-modal',
+      componentProps: {
+        selectedUnits: this.table?.getSelectedData(),
+      }
     });
 
+
     modal.componentProps = {
-      parentModal: modal,
-      selectedUnits: this.table?.getSelectedData(),
+      ...modal.componentProps,
+      parentModal: modal
     };
     modal.present();
   }
