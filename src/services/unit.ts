@@ -1,46 +1,52 @@
 import {WarnoUnit} from '../types';
 import {latinize} from '../utils/latinize';
+// @ts-ignore
+import UnitJson from "../../data/warno-units-v6.json";
 
 class UnitServiceClass {
   private async _fetchData() {
-    const response = await fetch('/warno-units-v6.json');
-    const json = await response.json();
-
-    const units: WarnoUnit[] = json.map(function (
-      unit: {[key: string]: string},
-      index: number
-    ) {
-      const newUnit: WarnoUnit = {
-        id: `${index}`,
-        weaponOne: {weaponId: 'weaponOne'},
-        weaponTwo: {weaponId: 'weaponTwo'},
-        weaponThree: {weaponId: 'weaponThree'},
-      } as unknown as WarnoUnit;
-
-      for (const prop in unit) {
-        // Weapons have the weapon number before the underscore
-        const splitProp = prop.split('_');
-
-        if (splitProp.length > 1) {
-          const weaponName = splitProp[0];
-          const weaponProp = splitProp[1];
-
-          if (weaponName === 'weaponOne') {
-            newUnit.weaponOne[weaponProp] = unit[prop];
-          } else if (weaponName === 'weaponTwo') {
-            newUnit.weaponTwo[weaponProp] = unit[prop];
-          } else if (weaponName === 'weaponThree') {
-            newUnit.weaponThree[weaponProp] = unit[prop];
+    try {
+      const units: WarnoUnit[] = UnitJson.map(function (
+        unit: {[key: string]: string},
+        index: number
+      ) {
+        const newUnit: WarnoUnit = {
+          id: `${index}`,
+          weaponOne: {weaponId: 'weaponOne'},
+          weaponTwo: {weaponId: 'weaponTwo'},
+          weaponThree: {weaponId: 'weaponThree'},
+        } as unknown as WarnoUnit;
+  
+        for (const prop in unit) {
+          // Weapons have the weapon number before the underscore
+          const splitProp = prop.split('_');
+  
+          if (splitProp.length > 1) {
+            const weaponName = splitProp[0];
+            const weaponProp = splitProp[1];
+  
+            if (weaponName === 'weaponOne') {
+              newUnit.weaponOne[weaponProp] = unit[prop];
+            } else if (weaponName === 'weaponTwo') {
+              newUnit.weaponTwo[weaponProp] = unit[prop];
+            } else if (weaponName === 'weaponThree') {
+              newUnit.weaponThree[weaponProp] = unit[prop];
+            }
+          } else {
+            newUnit[prop] = unit[prop];
           }
-        } else {
-          newUnit[prop] = unit[prop];
         }
-      }
-
-      return newUnit;
-    });
-
-    return units;
+  
+        return newUnit;
+      });
+  
+      return units;
+    }
+    catch(err) {
+      console.error(err);
+      return [];
+    }
+    
   }
   private _units: WarnoUnit[] = [];
 

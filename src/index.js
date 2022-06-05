@@ -10,3 +10,8 @@ import "./components/unit-details-card";
 import "./components/selected-units-modal";
 import "./components/search-results";
 import "./components/e-chart";
+import "./components/gridstack";
+import "./components/waryes-card";
+
+import "../styles/app.css";
+import "../node_modules/gridstack/dist/gridstack.min.css";

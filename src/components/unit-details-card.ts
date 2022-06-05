@@ -14,13 +14,18 @@ type AttributeGroup = {
 export class Unit extends LitElement {
   static get styles() {
     return css`
+      :host {
+        overflow: hidden;
+        display: block;
+        height: 100%;
+      }
       .card {
         background-color: var(--ion-panel-background-color);
         border-radius: 5px;
-        border: 1px solid var(--ion-color-medium);
         padding-left: 8px;
         padding-right: 8px;
         max-width: 512px;
+        height: 100%;
       }
 
       .card-header {

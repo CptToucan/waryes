@@ -1,30 +1,39 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import {css, html, LitElement} from 'lit';
 import {customElement, query, property} from 'lit/decorators.js';
+import * as echarts from 'echarts';
 
 @customElement('e-chart')
 export class EChart extends LitElement {
   @property()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any;
+  options?: echarts.EChartsOption;
 
   @query('#echart')
   chartRoot!: HTMLDivElement;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  echartsInstance: any;
+  echartsInstance?: echarts.ECharts;
 
   willUpdate() {
-    if(this.echartsInstance) {
+    if (this.echartsInstance && this.options) {
       this.echartsInstance.setOption(this.options);
     }
+  }
+
+  resize() {
+    setTimeout(() => {
+      if (this.echartsInstance) {
+        this.echartsInstance.resize();
+      }
+    }, 100);
   }
 
   static get styles() {
     return css`
       #echart {
-        height: 600px;
-        width: 600px;
+        height: 100%;
+        width: 100%;
       }
     `;
   }
@@ -33,10 +42,29 @@ export class EChart extends LitElement {
     // Couldn't get echarts to be imported via Typescript due to some legacy process code in echarts.
     // @ts-ignore
     echarts.registerTheme('waryes', theme);
-    // @ts-ignore
-    const chart = echarts.init(this.chartRoot, 'waryes');
-    chart.setOption(this.options);
-    this.echartsInstance = chart;
+    if (this.options) {
+      const chart = echarts.init(this.chartRoot, 'waryes');
+      chart.setOption(this.options);
+      this.echartsInstance = chart;
+      this.echartsInstance.resize();
+      
+      setTimeout(() => {
+        if (this.echartsInstance) {
+          this.echartsInstance.resize();
+        }
+      }, 100);
+    }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('resize', this.resize.bind(this));
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('resize', this.resize.bind(this));
+    this.echartsInstance?.dispose();
   }
 
   render() {

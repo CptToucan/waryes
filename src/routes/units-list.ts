@@ -7,7 +7,7 @@ import {humanize} from '../utils/humanize';
 import {IonModal} from '@ionic/core/components/ion-modal';
 import {modalController} from '@ionic/core';
 
-import { platoonStats, staticStats } from '../utils/extract-unit-information';
+import { platoonStats, staticStats, weaponStats } from '../utils/extract-unit-information';
 
 @customElement('units-list-route')
 export class UnitsListRoute extends LitElement {
@@ -35,11 +35,12 @@ export class UnitsListRoute extends LitElement {
         formatter: "link", formatterParams: {
           labelField: "name",
           urlPrefix: "/#/unit/"
-        }
+        },
+        minWidth: 200 
       }
     ];
 
-    for (const columnName of [...platoonStats, ...staticStats]) {
+    for (const columnName of [...staticStats, ...platoonStats, ...weaponStats.map((el) => `weaponOne.${el}`), ...weaponStats.map((el) => `weaponTwo.${el}`), ...weaponStats.map((el) => `weaponThree.${el}`)]) {
       if(columnName !== "name") {
         columns.push({title: humanize(columnName), field: columnName});
       }

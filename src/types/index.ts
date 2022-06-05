@@ -22,4 +22,15 @@ type WarnoStatic = {
   [key: string]: string;
 }
 
-export { WarnoWeapon, WarnoPlatoon, WarnoUnit, WarnoStatic };
+enum DashboardType {
+  UNIT,
+  CHART,
+}
+
+type Dashboard = {
+  id: string
+  type: DashboardType,
+  data: unknown
+}
+
+export { WarnoWeapon, WarnoPlatoon, WarnoUnit, WarnoStatic, DashboardType, Dashboard };
