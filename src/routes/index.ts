@@ -1,5 +1,7 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement} from 'lit/decorators.js';
+// @ts-ignore
+import WaryesImage from "../../images/waryes-transparent.png";
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
@@ -18,7 +20,7 @@ export class IndexRoute extends LitElement {
           <ion-row class="ion-justify-content-center">
             <ion-col>
               <div style="width: 100%; display: flex; justify-content: center">
-                <img height="86" src="/waryes-transparent.png" />
+                <img height="86" src=${WaryesImage} />
               </div>
             </ion-col>
           </ion-row>

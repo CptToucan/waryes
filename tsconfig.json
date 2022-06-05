@@ -2,26 +2,37 @@
   "compilerOptions": {
     "target": "es2019",
     "module": "es2020",
+    "moduleResolution": "node",
+    "noEmitOnError": false,
     "lib": ["es6", "DOM", "DOM.Iterable"],
-    "declaration": true,
-    "declarationMap": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
     "sourceMap": true,
     "inlineSources": true,
-    "outDir": "./out-tsc",
+    "incremental": true,
+    "skipLibCheck": true,
+
+
+    "declaration": true,
+    "declarationMap": true,
+
+
+    "outDir": "./build/tsc",
+    "baseUrl": "/",
     "rootDir": "./src",
-    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
+
     "plugins": [
       {
         "name": "ts-lit-plugin",
@@ -29,6 +40,6 @@
       }
     ]
   },
-  "include": ["src/**/*.ts", "node_modules/@ionic/core/components/*.d.ts", "node_modules/@types/tabulator-tables/*.d.ts"],
+  "include": ["src/**/*.ts", "node_modules/@ionic/core/components/*.d.ts", "node_modules/gridstack/dist/es5/types.d.ts"],
   "exclude": [],
 }

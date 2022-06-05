@@ -3,7 +3,8 @@ import {IonModal} from '@ionic/core/components/ion-modal';
 import {css, html, LitElement} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {UnitService} from '../services/unit';
-//UnitService.getUnits();
+// @ts-ignore
+import WaryesImage from "../../images/waryes-transparent.png";
 
 @customElement('application-route')
 export class Application extends LitElement {
@@ -106,14 +107,14 @@ export class Application extends LitElement {
                   </ion-router-link>
                 </ion-buttons>
 
-                <img height="43" src="/waryes-transparent.png" />
+                <img height="43" src=${WaryesImage} />
               </ion-toolbar>
             </ion-header>
 
             ${this.loadedUnits
               ? html`<ion-content class="ion-padding"
-                  ><ion-nav></ion-nav
-                ></ion-content>`
+                  ><ion-router-outlet></ion-router-outlet>
+                </ion-content>`
               : html`<ion-content class=""
                   ><ion-progress-bar type="indeterminate"></ion-progress-bar>
                   <div>Loading...</div></ion-content
