@@ -18,14 +18,16 @@
   "license": "BSD-3-Clause",
   "dependencies": {
     "@ionic/core": "6.1.7",
+    "@lit-labs/motion": "^1.0.2",
+    "@vaadin/grid": "^23.1.0",
     "echarts": "^5.3.2",
     "gridstack": "^5.1.0",
-    "lit": "^2.1.0",
-    "tabulator-tables": "^5.2.4"
+    "lit": "^2.1.0"
   },
   "devDependencies": {
     "@11ty/eleventy": "^0.12.1",
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.1",
+    "@babel/preset-typescript": "^7.17.12",
     "@custom-elements-manifest/analyzer": "^0.5.7",
     "@types/tabulator-tables": "^5.1.2",
     "@typescript-eslint/eslint-plugin": "^4.3.0",

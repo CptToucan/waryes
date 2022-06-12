@@ -1,36 +1,46 @@
 import {EChartsOption} from 'echarts';
-import {css, html, LitElement} from 'lit';
+import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {UnitService} from '../services/unit';
-import {WarnoUnit, WarnoWeapon, Dashboard, DashboardType} from '../types';
+import {
+  Dashboard,
+  DashboardType,
+  quality,
+  UnitMetadata,
+  metadataStore,
+  WeaponMetadata,
+} from '../types';
+import {modalController} from '@ionic/core';
+import {UrlWatcher} from '../services/location';
 
 function b64_to_utf8(str: string): string {
   return decodeURIComponent(escape(window.atob(str)));
 }
 
-const quality: stringToNumberInterface = {
-  "Bad": 0,
-  "Mediocre": 1,
-  "Normal": 2,
-  "Good": 3,
-  "Very Good": 4,
-  "Exceptional": 5
-}
+const qualityToIntegerMap: qualityToIntegerInterface = {
+  [quality.BAD]: 0,
+  [quality.MEDIOCRE]: 1,
+  [quality.NORMAL]: 2,
+  [quality.GOOD]: 3,
+  [quality.VERY_GOOD]: 4,
+  [quality.EXCEPTIONAL]: 5,
+};
+
+type qualityToIntegerInterface = {
+  [key in quality]: number;
+};
 
 interface stringToNumberInterface {
-  [key: string]: number
+  [key: string]: number;
 }
 
 const yesNo: stringToNumberInterface = {
-  "Yes": 1,
-  "No": 0
-}
-
-const qualityFields = ["agility", "stealth", "optics"];
-const yesNoFields = ["revealInfluence"];
+  Yes: 1,
+  No: 0,
+};
 
 type comparisonSettings = {
-  selectedUnitWeapons: {id: string; weapon: string}[];
+  selectedUnitWeapons: {id: string; weapon: number}[];
   unitFields: string[];
   weaponFields: string[];
 };
@@ -38,34 +48,76 @@ type comparisonSettings = {
 @customElement('workspace-route')
 export class UnitsListRoute extends LitElement {
   static get styles() {
-    return css``;
+    return css`
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+    `;
   }
+
+  registeredCallback = false;
 
   protected createRenderRoot() {
     return this;
   }
 
+  async openModal() {
+    const modal = await modalController.create({
+      component: 'unit-select-modal',
+      componentProps: {},
+    });
+
+    modal.componentProps = {
+      ...modal.componentProps,
+      parentModal: modal,
+    };
+    modal.present();
+  }
+
   @state()
   _chartOptions?: any;
 
+  @state()
   comparisonSettings?: comparisonSettings;
 
   connectedCallback() {
+    this.updateComparisonSettings();
+
+    if (this.registeredCallback === false) {
+      UrlWatcher.registerCallback(this.updateComparisonSettings.bind(this));
+      this.registeredCallback = true;
+    }
+
     super.connectedCallback();
-    const urlSearchParams = window.location.hash.split('?')[1];
-    this.comparisonSettings = JSON.parse(b64_to_utf8(urlSearchParams));
   }
 
-  transformToNumber(fieldName: string, input: string): string {
-    
-    if(qualityFields.includes(fieldName)) {
-      return `${quality[input as keyof stringToNumberInterface]}`;
+  updateComparisonSettings() {
+    const urlSearchParams = window.location.hash.split('?')[1];
+
+    if (urlSearchParams?.length > 0) {
+      this.comparisonSettings = JSON.parse(b64_to_utf8(urlSearchParams));
+    } else {
+      this.comparisonSettings = undefined;
     }
-    else if(yesNoFields.includes(fieldName)) {
-      return `${yesNo[input as keyof stringToNumberInterface]}`;
+    this.requestUpdate();
+  }
+
+  transformToChartComparison(fieldName: string, unit: UnitMetadata): unknown {
+    const allMetadata = UnitService.metadata;
+
+    const fieldMetadata = allMetadata[fieldName as keyof metadataStore];
+    const fieldValue = unit[fieldName as keyof UnitMetadata];
+
+    if (fieldMetadata.type === 'enum') {
+      return qualityToIntegerMap[fieldValue as keyof qualityToIntegerInterface];
+    } else if (fieldMetadata.type === 'boolean') {
+      return yesNo[fieldValue as keyof stringToNumberInterface];
     }
 
-    return input;
+    return fieldValue;
   }
 
   generateChartOptions() {
@@ -74,7 +126,7 @@ export class UnitsListRoute extends LitElement {
     const legend: string[] = [];
 
     if (this.comparisonSettings) {
-      const units: WarnoUnit[] = UnitService.getUnitsById(
+      const units: UnitMetadata[] = UnitService.getUnitsById(
         this.comparisonSettings?.selectedUnitWeapons.map((unit) => unit.id)
       );
       const selectedUnitFields = this.comparisonSettings.unitFields;
@@ -92,15 +144,19 @@ export class UnitsListRoute extends LitElement {
         )?.weapon;
 
         legend.push(unit.name);
+
         for (const field of selectedUnitFields) {
-          valuesForUnit.push(this.transformToNumber(field, unit[field]));
+          valuesForUnit.push(
+            <string>this.transformToChartComparison(field, unit)
+          );
         }
 
         for (const field of selectedWeaponFields) {
-          if (selectedWeapon) {
-            const weaponData: string = (
-              unit[selectedWeapon] as unknown as WarnoWeapon
-            )[field];
+          if (selectedWeapon !== undefined) {
+            const weaponData =
+              unit.weaponMetadata[selectedWeapon][
+                field as keyof WeaponMetadata
+              ];
             valuesForUnit.push(weaponData);
           } else {
             console.error(
@@ -137,14 +193,14 @@ export class UnitsListRoute extends LitElement {
       },
       tooltip: {
         trigger: 'item',
-        confine: true
+        confine: true,
       },
       radar: {
         indicator: indicators,
-        radius: "60%",
+        radius: '60%',
         shape: 'circle',
         axisName: {
-          show: true
+          show: true,
         },
 
         splitLine: {
@@ -176,10 +232,28 @@ export class UnitsListRoute extends LitElement {
 
   render() {
     const dashboard: Dashboard[] = this.generateDashboard();
+    let pageContent: TemplateResult;
+    if (dashboard.length > 0) {
+      pageContent = html`<gridstack-dashboard
+        .dashboard=${dashboard}
+      ></gridstack-dashboard>`;
+    } else {
+      pageContent = html`<div class="empty-state">
+        <ion-icon name="document-outline"></ion-icon>
+        <h2>No workspace configured</h2>
+        <div>
+          <ion-button @click=${this.openModal} size="large"
+            >Configure</ion-button
+          >
+        </div>
+      </div>`;
+    }
 
-    return html`<gridstack-dashboard
-      .dashboard=${dashboard}
-    ></gridstack-dashboard>`;
+    return html`${pageContent}  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button ?disabled=${this.comparisonSettings === undefined} @click=${() => {this.comparisonSettings = undefined; this.requestUpdate()}}>
+      <ion-icon name="trash-bin-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>`;
   }
 
   generateDashboard(): Dashboard[] {
@@ -194,7 +268,7 @@ export class UnitsListRoute extends LitElement {
       const units = UnitService.getUnitsById(
         this.comparisonSettings.selectedUnitWeapons.map((el) => el.id)
       );
-      console.log(units);
+
       const dashboardUnits: Dashboard[] = units.map((unit) => {
         return {id: `unit_${unit.id}`, type: DashboardType.UNIT, data: unit};
       });
@@ -204,14 +278,3 @@ export class UnitsListRoute extends LitElement {
     return dashboard;
   }
 }
-
-/* html`<waryes-card style="width: 100%; height: 512px;"><e-chart .options=${this.generateChartOptions()}></e-chart></waryes-card>` */
-/*
-${units.map((unit) => {
-  return html`<div class="grid-stack-item" gs-w="3" gs-h="auto">
-    <div class="grid-stack-content">
-      <unit-details-card .unit=${unit}></unit-details-card>
-    </div>
-  </div>`;
-})}
-*/
