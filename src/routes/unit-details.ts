@@ -40,8 +40,8 @@ export class UnitDetailsRoute extends LitElement {
     return html`
       <ion-content>
         <ion-grid>
-          <ion-row>
-            <ion-col style="display: flex; justify-content: center;">
+          <ion-row style="justify-content: center">
+            <ion-col style="display: flex; justify-content: center; align-items: center; max-width: 512px;">
               ${until(this.renderUnit(), html`Loading...`)}
             </ion-col>
           </ion-row>
