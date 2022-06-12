@@ -54,6 +54,10 @@ ion-loading {
   color: var(--ion-color-light) !important;
 }
 
+vaadin-grid-sorter {
+  color: var(--ion-color-primary);
+}
+
 ion-card {
   --background: #1A1A1E;
 }
@@ -63,9 +67,10 @@ ion-card {
 }
 
 
-.alert-wrapper.ion-overlay-wrapper.sc-ion-alert-md {
+.alert-wrapper.ion-overlay-wrapper.sc-ion-alert-md, .alert-wrapper.ion-overlay-wrapper.sc-ion-alert-ios {
   --width: 380px !important;
   --max-width: 380px !important; 
+  --background: var(--ion-background-color);
 }
 
 .grid-stack-content {
@@ -73,6 +78,19 @@ ion-card {
   padding: 4px;
   display: flex;
   flex-direction: column;
+}
+
+.empty-state {
+  margin-top: 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.empty-state ion-icon {
+  font-size: 128px;
+  color: var(--ion-color-primary) !important;
 }
 
 :root {
@@ -579,3 +597,35 @@ ion-split-pane {
   -o-transition: left 0s, top 0s, height 0s, width 0s;
   transition: left 0s, top 0s, height 0s, width 0s;
 }
+
+
+
+.v-fade { transition: opacity 0.1s ease-in; }
+
+
+vaadin-grid {
+  --lumo-base-color: var(--ion-background-color);
+  --lumo-body-text-color: var(--ion-color-light);
+  --lumo-primary-color-50pct: var(--ion-color-tertiary);
+    --lumo-tertiary-text-color: var(--ion-color-medium);
+  --_lumo-grid-border-color: rgba(var(--ion-color-primary-rgb), 0.4);
+  --_lumo-grid-secondary-border-color: rgba(var(--ion-color-primary-rgb), 0.4);
+  --lumo-font-family: Orbitron;
+}
+
+[part~="header-cell"] ::slotted(vaadin-grid-cell-content) {
+  background-color: white !important;
+  color: black !important;
+}
+
+/*
+.v-hidden {
+  position: relative;
+  top: 0px;
+}
+
+.v-display {
+  position: relative;
+  top: 30px;
+}
+*/

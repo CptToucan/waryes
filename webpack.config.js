@@ -14,12 +14,6 @@ module.exports = {
     historyApiFallback: true,
   },
   resolve: {
-    alias: {
-      'jquery': 'gridstack/dist/jq/jquery.js',
-      'jquery-ui': 'gridstack/dist/jq/jquery-ui.js',
-      'jquery.ui': 'gridstack/dist/jq/jquery-ui.js',
-      'jquery.ui.touch-punch': 'gridstack/dist/jq/jquery.ui.touch-punch.js',
-    },
     extensions: ['.tsx', '.ts', '.js'],
     plugins: [new TsConfigPathsPlugin()],
   },

@@ -4,7 +4,7 @@ import {css, html, LitElement} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {UnitService} from '../services/unit';
 // @ts-ignore
-import WaryesImage from "../../images/waryes-transparent.png";
+import WaryesImage from '../../images/waryes-transparent.png';
 
 @customElement('application-route')
 export class Application extends LitElement {
@@ -24,7 +24,7 @@ export class Application extends LitElement {
 
   private routeDidChange() {
     this.menu.close();
-    this.modal?.dismiss()
+    //this.modal?.dismiss();
   }
 
   @state()
@@ -34,7 +34,7 @@ export class Application extends LitElement {
     await UnitService.getUnits();
     this.loadedUnits = true;
   }
-
+  //  <ion-route-redirect from="/workspace-clear" to="/workspace"></ion-route-redirect>
   render() {
     return html`
       <ion-router ?useHash=${true} @ionRouteDidChange="${this.routeDidChange}">
@@ -44,6 +44,7 @@ export class Application extends LitElement {
           url="/unit/:unitId"
           component="unit-details-route"
         ></ion-route>
+
         <ion-route
           url="/workspace"
           component="workspace-route"
@@ -51,7 +52,7 @@ export class Application extends LitElement {
       </ion-router>
 
       <ion-app>
-        <ion-split-pane content-id="main" when="md">
+  
           <ion-menu side="start" menu-id="first" content-id="main">
             <ion-content>
               <ion-list>
@@ -100,7 +101,10 @@ export class Application extends LitElement {
                   <ion-menu-button></ion-menu-button>
                 </ion-buttons>
                 <ion-buttons slot="end">
-                  <ion-router-link href="https://discord.gg/gqBgvgGj8H" target="_blank">
+                  <ion-router-link
+                    href="https://discord.gg/gqBgvgGj8H"
+                    target="_blank"
+                  >
                     <ion-button>
                       <ion-icon name="logo-discord"></ion-icon>
                     </ion-button>
@@ -120,8 +124,10 @@ export class Application extends LitElement {
                   <div>Loading...</div></ion-content
                 >`}
           </div>
-        </ion-split-pane>
+
       </ion-app>
     `;
   }
 }
+
+//      <ion-split-pane content-id="main" when="md">         </ion-split-pane>

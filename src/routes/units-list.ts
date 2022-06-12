@@ -1,13 +1,22 @@
-import {css, html, LitElement} from 'lit';
-import {customElement, query} from 'lit/decorators.js';
-import {WarnoUnit} from '../types';
+import {css, html, LitElement, TemplateResult, render} from 'lit';
+import {customElement, query, state} from 'lit/decorators.js';
+import {fieldType, UnitMetadata} from '../types';
 import {UnitService} from '../services/unit';
-import {TabulatorFull as Tabulator} from 'tabulator-tables';
-import {humanize} from '../utils/humanize';
 import {IonModal} from '@ionic/core/components/ion-modal';
-import {modalController} from '@ionic/core';
-
-import { platoonStats, staticStats, weaponStats } from '../utils/extract-unit-information';
+import '@vaadin/grid';
+import '@vaadin/grid/vaadin-grid-sort-column.js';
+import '@vaadin/grid/vaadin-grid-column-group.js';
+import {
+  GridColumn,
+  GridItemModel,
+  GridSorterDirection,
+  Grid,
+} from '@vaadin/grid';
+import {animate} from '@lit-labs/motion';
+import {FilterMetadata} from '../metadata/FilterMetadata';
+import {GridSorterDirectionChangedEvent} from '@vaadin/grid/vaadin-grid-sorter';
+import {IonGrid} from '@ionic/core/components/ion-grid';
+import {IonContent} from '@ionic/core/components/ion-content';
 
 @customElement('units-list-route')
 export class UnitsListRoute extends LitElement {
@@ -18,85 +27,186 @@ export class UnitsListRoute extends LitElement {
   @query('ion-modal')
   modal!: IonModal;
 
-  table?: Tabulator;
+  @query('ion-grid')
+  ionGrid!: IonGrid;
+
+  @query('#units-list-content')
+  ionContent!: IonContent;
+
+  @query('vaadin-grid')
+  grid!: Grid;
 
   protected createRenderRoot() {
     return this;
   }
 
-  async firstUpdated() {
-    const units: WarnoUnit[] = UnitService.units;
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const columns: any[] = [
-      {
-        field: "id",
-        title: "Name",
-        formatter: "link", formatterParams: {
-          labelField: "name",
-          urlPrefix: "/#/unit/"
-        },
-        minWidth: 200 
-      }
-    ];
+  @state()
+  units: UnitMetadata[] = [];
 
-    for (const columnName of [...staticStats, ...platoonStats, ...weaponStats.map((el) => `weaponOne.${el}`), ...weaponStats.map((el) => `weaponTwo.${el}`), ...weaponStats.map((el) => `weaponThree.${el}`)]) {
-      if(columnName !== "name") {
-        columns.push({title: humanize(columnName), field: columnName});
+  @state()
+  filters: FilterMetadata<unknown>[] = [];
+
+  @state()
+  columns: TemplateResult[] = [];
+
+  @state()
+  showFilterSelection = false;
+
+  @state()
+  sort?: {field: string; direction: GridSorterDirection};
+
+  filtersChanged(event: CustomEvent) {
+    this.filters = event.detail.value;
+    this.requestUpdate();
+  }
+
+  sortChanged(event: GridSorterDirectionChangedEvent) {
+    console.log(event);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    window.addEventListener('resize', this.resize.bind(this));
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('resize', this.resize.bind(this));
+  }
+
+  resize() {
+    this.grid.style.height = `${
+      this.ionContent.clientHeight - this.ionGrid.clientHeight - 80
+    }px`;
+  }
+
+  async firstUpdated() {
+    this.units = UnitService.units;
+
+    const columns: TemplateResult[] = [];
+    //const unitFieldColumns: TemplateResult[] = [];
+
+    columns.push(
+      html`<vaadin-grid-sort-column
+        path=${UnitService.metadata.name.id}
+        auto-width
+        frozen
+        resizable
+        .headerRenderer=${this.headerRenderer}
+        .renderer=${this.linkCellRenderer}
+      ></vaadin-grid-sort-column>`
+    );
+
+    for (const fieldMetadata of [
+      ...UnitService.findFieldMetadataByType(fieldType.STATIC),
+      ...UnitService.findFieldMetadataByType(fieldType.PLATOON),
+    ]) {
+      if (fieldMetadata.id !== 'name') {
+        columns.push(
+          html`<vaadin-grid-sort-column
+            auto-width
+            resizable
+            path=${fieldMetadata.id}
+            .headerRenderer=${this.headerRenderer}
+            @direction-changed=${this.sortChanged}
+          ></vaadin-grid-sort-column>`
+        );
       }
     }
 
-    this.table = new Tabulator('#units-table', {
-      height: '700px',
-      data: units,
-      columns,
-      selectable: true,
-    });
+    /*
+    for (const weapon of ['weaponOne', 'weaponTwo', 'weaponThree']) {
+      columns.push(html`<vaadin-grid-column-group header=${weapon}>
+        ${weaponStats.map((weaponField) => {
+          return html`<vaadin-grid-sort-column
+            auto-width
+            resizable
+            path=${`${weapon}.${weaponField}`}
+          ></vaadin-grid-sort-column>`;
+        })}
+      </vaadin-grid-column-group>`);
+    }
+    */
+
+    this.columns = columns;
+    setTimeout(() => this.resize());
   }
 
-  async openSelected() {
-    const modal = await modalController.create({
-      component: 'selected-units-modal',
-      componentProps: {
-        selectedUnits: this.table?.getSelectedData(),
-      }
-    });
+  linkCellRenderer(
+    root: HTMLElement,
+    _: GridColumn,
+    model: GridItemModel<UnitMetadata>
+  ) {
+    return render(
+      html`<a href="/#/unit/${model.item.id}">${model.item.name}</a>`,
+      root
+    );
+  }
 
-
-    modal.componentProps = {
-      ...modal.componentProps,
-      parentModal: modal
-    };
-    modal.present();
+  headerRenderer(root: HTMLElement, cell: GridColumn) {
+    return render(
+      html`<span
+        style="color: var(--ion-color-primary); font-size: 16px; font-weight: bold !important; text-transform: capitalize;"
+        >${cell?.path?.split('.').join(' ')}</span
+      >`,
+      root
+    );
   }
 
   render() {
+    const renderGrid = true;
+    let filteredUnits: UnitMetadata[] = [...this.units];
+
+    for (const filter of this.filters) {
+      const filterFunction = filter.getFilterFunctionForOperator();
+      filteredUnits = filteredUnits.filter(filterFunction(filter));
+    }
+
     return html`
-      <ion-modal>
-        <ion-content>
-          <ion-text color="secondary">
-            <h1>Selected Units</h1>
-          </ion-text>
-        </ion-content>
-      </ion-modal>
-      <ion-content>
+      <ion-content id="units-list-content">
         <ion-grid>
           <ion-row class="ion-justify-content-start">
-            <ion-col>
+            <ion-col
+              style="display: flex; justify-content: space-between; align-items: center"
+            >
               <ion-text color="secondary">
                 <h1 style="font-weight: bold">Units</h1>
               </ion-text>
+              <div>
+                <ion-button
+                  color="primary"
+                  fill="outline"
+                  @click=${() => {
+                    this.showFilterSelection = !this.showFilterSelection;
+                  }}
+                >
+                  <ion-icon slot="start" name="filter-outline"></ion-icon
+                  >Filter</ion-button
+                >
+              </div>
             </ion-col>
           </ion-row>
           <ion-row>
-            <div id="units-table"></div>
+            <ion-col>
+              <table-filters
+                ?showFilterSelection=${this.showFilterSelection}
+                @filters-changed=${this.filtersChanged}
+              ></table-filters>
+            </ion-col>
           </ion-row>
         </ion-grid>
-        <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-          <ion-fab-button @click=${this.openSelected}>
-            <ion-icon name="checkmark-outline"></ion-icon>
-          </ion-fab-button>
-        </ion-fab>
+
+        <div ${animate()}>
+          ${renderGrid
+            ? html` <vaadin-grid
+                .items=${filteredUnits}
+                theme="no-border no-row-borders compact"
+                ${animate()}
+              >
+                ${this.columns}
+              </vaadin-grid>`
+            : html``}
+        </div>
       </ion-content>
     `;
   }

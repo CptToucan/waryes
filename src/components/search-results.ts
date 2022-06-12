@@ -2,7 +2,7 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {IonSearchbar} from '@ionic/core/components/ion-searchbar';
 import {UnitService} from '../services/unit';
-import {WarnoUnit} from '../types';
+import {UnitMetadata} from '../types';
 
 @customElement('search-results')
 export class SearchResults extends LitElement {
@@ -48,11 +48,11 @@ export class SearchResults extends LitElement {
   searchValue = '';
 
   @state()
-  searchedUnits: WarnoUnit[] | null = null;
+  searchedUnits: UnitMetadata[] | null = null;
 
   async search(event: { detail: { value: string; }; }) {
     this.searchValue = event.detail.value;
-    const foundUnits: WarnoUnit[] = await UnitService.findUnitsByName(
+    const foundUnits: UnitMetadata[] = await UnitService.findUnitsByName(
       this.searchValue
     );
     this.searchedUnits = foundUnits;
@@ -61,7 +61,7 @@ export class SearchResults extends LitElement {
   renderSearchResults(): TemplateResult {
     if (this.searchedUnits !== null && this.searchValue !== '') {
       const results: TemplateResult[] = this.searchedUnits.map(
-        (unit: WarnoUnit) =>
+        (unit: UnitMetadata) =>
           html`
             <ion-router-link href="/unit/${unit.id}">
               <div class="search-result">

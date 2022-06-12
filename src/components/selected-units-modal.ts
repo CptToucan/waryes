@@ -1,21 +1,14 @@
-import {SelectCustomEvent} from '@ionic/core';
+import {modalController, SelectCustomEvent} from '@ionic/core';
 import {IonModal} from '@ionic/core/components/ion-modal';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {WarnoUnit, WarnoWeapon} from '../types';
-
-import {
-  platoonStats,
-  weaponStats,
-  staticStats,
-  extractUnitInformation,
-} from '../utils/extract-unit-information';
-import {humanize} from '../utils/humanize';
+import {fieldType, UnitMetadata, WeaponMetadata} from '../types';
+import {UnitService} from '../services/unit';
 
 type SelectedUnitWeapon = {
-  unit: WarnoUnit;
-  weapons: WarnoWeapon[];
-  selectedWeapon: string;
+  unit: UnitMetadata;
+  weapons: WeaponMetadata[];
+  selectedWeaponIndex: number;
 };
 
 enum modalStage {
@@ -23,13 +16,11 @@ enum modalStage {
   FIELD_SELECT,
 }
 
-const NO_WEAPON_SELECTED = 'NONE';
+const NO_WEAPON_SELECTED_INDEX = -1;
 
-function utf8_to_b64( str: string ): string {
-  return window.btoa(unescape(encodeURIComponent( str )));
+function utf8_to_b64(str: string): string {
+  return window.btoa(unescape(encodeURIComponent(str)));
 }
-
-
 
 @customElement('selected-units-modal')
 export class Unit extends LitElement {
@@ -101,7 +92,7 @@ export class Unit extends LitElement {
   parentModal?: IonModal;
 
   @property()
-  selectedUnits: WarnoUnit[] = [];
+  selectedUnits: UnitMetadata[] = [];
 
   @state()
   selectedUnitWeapons?: SelectedUnitWeapon[];
@@ -118,12 +109,20 @@ export class Unit extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     this.selectedUnitWeapons = this.selectedUnits.map((unit) => {
-      const unitInfo = extractUnitInformation(unit);
-      const unitWeapons = unitInfo.allWeaponsInformation.filter(
-        (weapon) => weapon.name !== undefined
-      );
-      return {unit, weapons: unitWeapons, selectedWeapon: NO_WEAPON_SELECTED};
+      const unitWeapons = unit.weaponMetadata;
+      return {
+        unit,
+        weapons: unitWeapons,
+        selectedWeaponIndex: NO_WEAPON_SELECTED_INDEX,
+      };
     });
+  }
+
+  async navigateToWorkspace(workspaceConfig: string) {
+    while (await modalController.getTop()) {
+      await modalController.dismiss();
+    }
+    location.href = `/#/workspace/?${workspaceConfig}`;
   }
 
   dismissModal() {
@@ -139,11 +138,28 @@ export class Unit extends LitElement {
   }
 
   selectedWeaponForUnit(
-    selectedWeapon: string,
+    selectedWeaponIndex: number,
     unitWeapon: SelectedUnitWeapon
   ): void {
-    unitWeapon.selectedWeapon = selectedWeapon;
+    unitWeapon.selectedWeaponIndex = selectedWeaponIndex;
     this.requestUpdate();
+  }
+
+  selectAllFirstWeapon() {
+    if(this.selectedUnitWeapons) {
+      for(const unitWeapon of this.selectedUnitWeapons) {
+        unitWeapon.selectedWeaponIndex = 0;
+      }
+  
+      this.requestUpdate();
+    }
+  }
+
+  weaponIsPresent(weapon: WeaponMetadata) {
+    if (weapon.name === undefined) {
+      return false;
+    }
+    return true;
   }
 
   render(): TemplateResult {
@@ -177,12 +193,15 @@ export class Unit extends LitElement {
 
       const noWeaponSelectedUnits = this.selectedUnitWeapons.filter(
         (unitWeapon) => {
-          return unitWeapon.selectedWeapon === NO_WEAPON_SELECTED;
+          return unitWeapon.selectedWeaponIndex === NO_WEAPON_SELECTED_INDEX;
         }
       );
 
       for (const unitWeapon of this.selectedUnitWeapons) {
-        if (unitWeapon.weapons.length === 0) {
+        if (
+          unitWeapon.weapons.filter((el) => this.weaponIsPresent(el)).length ===
+          0
+        ) {
           canSelectWeapons = false;
         }
       }
@@ -200,7 +219,8 @@ export class Unit extends LitElement {
       if (canSelectWeapons) {
         weaponSelectBody = html`<ion-list style="margin-bottom: 128px;">
           <ion-list-header slot="header"
-            >Select fields to compare</ion-list-header
+            ><div>Select fields to compare</div>
+            <ion-button style="margin-left: auto;" @click=${this.selectAllFirstWeapon}> Pick All First Weapon </ion-button></ion-list-header
           >
           ${this.selectedUnitWeapons.map((unitWeapon) => {
             return html`<ion-list-header
@@ -215,19 +235,23 @@ export class Unit extends LitElement {
                   cancel-text="Cancel"
                   ok-text="Confirm"
                   placeholder="Weapon"
-                  value=${unitWeapon.selectedWeapon}
+                  value=${unitWeapon.selectedWeaponIndex}
                   @ionChange=${(event: SelectCustomEvent<string>) =>
-                    this.selectedWeaponForUnit(event.detail.value, unitWeapon)}
+                    this.selectedWeaponForUnit(
+                      parseInt(event.detail.value),
+                      unitWeapon
+                    )}
                 >
-                  ${unitWeapon.weapons.map(
-                    (el) =>
-                      html`<ion-select-option value=${el.weaponId}>
-                        ${el.type}</ion-select-option
-                      >`
-                  )}
-                  <ion-select-option value=${NO_WEAPON_SELECTED}>
-                    ${NO_WEAPON_SELECTED}</ion-select-option
+                  <ion-select-option value=${NO_WEAPON_SELECTED_INDEX}>
+                    NONE</ion-select-option
                   >
+                  ${unitWeapon.weapons
+                    .filter((el) => this.weaponIsPresent(el))
+                    .map((el, index) => {
+                      return html`<ion-select-option value=${index}>
+                        ${el.type}
+                      </ion-select-option>`;
+                    })}
                 </ion-select>
               </ion-item> `;
           })}
@@ -278,7 +302,7 @@ export class Unit extends LitElement {
 
       const unitsWithWeaponSelected = this.selectedUnitWeapons.filter(
         (unit) => {
-          return unit.selectedWeapon !== NO_WEAPON_SELECTED;
+          return unit.selectedWeaponIndex !== NO_WEAPON_SELECTED_INDEX;
         }
       );
 
@@ -289,13 +313,18 @@ export class Unit extends LitElement {
         canSelectWeaponFields = false;
       }
 
-      const queryParams = utf8_to_b64(JSON.stringify({
+      const queryParams = utf8_to_b64(
+        JSON.stringify({
           unitFields: this.selectedUnitFieldsToCompare,
           weaponFields: this.selectedWeaponFieldsToCompare,
           selectedUnitWeapons: this.selectedUnitWeapons.map((unitWeapon) => {
-            return {id: unitWeapon.unit.id, weapon: unitWeapon.selectedWeapon};
+            return {
+              id: unitWeapon.unit.id,
+              weapon: unitWeapon.selectedWeaponIndex,
+            };
           }),
-        }));
+        })
+      );
 
       return html`
         <ion-list>
@@ -317,10 +346,13 @@ export class Unit extends LitElement {
               ?disabled=${!canSelectUnitFields}
               @ionChange=${this.didSelectUnitField}
             >
-              ${[...staticStats, ...platoonStats].map(
+              ${[
+                ...UnitService.findFieldMetadataByType(fieldType.STATIC),
+                ...UnitService.findFieldMetadataByType(fieldType.PLATOON),
+              ].map(
                 (el) =>
-                  html`<ion-select-option value=${el}
-                    >${humanize(el)}</ion-select-option
+                  html`<ion-select-option value=${el.id}
+                    >${el.label}</ion-select-option
                   >`
               )}
             </ion-select>
@@ -340,12 +372,12 @@ export class Unit extends LitElement {
               ?disabled=${!canSelectWeaponFields}
               @ionChange=${this.didSelectWeaponField}
             >
-              ${weaponStats
-                .filter((el) => el !== 'type' && el !== 'name')
+              ${UnitService.findFieldMetadataByType(fieldType.WEAPON)
+                .filter((el) => el.id !== 'type' && el.id !== 'name')
                 .map(
                   (el) =>
-                    html`<ion-select-option value=${el}
-                      >${humanize(el)}</ion-select-option
+                    html`<ion-select-option value=${el.id}
+                      >${el.label}</ion-select-option
                     >`
                 )}
             </ion-select>
@@ -358,6 +390,7 @@ export class Unit extends LitElement {
             expand="block"
             ?disabled=${!canCompare}
             href="/workspace?${queryParams}"
+            @click=${() => this.navigateToWorkspace(queryParams)}
           >
             Compare
           </ion-button>
@@ -375,6 +408,7 @@ export class Unit extends LitElement {
    * Renders an error message
    * @param errorMessage
    */
+
   renderErrorMessage(errorMessage: string): TemplateResult {
     return html` <div class="error-message">${errorMessage}</div>`;
   }

@@ -1,9 +1,14 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {WarnoStatic, WarnoWeapon, WarnoPlatoon, WarnoUnit} from '../types';
-import {humanize} from '../utils/humanize';
+import {
+  UnitMetadata,
+  fieldType,
+  metadataMap,
+  WeaponMetadata
+} from '../types';
 import {modalController} from '@ionic/core';
-import { extractUnitInformation, platoonStats } from "../utils/extract-unit-information";
+import {UnitService} from '../services/unit';
+import {convertMetadataArrayToMap} from '../utils/convert-metadata-array-to-map';
 
 type AttributeGroup = {
   name?: string;
@@ -24,7 +29,7 @@ export class Unit extends LitElement {
         border-radius: 5px;
         padding-left: 8px;
         padding-right: 8px;
-        max-width: 512px;
+
         height: 100%;
       }
 
@@ -46,6 +51,10 @@ export class Unit extends LitElement {
       .card-armor {
         display: flex;
         justify-content: space-evenly;
+      }
+
+      .command-points {
+        color: var(--ion-color-tertiary);
       }
 
       .armor {
@@ -145,26 +154,31 @@ export class Unit extends LitElement {
   }
 
   @property()
-  unit?: WarnoUnit;
+  unit?: UnitMetadata;
 
   @state()
-  selectedTab = '';
+  selectedTab = 0;
 
-  renderHeader(staticInfo: WarnoStatic): TemplateResult {
+  renderHeader(unit: UnitMetadata): TemplateResult {
     return html`<div class="card-header">
-      <h3 class="card-title">${staticInfo.name}</h3>
-      <ion-button fill="clear" @click=${this.openSelected}>
-        <ion-icon slot="icon-only" name="stats-chart"></ion-icon>
-      </ion-button>
+      <h3 class="card-title">${unit.name}</h3>
+      <h3 class="command-points">${unit.commandPoints}</h3>
     </div>`;
   }
 
-  renderArmor(staticInfo: WarnoStatic): TemplateResult {
+  /*
+
+        <ion-button fill="clear" @click=${this.openSelected}>
+        <ion-icon slot="icon-only" name="stats-chart"></ion-icon>
+      </ion-button>
+      */
+
+  renderArmor(unit: UnitMetadata, metadataMap: metadataMap): TemplateResult {
     const armorValues = [
-      {id: 'frontArmor', display: 'Front'},
-      {id: 'sideArmor', display: 'Side'},
-      {id: 'rearArmor', display: 'Rear'},
-      {id: 'topArmor', display: 'Top'},
+      metadataMap.frontArmor,
+      metadataMap.sideArmor,
+      metadataMap.rearArmor,
+      metadataMap.topArmor,
     ];
 
     const armorTemplateResults: TemplateResult[] = [];
@@ -172,29 +186,26 @@ export class Unit extends LitElement {
     for (const armor of armorValues) {
       armorTemplateResults.push(
         html`<div class="armor">
-          <div class="armor-value">${staticInfo[armor.id]}</div>
-          <div class="armor-title">${armor.display}</div>
+          <div class="armor-value">${unit[armor.id as keyof UnitMetadata]}</div>
+          <div class="armor-title">${armor.label}</div>
         </div>`
       );
     }
     return html`<div class="card-armor">${armorTemplateResults}</div>`;
   }
 
-  tabChange(event: { detail: { value: string; }; }): void {
-    this.selectedTab = event.detail.value;
+  tabChange(event: {detail: {value: string}}): void {
+    this.selectedTab = parseInt(event.detail.value);
   }
 
-  renderWeaponTabs(weapons: WarnoWeapon[]): TemplateResult {
+  renderWeaponTabs(unit: UnitMetadata, metadata: metadataMap): TemplateResult {
     const weaponTemplateResult: TemplateResult[] = [];
 
-    if (this.selectedTab === '') {
-      this.selectedTab = weapons[0]?.name;
-    }
-
-    for (const weapon of weapons) {
-      if(weapon.name) {
+    let index = 0;
+    for (const weapon of unit.weaponMetadata) {
+      if (weapon.name) {
         weaponTemplateResult.push(
-          html` <ion-segment-button value=${weapon.name}>
+          html` <ion-segment-button value=${index}>
             <ion-label>
               <ion-text color="light"> ${weapon.name} </ion-text>
             </ion-label>
@@ -202,15 +213,14 @@ export class Unit extends LitElement {
         );
       }
 
+      index++;
     }
 
-    const selectedWeapon: WarnoWeapon | undefined = weapons.find(
-      (element) => this.selectedTab === element.name
-    );
+    const selectedWeapon: WeaponMetadata = unit.weaponMetadata[this.selectedTab];
     let weaponDetailsResult: TemplateResult = html``;
 
     if (this.selectedTab !== undefined && selectedWeapon) {
-      weaponDetailsResult = this.renderWeapon(selectedWeapon);
+      weaponDetailsResult = this.renderWeapon(selectedWeapon, metadata);
     }
 
     return html`<div class="card-tab-header">
@@ -221,10 +231,10 @@ export class Unit extends LitElement {
     </div>`;
   }
 
-  renderWeapon(weapon: WarnoWeapon): TemplateResult {
+  renderWeapon(weapon: WeaponMetadata, weaponFieldMetadata: metadataMap): TemplateResult {
     const layout: AttributeGroup[] = [
       {
-        attributes: ['name'],
+        attributes: ['name', 'ammunition'],
       },
       {
         name: 'damage',
@@ -232,7 +242,7 @@ export class Unit extends LitElement {
       },
       {
         name: 'range',
-        attributes: ['ground', 'helicopter', 'plane'],
+        attributes: ['ground', 'helicopter', 'aircraft'],
       },
       {
         name: 'accuracy',
@@ -240,14 +250,14 @@ export class Unit extends LitElement {
       },
       {
         name: 'attributes',
-        attributes: ['rateOfFire', 'aimingTime', 'reloadTime', 'salvoLength'],
+        attributes: ['rateOfFire', 'aiming', 'reload', 'salvoLength'],
       },
       {
         attributes: ['supplyCost'],
       },
     ];
 
-    const weaponLayout: TemplateResult[] = [html``];
+    const weaponLayout: TemplateResult[] = [];
 
     for (const group of layout) {
       const weaponStatGroup: TemplateResult[] = [];
@@ -255,8 +265,8 @@ export class Unit extends LitElement {
       for (const attribute of group.attributes) {
         weaponStatGroup.push(html`
           <div class="weapon-stat">
-            <div class="weapon-attribute-name">${humanize(attribute)}</div>
-            <div class="weapon-attribute-value">${weapon[attribute]}</div>
+            <div class="weapon-attribute-name">${weaponFieldMetadata[attribute]?.label}</div>
+            <div class="weapon-attribute-value">${weapon[attribute as keyof WeaponMetadata]}</div>
           </div>
         `);
       }
@@ -271,14 +281,14 @@ export class Unit extends LitElement {
     return html`<div class="weapon-stats">${weaponLayout}</div>`;
   }
 
-  renderFooter(platoonInfo: WarnoPlatoon): TemplateResult {
+  renderFooter(unit: UnitMetadata, platoonFieldMetadata: metadataMap): TemplateResult {
     const platoonHtml: TemplateResult[] = [];
 
-    for (const stat of platoonStats) {
+    for (const stat in platoonFieldMetadata) {
       platoonHtml.push(html`<div class="platoon-stat">
-        <div class="platoon-attribute-name">${humanize(stat)}</div>
+        <div class="platoon-attribute-name">${platoonFieldMetadata[stat].label}</div>
         <div class="platoon-attribute-value">
-          ${platoonInfo[stat] ? platoonInfo[stat] : 'N/A'}
+          ${unit[stat as keyof UnitMetadata]}
         </div>
       </div>`);
     }
@@ -291,42 +301,49 @@ export class Unit extends LitElement {
       component: 'selected-units-modal',
       componentProps: {
         selectedUnits: [this.unit],
-      }
+      },
     });
 
     modal.componentProps = {
       ...modal.componentProps,
-      parentModal: modal
+      parentModal: modal,
     };
     modal.present();
   }
 
   render() {
+    if (this.unit) {
+      const staticFields = convertMetadataArrayToMap(
+        UnitService.findFieldMetadataByType(fieldType.STATIC)
+      );
 
-    if(this.unit) {
-      const {
-        staticInformation,
-        allWeaponsInformation,
-        platoonInformation,
-      }: {
-        staticInformation: WarnoStatic;
-        allWeaponsInformation: WarnoWeapon[];
-        platoonInformation: WarnoPlatoon;
-      } = extractUnitInformation(this.unit);
-  
-  
-      if (this.unit) {
-        return html`
-          <div class="card">
-            ${this.renderHeader(staticInformation)}
-            ${this.renderArmor(staticInformation)}
-            ${this.renderWeaponTabs(allWeaponsInformation)}
-            ${this.renderFooter(platoonInformation)}
-          </div>
-        `;
-      }
+      const weaponFields = convertMetadataArrayToMap(
+        UnitService.findFieldMetadataByType(fieldType.WEAPON)
+      );
+
+      const platoonFields = convertMetadataArrayToMap(
+        UnitService.findFieldMetadataByType(fieldType.PLATOON)
+      )
+
+      return html`
+        <div class="card">
+          ${this.renderHeader(this.unit)}
+          ${this.renderArmor(this.unit, staticFields)}
+          ${this.renderWeaponTabs(this.unit, weaponFields)}
+          ${this.renderFooter(this.unit, platoonFields)}
+        </div>
+      `;
     }
 
     return html`Error loading unit`;
   }
 }
+
+/*
+
+            ${this.renderHeader(staticInformation)}
+            ${this.renderArmor(staticInformation)}
+            ${this.renderWeaponTabs(allWeaponsInformation)}
+            ${this.renderFooter(platoonInformation)}
+
+            */
