@@ -127,7 +127,7 @@ export class TableFilters extends LitElement {
   renderFieldSelect() {
     return html`
       <ion-label>Field</ion-label>
-      <ion-select @ionChange=${this.didSelectField}>
+      <ion-select @ionChange=${this.didSelectField} .value=${this.activeFilter?.field}>
         ${[
           ...UnitService.findFieldMetadataByType(fieldType.STATIC),
           ...UnitService.findFieldMetadataByType(fieldType.PLATOON),
