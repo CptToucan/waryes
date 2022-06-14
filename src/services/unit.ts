@@ -7,7 +7,7 @@ import {
   NumberFieldMetadata,
 } from '../metadata';
 // @ts-ignore
-import UnitJson from '../../data/warno-units-v6.json';
+import UnitJson from '../../data/warno-units-v10.json';
 import { AbstractFieldMetadata } from '../metadata/AbstractFieldMetadata';
 
 class UnitServiceClass {
