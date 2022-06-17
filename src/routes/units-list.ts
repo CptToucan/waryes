@@ -17,7 +17,6 @@ import {FilterMetadata} from '../metadata/FilterMetadata';
 import {GridSorterDirectionChangedEvent} from '@vaadin/grid/vaadin-grid-sorter';
 import {IonGrid} from '@ionic/core/components/ion-grid';
 import {IonContent} from '@ionic/core/components/ion-content';
-
 @customElement('units-list-route')
 export class UnitsListRoute extends LitElement {
   static get styles() {
@@ -89,7 +88,7 @@ export class UnitsListRoute extends LitElement {
     columns.push(
       html`<vaadin-grid-sort-column
         path=${UnitService.metadata.name.id}
-        auto-width
+        width="15em"
         frozen
         resizable
         .headerRenderer=${this.headerRenderer}
@@ -138,7 +137,7 @@ export class UnitsListRoute extends LitElement {
     model: GridItemModel<UnitMetadata>
   ) {
     return render(
-      html`<a href="/#/unit/${model.item.id}">${model.item.name}</a>`,
+      html`<a style="width: 200px; overflow: hidden;" href="/#/unit/${model.item.id}">${model.item.name}</a>`,
       root
     );
   }
@@ -155,7 +154,7 @@ export class UnitsListRoute extends LitElement {
 
   render() {
     const renderGrid = true;
-    let filteredUnits: UnitMetadata[] = [...this.units];
+    let filteredUnits: UnitMetadata[] = [...UnitService.units];
 
     for (const filter of this.filters) {
       const filterFunction = filter.getFilterFunctionForOperator();

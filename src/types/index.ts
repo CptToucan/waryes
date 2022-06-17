@@ -1,7 +1,7 @@
-import { StringFieldMetadata, BooleanFieldMetadata, EnumFieldMetadata,  NumberFieldMetadata} from "../metadata"
-import { AbstractFieldMetadata } from "../metadata/AbstractFieldMetadata"
-import { FilterMetadata } from "../metadata/FilterMetadata"
-
+import { BooleanFieldMetadata, EnumFieldMetadata, NumberFieldMetadata, StringFieldMetadata } from "../metadata";
+import { AbstractFieldMetadata } from "../metadata/AbstractFieldMetadata";
+import { FilterMetadata } from "../metadata/FilterMetadata";
+import { UnitMetadata } from "./UnitMetadata";
 
 enum DashboardType {
   UNIT,
@@ -14,69 +14,16 @@ type Dashboard = {
   data: unknown
 }
 
-export enum quality {
-  BAD = "Bad",
-  MEDIOCRE = "Mediocre",
-  NORMAL = "Normal",
-  GOOD = "Good",
-  VERY_GOOD = "Very Good",
-  EXCEPTIONAL = "Exceptional"
-}
-
 export enum fieldType {
   STATIC,
   WEAPON,
   PLATOON
 }
 
-export type UnitMetadata = {
-  id: string;
-  name: string;
-  commandPoints: number;
-  frontArmor: number;
-  rearArmor: number;
-  sideArmor: number;
-  topArmor: number;
-  strength: number;
-  optics: quality;
-  stealth: quality;
-  revealInfluence: boolean;
-  maxDmg: number;
-  airOptics: quality;
-  ecm: number;
-  agility: number;
-  trajectory: number;
-  speed: number;
-  roadSpeed: number;
-  autonomy: number;
-  fuel: number;
-  supply: number;
-  transport: number;
-  weaponMetadata: WeaponMetadata[]
-}
-
 export type metadataMap = {
   [key: string]: AbstractFieldMetadata<unknown>
 }
 
-export type WeaponMetadata = {
-  aiming: number;
-  aircraft: number;
-  ammunition: string;
-  ground: number;
-  he: number;
-  helicopter: number;
-  motion: number;
-  name: string;
-  penetration: number;
-  rateOfFire: number;
-  reload: number;
-  salvoLength: number;
-  static: number;
-  supplyCost: number;
-  suppress: number;
-  type: string;
-}
 
 export type metadataStore = {
   name: StringFieldMetadata;
@@ -141,3 +88,5 @@ export type operatorMap = {
 type UrlWatcherCallback = (newUrl: string, oldUrl: string) => void;
 
 export { DashboardType, Dashboard, UrlWatcherCallback };
+
+export { UnitMetadata,  WeaponMetadata, quality, UnitMetadataOptions} from "./UnitMetadata";
