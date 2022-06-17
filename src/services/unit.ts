@@ -7,8 +7,11 @@ import {
   NumberFieldMetadata,
 } from '../metadata';
 // @ts-ignore
-import UnitJson from '../../data/warno-units-v10.json';
+import UnitJson from '../../data/warno-units-lannes.json';
+// @ts-ignore
+import MuratJson from '../../data/warno-units-murat.json';
 import { AbstractFieldMetadata } from '../metadata/AbstractFieldMetadata';
+import { IonToast } from '@ionic/core/components/ion-toast';
 
 class UnitServiceClass {
   constructor() {
@@ -89,6 +92,9 @@ class UnitServiceClass {
 
   metadata: metadataStore;
 
+  selectedVersions: string[] = ["LANNES"];
+
+  currentToast?: IonToast;
   getMetadataAsArray(): AbstractFieldMetadata<unknown>[] {
     const metadataArray: AbstractFieldMetadata<unknown>[] = [];
     for(const key in this.metadata) {
@@ -103,89 +109,15 @@ class UnitServiceClass {
     try {
       let index = 1;
       for (const unit of UnitJson) {
-        const weapons: WeaponMetadata[] = [];
-        for (const weaponName of ['weaponOne', 'weaponTwo', 'weaponThree']) {
-          const weapon: WeaponMetadata = {
-            aiming: this.metadata.aiming.deserialize(
-              unit[`${weaponName}_aiming`]
-            ),
-            aircraft: this.metadata.aircraft.deserialize(
-              unit[`${weaponName}_aircraft`]
-            ),
-            ammunition: this.metadata.ammunition.deserialize(
-              unit[`${weaponName}_ammunition`]
-            ),
-            ground: this.metadata.ground.deserialize(
-              unit[`${weaponName}_ground`]
-            ),
-            he: this.metadata.he.deserialize(unit[`${weaponName}_he`]),
-            helicopter: this.metadata.helicopter.deserialize(
-              unit[`${weaponName}_helicopter`]
-            ),
-            motion: this.metadata.motion.deserialize(
-              unit[`${weaponName}_motion`]
-            ),
-            name: this.metadata.weaponName.deserialize(
-              unit[`${weaponName}_name`]
-            ),
-            penetration: this.metadata.penetration.deserialize(
-              unit[`${weaponName}_penetration`]
-            ),
-            rateOfFire: this.metadata.rateOfFire.deserialize(
-              unit[`${weaponName}_rateOfFire`]
-            ),
-            reload: this.metadata.reload.deserialize(
-              unit[`${weaponName}_reload`]
-            ),
-            salvoLength: this.metadata.salvoLength.deserialize(
-              unit[`${weaponName}_salvoLength`]
-            ),
-            static: this.metadata.static.deserialize(
-              unit[`${weaponName}_static`]
-            ),
-            supplyCost: this.metadata.supplyCost.deserialize(
-              unit[`${weaponName}_supplyCost`]
-            ),
-            suppress: this.metadata.suppress.deserialize(
-              unit[`${weaponName}_suppress`]
-            ),
-            type: this.metadata.type.deserialize(unit[`${weaponName}_type`]),
-          };
-          weapons.push(weapon);
-        }
-
-        const unitMetadata: UnitMetadata = {
-          id: `${index}`,
-          name: this.metadata.name.deserialize(unit.name),
-          commandPoints: this.metadata.commandPoints.deserialize(
-            unit.commandPoints
-          ),
-          frontArmor: this.metadata.frontArmor.deserialize(unit.frontArmor),
-          rearArmor: this.metadata.rearArmor.deserialize(unit.rearArmor),
-          sideArmor: this.metadata.sideArmor.deserialize(unit.sideArmor),
-          topArmor: this.metadata.topArmor.deserialize(unit.topArmor),
-          strength: this.metadata.strength.deserialize(unit.strength),
-          optics: this.metadata.optics.deserialize(unit.optics),
-          stealth: this.metadata.stealth.deserialize(unit.stealth),
-          revealInfluence: this.metadata.revealInfluence.deserialize(
-            unit.revealInfluence
-          ),
-          maxDmg: this.metadata.maxDmg.deserialize(unit.maxDmg),
-          airOptics: this.metadata.airOptics.deserialize(unit.airOptics),
-          ecm: this.metadata.ecm.deserialize(unit.ecm),
-          agility: this.metadata.agility.deserialize(unit.agility),
-          trajectory: this.metadata.trajectory.deserialize(unit.trajectory),
-          speed: this.metadata.speed.deserialize(unit.speed),
-          roadSpeed: this.metadata.roadSpeed.deserialize(unit.roadSpeed),
-          autonomy: this.metadata.autonomy.deserialize(unit.autonomy),
-          fuel: this.metadata.fuel.deserialize(unit.fuel),
-          supply: this.metadata.supply.deserialize(unit.supply),
-          transport: this.metadata.transport.deserialize(unit.transport),
-          weaponMetadata: weapons,
-        };
-
+        const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "LANNES");
         unitsMetadata.push(unitMetadata);
         index++;
+      }
+
+      for(const unit of MuratJson) {
+        const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "MURAT");
+        unitsMetadata.push(unitMetadata);
+        index++
       }
 
       return unitsMetadata;
@@ -196,8 +128,94 @@ class UnitServiceClass {
   }
   private _units: UnitMetadata[] = [];
 
+  private convertJsonToMetadata(unit: any, id: number, version: string) {
+    const weapons: WeaponMetadata[] = [];
+    for (const weaponName of ['weaponOne', 'weaponTwo', 'weaponThree']) {
+      const weapon: WeaponMetadata = {
+        aiming: this.metadata.aiming.deserialize(
+          unit[`${weaponName}_aiming`]
+        ),
+        aircraft: this.metadata.aircraft.deserialize(
+          unit[`${weaponName}_aircraft`]
+        ),
+        ammunition: this.metadata.ammunition.deserialize(
+          unit[`${weaponName}_ammunition`]
+        ),
+        ground: this.metadata.ground.deserialize(
+          unit[`${weaponName}_ground`]
+        ),
+        he: this.metadata.he.deserialize(unit[`${weaponName}_he`]),
+        helicopter: this.metadata.helicopter.deserialize(
+          unit[`${weaponName}_helicopter`]
+        ),
+        motion: this.metadata.motion.deserialize(
+          unit[`${weaponName}_motion`]
+        ),
+        name: this.metadata.weaponName.deserialize(
+          unit[`${weaponName}_name`]
+        ),
+        penetration: this.metadata.penetration.deserialize(
+          unit[`${weaponName}_penetration`]
+        ),
+        rateOfFire: this.metadata.rateOfFire.deserialize(
+          unit[`${weaponName}_rateOfFire`]
+        ),
+        reload: this.metadata.reload.deserialize(
+          unit[`${weaponName}_reload`]
+        ),
+        salvoLength: this.metadata.salvoLength.deserialize(
+          unit[`${weaponName}_salvoLength`]
+        ),
+        static: this.metadata.static.deserialize(
+          unit[`${weaponName}_static`]
+        ),
+        supplyCost: this.metadata.supplyCost.deserialize(
+          unit[`${weaponName}_supplyCost`]
+        ),
+        suppress: this.metadata.suppress.deserialize(
+          unit[`${weaponName}_suppress`]
+        ),
+        type: this.metadata.type.deserialize(unit[`${weaponName}_type`]),
+      };
+      weapons.push(weapon);
+    }
+
+    const unitMetadata: UnitMetadata = new UnitMetadata({
+      id: `${id}`,
+      name: this.metadata.name.deserialize(unit.name),
+      commandPoints: this.metadata.commandPoints.deserialize(
+        unit.commandPoints
+      ),
+      frontArmor: this.metadata.frontArmor.deserialize(unit.frontArmor),
+      rearArmor: this.metadata.rearArmor.deserialize(unit.rearArmor),
+      sideArmor: this.metadata.sideArmor.deserialize(unit.sideArmor),
+      topArmor: this.metadata.topArmor.deserialize(unit.topArmor),
+      strength: this.metadata.strength.deserialize(unit.strength),
+      optics: this.metadata.optics.deserialize(unit.optics),
+      stealth: this.metadata.stealth.deserialize(unit.stealth),
+      revealInfluence: this.metadata.revealInfluence.deserialize(
+        unit.revealInfluence
+      ),
+      maxDmg: this.metadata.maxDmg.deserialize(unit.maxDmg),
+      airOptics: this.metadata.airOptics.deserialize(unit.airOptics),
+      ecm: this.metadata.ecm.deserialize(unit.ecm),
+      agility: this.metadata.agility.deserialize(unit.agility),
+      trajectory: this.metadata.trajectory.deserialize(unit.trajectory),
+      speed: this.metadata.speed.deserialize(unit.speed),
+      roadSpeed: this.metadata.roadSpeed.deserialize(unit.roadSpeed),
+      autonomy: this.metadata.autonomy.deserialize(unit.autonomy),
+      fuel: this.metadata.fuel.deserialize(unit.fuel),
+      supply: this.metadata.supply.deserialize(unit.supply),
+      transport: this.metadata.transport.deserialize(unit.transport),
+      weaponMetadata: weapons,
+      version
+    });
+    return unitMetadata;
+  }
+
   public get units(): UnitMetadata[] {
-    return this._units;
+    const selectedVersions = this.selectedVersions;
+    return [...this._units].filter((unit) => selectedVersions.includes(unit.version));
   }
 
   async getUnits(): Promise<UnitMetadata[]> {
@@ -209,6 +227,16 @@ class UnitServiceClass {
     this._units = units;
 
     return units;
+  }
+
+  refreshCallbacks: {id: string, callback: (() => void)}[] = [];
+
+  registerCallback(id: string, callback: () => void) {
+    this.refreshCallbacks.push({id, callback});
+  }
+
+  unregisterCallback(id: string) {
+    this.refreshCallbacks = [...this.refreshCallbacks].filter((el) => el.id !== id);
   }
 
   getUnit(unitId: string): UnitMetadata | null {
@@ -256,6 +284,31 @@ class UnitServiceClass {
     }
 
     return foundFields
+  }
+
+  setUnitVersions(values: string[]) {
+    const toast = document.createElement('ion-toast');
+    this.currentToast?.dismiss();
+    this.currentToast = toast;
+    this.selectedVersions = values;
+
+    toast.message = `Changed display units`;
+    toast.duration = 2000;
+
+    document.body.appendChild(toast);
+
+    for(const callback of this.refreshCallbacks) {
+      callback.callback();
+    }
+
+    const applicationElement = document.querySelector("application-route");
+    applicationElement?.remove();
+
+    const newApplication = document.createElement("application-route");
+    const body = document.querySelector("body");
+    body?.appendChild(newApplication);
+
+    return toast.present();
   }
 }
 
