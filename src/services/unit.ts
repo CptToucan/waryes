@@ -6,10 +6,6 @@ import {
   StringFieldMetadata,
   NumberFieldMetadata,
 } from '../metadata';
-// @ts-ignore
-import UnitJson from '../../data/warno-units-lannes.json';
-// @ts-ignore
-import MuratJson from '../../data/warno-units-murat.json';
 import { AbstractFieldMetadata } from '../metadata/AbstractFieldMetadata';
 import { IonToast } from '@ionic/core/components/ion-toast';
 
@@ -92,7 +88,7 @@ class UnitServiceClass {
 
   metadata: metadataStore;
 
-  selectedVersions: string[] = ["LANNES"];
+  selectedVersions: string[] = ["BESSIERES"];
 
   currentToast?: IonToast;
   getMetadataAsArray(): AbstractFieldMetadata<unknown>[] {
@@ -106,14 +102,37 @@ class UnitServiceClass {
   private async _fetchData() {
     const unitsMetadata: UnitMetadata[] = [];
 
+    const BessieresPromise: Promise<Response> = fetch("/data/warno-units-bessieres.json");
+    const MassenaPromise: Promise<Response>  = fetch("/data/warno-units-massena.json");
+    const LannesPromise: Promise<Response>  = fetch("/data/warno-units-lannes.json");
+    const MuratPromise: Promise<Response>  = fetch("/data/warno-units-murat.json");
+
+    await Promise.all([BessieresPromise, MassenaPromise, LannesPromise, MuratPromise]);
     try {
       let index = 1;
-      for (const unit of UnitJson) {
+
+      const BessieresJson = await (await BessieresPromise).json();
+      for (const unit of BessieresJson) {
+        const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "BESSIERES");
+        unitsMetadata.push(unitMetadata);
+        index++;
+      }
+
+      const MassenaJson = await (await MassenaPromise).json();
+      for (const unit of MassenaJson) {
+        const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "MASSENA");
+        unitsMetadata.push(unitMetadata);
+        index++;
+      }
+
+      const LannesJson = await (await LannesPromise).json();
+      for (const unit of LannesJson) {
         const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "LANNES");
         unitsMetadata.push(unitMetadata);
         index++;
       }
 
+      const MuratJson = await (await MuratPromise).json();
       for(const unit of MuratJson) {
         const unitMetadata: UnitMetadata = this.convertJsonToMetadata(unit, index, "MURAT");
         unitsMetadata.push(unitMetadata);
