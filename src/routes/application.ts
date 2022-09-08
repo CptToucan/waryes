@@ -107,6 +107,8 @@ export class Application extends LitElement {
                   <ion-select style="max-width: 120px;" ?multiple=${true} @ionChange=${this.versionChanged} .value=${UnitService.selectedVersions}>
                     <ion-select-option value="MURAT">Murat</ion-select-option>
                     <ion-select-option value="LANNES">Lannes</ion-select-option>
+                    <ion-select-option value="MASSENA">Massena</ion-select-option>
+                    <ion-select-option value="BESSIERES">Bessieres</ion-select-option>
                   </ion-select>
                 </ion-item>
 

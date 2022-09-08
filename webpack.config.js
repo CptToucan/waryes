@@ -9,6 +9,11 @@ module.exports = {
   output: {
     publicPath: 'auto',
   },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
 
   devServer: {
     historyApiFallback: true,
@@ -37,5 +42,6 @@ module.exports = {
   plugins: [
     new NodePolyfillPlugin(),
     new HtmlWebpackPlugin({template: './src/index.html', publicPath: '/'}),
+    new CopyPlugin({patterns: [{from: "data", to: "data"}]})
   ],
 };
