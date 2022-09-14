@@ -29,4 +29,11 @@ html {
   --lumo-font-family: Orbitron;
 }
 
+html[theme~="dark"] {
+  --lumo-base-color: hsl(240, 7%, 11%);
+  --lumo-primary-text-color: #FF1FEC;
+  --lumo-primary-color: #FF1FEC;
+  --lumo-body-text-color: #FDFD55;
+}
+
 

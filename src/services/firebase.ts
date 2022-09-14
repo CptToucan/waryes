@@ -14,10 +14,10 @@ const firebaseConfig = {
 };
 
 class FirebaseServiceClass {
-  init() {
+  constructor() {
     const app = initializeApp(firebaseConfig);
     const db = initializeFirestore(app, {ignoreUndefinedProperties: true});
-    const auth = getAuth();
+    const auth = getAuth(app);
 
   
     this.app = app;
@@ -31,4 +31,4 @@ class FirebaseServiceClass {
 }
 
 const FirebaseService = new FirebaseServiceClass();
-export {FirebaseService};
+export {FirebaseService, FirebaseServiceClass};
