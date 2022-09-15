@@ -1,8 +1,9 @@
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement} from 'lit/decorators.js';
+import { html, LitElement, TemplateResult} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
 import {FirebaseService, FirebaseServiceClass} from '../services/firebase';
+import { User } from "firebase/auth";
 import '@vaadin/app-layout';
 import '@vaadin/app-layout/vaadin-drawer-toggle';
 import '@vaadin/icon';
@@ -10,24 +11,10 @@ import '@vaadin/icons';
 import '@vaadin/tabs';
 import '../components/notification-manager';
 import { NotificationController } from '../controllers/notification';
+import '../components/authenticated-menu';
 
 @customElement('application-route')
 export class Application extends LitElement {
-  static get styles() {
-    return css`
-      h1 {
-        font-size: var(--lumo-font-size-l);
-        margin: 0;
-      }
-
-      vaadin-icon {
-        box-sizing: border-box;
-        margin-inline-end: var(--lumo-space-m);
-        margin-inline-start: var(--lumo-space-xs);
-        padding: var(--lumo-space-xs);
-      }
-    `;
-  }
 
   firebase: FirebaseServiceClass = FirebaseService;
   
@@ -36,29 +23,32 @@ export class Application extends LitElement {
     console.log(controller);
   }
 
+  /**
+   * loggedInUser states:
+   * undefined = waiting for auth status
+   * null      = not logged in
+   * User      = logged in
+   */
+  @property()
+  loggedInUser: User | null | undefined;
+
+  constructor() {
+    super();
+    
+    this.firebase.auth?.onAuthStateChanged((user) => {
+      this.loggedInUser = user
+    })
+  }
+
   render(): TemplateResult {
     return html`
     <notification-manager @notification-controller-registered=${() => {console.log("Hello")}}></notification-manager>
     
-    
-    <vaadin-app-layout theme="small">
-      <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
-      <h1 slot="navbar">WarYes</h1>
-      <vaadin-tabs slot="drawer" orientation="vertical">
-        <vaadin-tab>
-          <a tabindex="-1" href="/">
-            <vaadin-icon icon="vaadin:dashboard"></vaadin-icon>
-            <span>Home</span>
-          </a>
-        </vaadin-tab>
-        <vaadin-tab>
-          <a tabindex="-1" href="/register">
-            <vaadin-icon icon="vaadin:clipboard-user"></vaadin-icon>
-            <span>Register</span>
-          </a>
-        </vaadin-tab>
-      </vaadin-tabs>
-      <slot></slot>
-    </vaadin-app-layout>`;
+    ${ this.loggedInUser !== undefined ? html`
+        <authenticated-menu .user=${ this.loggedInUser }>
+          <slot></slot>
+        </authenticated-menu>` 
+        : null
+    }`;
   }
 }
