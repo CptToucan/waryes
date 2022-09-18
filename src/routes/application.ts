@@ -42,7 +42,7 @@ export class Application extends LitElement {
 
   render(): TemplateResult {
     return html`
-    <notification-manager @notification-controller-registered=${() => {console.log("Hello")}}></notification-manager>
+    <notification-manager></notification-manager>
     
     ${ this.loggedInUser !== undefined ? html`
         <authenticated-menu .user=${ this.loggedInUser }>

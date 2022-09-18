@@ -22,7 +22,7 @@ export type CredentialsSubmitEvent = CustomEvent<{value: RegisterDetails}>;
 @customElement('user-credentials')
 export class UserCredentials extends LitElement {
   static get styles() {
-    return css`
+    return css`      
       .form-structure {
         display: flex;
         flex-direction: column;
@@ -40,13 +40,13 @@ export class UserCredentials extends LitElement {
   };
 
   @property()
-  submitLabel = "Submit";
+  submitLabel = 'Submit';
 
   submit(event: Event) {
     event.preventDefault();
     this.dispatchEvent(
       new CustomEvent('credentials-submit', {
-        detail: { value: this.registerDetails },
+        detail: {value: this.registerDetails},
         composed: true,
       })
     );
@@ -62,6 +62,7 @@ export class UserCredentials extends LitElement {
 
   render(): TemplateResult {
     return html`
+      <section>
         <form class="form-structure" @submit=${this.submit}>
           <vaadin-email-field
             label="Email"
@@ -76,7 +77,7 @@ export class UserCredentials extends LitElement {
           >
           <input type="submit" hidden />
         </form>
-      </div>
+      </section>
     `;
   }
 }
