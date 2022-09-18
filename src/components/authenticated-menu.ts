@@ -1,9 +1,13 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import { User } from "firebase/auth";
+import {User, getAuth, signOut} from 'firebase/auth';
 import '@vaadin/icon';
 import '@vaadin/icons';
 import '@vaadin/tabs';
+import '@vaadin/context-menu';
+import {Router} from '@vaadin/router';
+import { ContextMenuItem, ContextMenuItemSelectedEvent } from '@vaadin/context-menu';
+import { notificationService } from '../services/notification';
 
 interface MenuItem {
   name: string;
@@ -12,35 +16,30 @@ interface MenuItem {
 }
 
 /// Create a single menu item
-type MenuItemRenderer = (menuItem: MenuItem) => TemplateResult 
+type MenuItemRenderer = (menuItem: MenuItem) => TemplateResult;
 
-/// Menu definition indicating an ordered list of items per user authentication type 
+/// Menu definition indicating an ordered list of items per user authentication type
 type MenuDefinition = {
-  user: MenuItem[],
-  guest: MenuItem[]
-}
+  user: MenuItem[];
+  guest: MenuItem[];
+};
 
 /// Default menu definitions per authentication level.
 const defaultMenu: MenuDefinition = {
   user: [
     {
-      name: "Home",
-      icon: "vaadin:dashboard",
-      href: "/"
-    }
+      name: 'Home',
+      icon: 'vaadin:dashboard',
+      href: '/',
+    },
   ],
   guest: [
     {
-      name: "Home",
-      icon: "vaadin:dashboard",
-      href: "/"
+      name: 'Home',
+      icon: 'vaadin:dashboard',
+      href: '/',
     },
-    {
-      name: "Register",
-      icon: "vaadin:clipboard-user",
-      href: "/register"
-    },
-  ]
+  ],
 };
 
 @customElement('authenticated-menu')
@@ -52,11 +51,20 @@ export class AuthenticatedMenu extends LitElement {
         margin: 0;
       }
 
-      vaadin-icon {
+      vaadin-icon.drawer-icon {
         box-sizing: border-box;
         margin-inline-end: var(--lumo-space-m);
         margin-inline-start: var(--lumo-space-xs);
         padding: var(--lumo-space-xs);
+      }
+
+      .navbar-layout {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+        padding-right: var(--lumo-space-s);
       }
     `;
   }
@@ -72,31 +80,83 @@ export class AuthenticatedMenu extends LitElement {
   renderMenuItem: MenuItemRenderer = (menuItem) => {
     return html`
       <vaadin-tab>
-        <a tabindex="-1" href="${ menuItem.href }">
-            <vaadin-icon icon="${ menuItem.icon }"></vaadin-icon>
-            <span>${ menuItem.name }</span>
+        <a tabindex="-1" href="${menuItem.href}">
+          <vaadin-icon
+            class="drawer-icon"
+            icon="${menuItem.icon}"
+          ></vaadin-icon>
+          <span>${menuItem.name}</span>
         </a>
       </vaadin-tab>
     `;
-  }
+  };
 
   items(): MenuItem[] {
     return this.user ? this.menuDefinition.user : this.menuDefinition.guest;
   }
 
-  render(): TemplateResult {
-    
-    const menu: TemplateResult[] = this.items().map((item) => this.renderMenuItem(item) );
+  getLoggedInContextMenuItems(): ContextMenuItem[] {
+    return [{text: 'Logout'}]
+  }
 
-    return html`
-        <vaadin-app-layout theme="small">
-            <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
-            <h1 slot="navbar">WarYes</h1>
-            <vaadin-tabs slot="drawer" orientation="vertical">
-                ${ menu }
-            </vaadin-tabs>
-            
-            <slot></slot>
-        </vaadin-app-layout>`;
+  async contextMenuItemSelected(event: ContextMenuItemSelectedEvent) {
+    if(event.detail.value.text === "Logout") {
+      const auth = getAuth();
+      await signOut(auth);
+      Router.go('/login');
+
+      notificationService.instance?.addNotification({
+        duration: 3000,
+        content: "Successfully logged out",
+        theme: 'success',
+      });
+    }
+  }
+
+  renderAccountButton(): TemplateResult {
+    if (this.user) {
+      return html` <vaadin-context-menu
+      @item-selected=${this.contextMenuItemSelected}
+        open-on="click"
+        .items=${this.getLoggedInContextMenuItems()}
+      >
+        <vaadin-button theme="tertiary" aria-label="Account">
+          <vaadin-icon icon="vaadin:user"></vaadin-icon>
+        </vaadin-button>
+      </vaadin-context-menu>`;
+    } else {
+      return html` <vaadin-button
+        theme="tertiary"
+        aria-label="Sign in"
+        @click=${() => {
+          Router.go('/login');
+        }}
+      >
+        <vaadin-icon icon="vaadin:sign-in"></vaadin-icon>
+      </vaadin-button>`;
+    }
+    return html``;
+  }
+
+  render(): TemplateResult {
+    const menu: TemplateResult[] = this.items().map((item) =>
+      this.renderMenuItem(item)
+    );
+
+    return html` <vaadin-app-layout theme="small">
+      <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
+      <div class="navbar-layout" slot="navbar">
+        <h1>WarYes</h1>
+        ${this.renderAccountButton()}
+      </div>
+
+      <vaadin-tabs slot="drawer" orientation="vertical"> ${menu} </vaadin-tabs>
+
+      <slot></slot>
+    </vaadin-app-layout>`;
   }
 }
+
+/**
+ *     <vaadin-button aria-label="Sign in" theme="icon" ><vaadin-icon icon="vaadin:sign-in"></vaadin-icon></vaadin-button>
+ */
