@@ -39,6 +39,9 @@ export class RegisterRoute extends LitElement {
   registrationError?: string;
 
   async register(event: LoginFormLoginEvent) {
+
+    this.registrationError = undefined;
+
     try {
       if (!FirebaseService.auth) {
         throw new Error('Auth service is not initialised');
