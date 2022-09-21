@@ -97,6 +97,8 @@ export class LoginRoute extends LitElement {
 
   async login(event: LoginFormLoginEvent) {
 
+    this.loginError = false;
+    
     try {
       const auth = getAuth();
       await signInWithEmailAndPassword(auth, event.detail.username, event.detail.password);
@@ -106,7 +108,6 @@ export class LoginRoute extends LitElement {
         content: "Logged in",
         theme: 'success',
       });
-      this.loginError = false;
       Router.go("/");
     }
     catch(error: any) {
