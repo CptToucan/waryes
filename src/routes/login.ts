@@ -2,7 +2,6 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
 import '@vaadin/login/vaadin-login-form';
-import '../components/user-credentials';
 import {LoginFormLoginEvent} from '@vaadin/login/vaadin-login-form';
 import '@vaadin/button';
 import {Router} from '@vaadin/router';
