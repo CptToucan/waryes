@@ -8,7 +8,9 @@ router.setRoutes([
     children: [
       {path: '/', component: 'index-route'},
       {path: '/register', component: 'register-route'},
-      {path: '/login', component: 'login-route'}
+      {path: '/login', component: 'login-route'},
+      {path: '/units', component: 'units-route'},
+      {path: '/unit/:unitId', component: 'unit-view-route'}
     ]
   }
 ]);
