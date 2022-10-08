@@ -32,6 +32,11 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:dashboard',
       href: '/',
     },
+    {
+      name: 'Units',
+      icon: 'vaadin:user-star',
+      href: '/units',
+    }
   ],
   guest: [
     {
