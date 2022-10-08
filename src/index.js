@@ -12,7 +12,8 @@ import "./routes/application";
 import "./routes/index";
 import "./routes/register";
 import "./routes/login";
-
+import "./routes/units";
+import "./routes/unit-view";
 
 /** Components */
 
