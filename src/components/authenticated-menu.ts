@@ -36,7 +36,12 @@ const defaultMenu: MenuDefinition = {
       name: 'Units',
       icon: 'vaadin:user-star',
       href: '/units',
-    }
+    },
+    {
+      name: 'Unit',
+      icon: 'vaadin:dashboard',
+      href: '/',
+    },
   ],
   guest: [
     {
@@ -44,7 +49,12 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:dashboard',
       href: '/',
     },
-  ],
+    {
+      name: 'Unit',
+      icon: 'vaadin:dashboard',
+      href: '/unit/1',
+    },
+  ]
 };
 
 @customElement('authenticated-menu')

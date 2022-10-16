@@ -10,7 +10,7 @@ router.setRoutes([
       {path: '/register', component: 'register-route'},
       {path: '/login', component: 'login-route'},
       {path: '/units', component: 'units-route'},
-      {path: '/unit/:unitId', component: 'unit-view-route'}
+      {path: '/unit/:unitId', component: 'unit-view-route'},
     ]
   }
 ]);
