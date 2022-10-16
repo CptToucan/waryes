@@ -1,4 +1,4 @@
-import '@vaadin/vaadin-lumo-styles';
+// import '@vaadin/vaadin-lumo-styles';
 import { color } from '@vaadin/vaadin-lumo-styles';
 
 const $tpl1 = document.createElement('template');
@@ -16,5 +16,5 @@ import "./routes/units";
 import "./routes/unit-view";
 
 /** Components */
-
+import "./components/unit-card";
 import "../styles/app.css";
