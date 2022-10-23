@@ -29,7 +29,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
 
   async fetchUnit(unitId: string) {
     const units = await UnitsDatabaseService.fetchUnits();
-    this.unit = units?.find((u) => u.id === unitId);
+    this.unit = units?.find((u) => u.descriptorName === unitId);
   }
 
   render(): TemplateResult {

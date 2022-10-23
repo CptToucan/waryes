@@ -1,47 +1,68 @@
 interface WeaponMetaData {
-    aiming?:             number,
-    aircraft?:          string,
-    ammunition?:        string,
-    ground?:            number,
-    he?:                number,
-    helicopter?:        number,
-    motion?:            number,
-    name?:              string,
-    penetration?:       number,
-    rateOfFire?:        number,
-    reload?:            number,
-    salvoLength?:       number,
-    static?:            number,
-    supplyCost?:        number,
-    suppress?:          number,
-    type?:              string,
+    showInInterface:    boolean
+    ammoDescriptorName: string
+    he?:                number
+    suppress?:          number
+    groundRange?:       number
+    helicopterRange?:   number
+    planeRange?:        number
+    aimingTime?:        number
+    reloadTime?:        number
+    salvoLength?:       number
+    rateOfFire?:        number
+    salvoIndex:         number
+    supplyCost?:        number
+    staticAccuracy:     number
+    movingAccuracy:     number
+    penetration?:       number
+
+    // TODO: Audit / remove
+    // old vlaues missing or removed
+    // aiming?:            number,
+    // aircraft?:          string,
+    // ammunition?:        string,
+    // ground?:            number,
+    // helicopter?:        number,
+    // motion?:            number,
+    // name?:              string,
+    // reload?:            number,
+    // static?:            number,
+    // type?:              string,
 }
 
 interface Unit {
-    _name:              string,
-    agility?:           string, 
-    airOptics?:         string,
-    autonomy?:          number,
-    commandPoints:      number,
-    ecm?:               number,
-    frontArmor?:        number,
-    fuel?:              number,
-    id:                 string,
-    maxDmg:             number,
-    optics?:            string,
-    rearArmor?:         number,
-    revealInfluence:    boolean,
-    roadSpeed?:         number,
-    sideArmor?:         number,
-    speed?:             number,
-    stealth?:           string,
-    strength?:          number,
-    supply?:            number,
-    topArmor?:          number,
-    trajectory?:        number,
-    transport?:         string,
-    version:            string,
-    weaponMetadata:     WeaponMetaData[],
+    descriptorName:         string,
+    frontArmor:             number,
+    sideArmor:              number,
+    rearArmor:              number,
+    topArmor:               number,
+    maxDamage:              number,
+    speed:                  number,
+    roadSpeed:              number,
+    optics?:                number,
+    airOptics?:             number,
+    stealth?:               number,
+    advancedDeployment?:    number,
+    fuel?:                  number,
+    fuelMove?:              number,
+    supply?:                number,
+    ecm:                    number,
+    agility?:               string, 
+    travelTime?:            number,
+    weapons:                WeaponMetaData[]
+    
+    // TODO: Audit / remove
+    // old values missing or removed
+    // _name:              string,
+    // autonomy?:          number,
+    // commandPoints:      number,
+    // id:                 string,
+    // revealInfluence:    boolean,
+    // strength?:          number,
+    // trajectory?:        number,
+    // transport?:         string,
+    // version:            string,
+    // weaponMetadata:     WeaponMetaData[],
 }
 
 export {Unit, WeaponMetaData};
