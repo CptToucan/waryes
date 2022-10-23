@@ -30,8 +30,7 @@ export class UnitsTable extends LitElement {
     return html`
       <div style="width: 100%; display: flex; justify-content: center">
         <vaadin-grid .items="${this.units}">
-            <vaadin-grid-column @click=${(e: any)=>console.log(e)} path="_name"></vaadin-grid-column>
-            <vaadin-grid-column path="id"></vaadin-grid-column>
+            <vaadin-grid-column path="descriptorName"></vaadin-grid-column>
             <vaadin-grid-column
               header=""
               ${columnBodyRenderer(this.viewColumnRenderer, [])}
@@ -44,7 +43,7 @@ export class UnitsTable extends LitElement {
   private viewColumnRenderer: GridColumnBodyLitRenderer<Unit> = (unit: Unit) => html`
       <div>
         <vaadin-button
-          @click=${()=> Router.go('/unit/' + unit.id)}
+          @click=${()=> Router.go('/unit/' + unit.descriptorName)}
         >View</vaadin-button>
       </div>
     `
