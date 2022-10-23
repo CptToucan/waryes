@@ -127,16 +127,16 @@ export class UnitCard extends LitElement {
 
   renderTitleRow(): TemplateResult {
     return html` <div class="unit-title">
-      <p class="unit-name">${this.unit?._name}</p>
-      <p class="unit-command-points">${this.unit?.commandPoints}</p>
+      <p class="unit-name">${this.unit?.descriptorName}</p>
+      <p class="unit-command-points">DATA SOURCE: TODO</p>
     </div>`;
   }
 
   renderWeaponTabs(): TemplateResult[] {
-    const tabs = (this.unit?.weaponMetadata ?? [])
+    const tabs = (this.unit?.weapons ?? [])
       .filter((w) => Object.keys(w).length > 0)
       .map((weapon) => {
-        return html`<vaadin-tab>${weapon.name}</vaadin-tab>`;
+        return html`<vaadin-tab>${weapon.ammoDescriptorName}</vaadin-tab>`;
       });
 
     return tabs;
@@ -147,10 +147,10 @@ export class UnitCard extends LitElement {
       <div class="weapons-tab">
         <table>
           <tbody>
-            ${this.renderWeaponTabRow('Name', weapon.name)}
+            ${this.renderWeaponTabRow('Name', weapon.ammoDescriptorName)}
             ${this.renderWeaponTabRow(
               'Ammunition',
-              weapon.ammunition,
+              'DATA SOURCE: TODO',
               'weapon-stat-border-bottom'
             )}
             ${this.renderWeaponTabRow('Penetration', weapon.penetration)}
@@ -160,22 +160,22 @@ export class UnitCard extends LitElement {
               weapon.suppress,
               'weapon-stat-border-bottom'
             )}
-            ${this.renderWeaponTabRow('Ground', weapon.ground)}
-            ${this.renderWeaponTabRow('Helicopter', weapon.helicopter)}
+            ${this.renderWeaponTabRow('Ground', weapon.groundRange)}
+            ${this.renderWeaponTabRow('Helicopter', weapon.helicopterRange)}
             ${this.renderWeaponTabRow(
               'Aircraft',
-              weapon.aircraft,
+              weapon.planeRange,
               'weapon-stat-border-bottom'
             )}
-            ${this.renderWeaponTabRow('Static', weapon.static)}
+            ${this.renderWeaponTabRow('Static', weapon.staticAccuracy)}
             ${this.renderWeaponTabRow(
               'Motion',
-              weapon.motion,
+              weapon.movingAccuracy,
               'weapon-stat-border-bottom'
             )}
             ${this.renderWeaponTabRow('Rate of Fire', weapon.rateOfFire)}
-            ${this.renderWeaponTabRow('Aiming Time', weapon.aiming)}
-            ${this.renderWeaponTabRow('Reload Time', weapon.reload)}
+            ${this.renderWeaponTabRow('Aiming Time', weapon.aimingTime)}
+            ${this.renderWeaponTabRow('Reload Time', weapon.reloadTime)}
             ${this.renderWeaponTabRow(
               'Salvo Length',
               weapon.salvoLength,
@@ -204,24 +204,24 @@ export class UnitCard extends LitElement {
   renderUnitBottomStats(): TemplateResult {
     return html`
       <div class="unit-bottom-stats">
-        ${this.renderUnitBottomStatsItem('Strength', this.unit?.strength)}
+        ${this.renderUnitBottomStatsItem('Strength', 'DATA SOURCE: TODO')}
         ${this.renderUnitBottomStatsItem('Optics', this.unit?.optics)}
         ${this.renderUnitBottomStatsItem('Stealth', this.unit?.stealth)}
         ${this.renderUnitBottomStatsItem(
           'Reveal Influence',
-          this.unit?.revealInfluence
+          'DATA SOURCE: TODO'
         )}
-        ${this.renderUnitBottomStatsItem('Max Damage', this.unit?.maxDmg)}
+        ${this.renderUnitBottomStatsItem('Max Damage', this.unit?.maxDamage)}
         ${this.renderUnitBottomStatsItem('Air Optics', this.unit?.airOptics)}
         ${this.renderUnitBottomStatsItem('ECM', this.unit?.ecm)}
         ${this.renderUnitBottomStatsItem('Agility', this.unit?.agility)}
-        ${this.renderUnitBottomStatsItem('Trajectory', this.unit?.trajectory)}
+        ${this.renderUnitBottomStatsItem('Trajectory', 'DATA SOURCE: TODO')}
         ${this.renderUnitBottomStatsItem('Speed', this.unit?.speed)}
         ${this.renderUnitBottomStatsItem('Road Speed', this.unit?.roadSpeed)}
-        ${this.renderUnitBottomStatsItem('Autonomy', this.unit?.autonomy)}
+        ${this.renderUnitBottomStatsItem('Autonomy', 'DATA SOURCE: TODO')}
         ${this.renderUnitBottomStatsItem('Fuel', this.unit?.fuel)}
         ${this.renderUnitBottomStatsItem('Supply Cost', this.unit?.supply)}
-        ${this.renderUnitBottomStatsItem('Transport', this.unit?.transport)}
+        ${this.renderUnitBottomStatsItem('Transport', 'DATA SOURCE: TODO')}
       </div>
     `;
   }
@@ -247,15 +247,15 @@ export class UnitCard extends LitElement {
             ${this.renderWeaponTabs()}
           </vaadin-tabs>
 
-          ${this.renderWeaponStats(
-            this.unit?.weaponMetadata[this.selectedWeapon] ?? {}
+          ${this.unit && this.renderWeaponStats(
+            this.unit.weapons[this.selectedWeapon]
           )}
         </vaadin-tabsheet>
       `;
     } else {
       return html`
         <div style="display: flex; flex-direction: row; justify-content: space-between;">
-          ${this.unit?.weaponMetadata.map((weaponMetadata) =>
+          ${this.unit?.weapons.map((weaponMetadata) =>
             this.renderWeaponStats(weaponMetadata)
           )}
         </div>
