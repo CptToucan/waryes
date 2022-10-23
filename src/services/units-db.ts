@@ -3,6 +3,9 @@ import { FirebaseService, FirebaseServiceClass } from "./firebase";
 import { getStorage, ref, getBlob } from "firebase/storage";
 import { Unit } from "../types/unit";
 
+const CURRENT_FILE_NAME = 'unit-bundle-suchet.txt'
+const CURRENT_NAMED_QUERY = 'units-suchet'
+
 enum UnitFetchStrategy {
     cache,
     forceDirect
@@ -55,7 +58,7 @@ class UnitsDatabaseServiceClass {
         this.isFetching = true;
         // Create a reference with an initial file path and name
         const storage = getStorage(FirebaseService.app);
-        const pathReference = ref(storage, 'unit-bundle-bessieres.txt');
+        const pathReference = ref(storage, CURRENT_FILE_NAME);
         const bundleBlob = await getBlob(pathReference)
         const bundleBlobStr = await bundleBlob.text()
 
@@ -69,7 +72,7 @@ class UnitsDatabaseServiceClass {
             throw new Error("Error loading bundle file")
         }
 
-        const query = await namedQuery(this.db, 'units-bessieres')
+        const query = await namedQuery(this.db, CURRENT_NAMED_QUERY)
         if (!query) throw new Error("Failed to find named query")
 
         const unitsQuery = await getDocsFromCache(query);
