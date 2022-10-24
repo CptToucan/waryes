@@ -47,7 +47,7 @@ interface Unit {
     fuelMove?:              number,
     supply?:                number,
     ecm:                    number,
-    agility?:               string, 
+    agility?:               number, 
     travelTime?:            number,
     weapons:                WeaponMetaData[]
     

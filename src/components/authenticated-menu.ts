@@ -5,6 +5,7 @@ import '@vaadin/icon';
 import '@vaadin/icons';
 import '@vaadin/tabs';
 import '@vaadin/context-menu';
+import '@vaadin/app-layout';
 import {Router} from '@vaadin/router';
 import { ContextMenuItem, ContextMenuItemSelectedEvent } from '@vaadin/context-menu';
 import { notificationService } from '../services/notification';
@@ -50,9 +51,9 @@ const defaultMenu: MenuDefinition = {
       href: '/',
     },
     {
-      name: 'Unit',
+      name: 'Units',
       icon: 'vaadin:dashboard',
-      href: '/unit/1',
+      href: '/units/',
     },
   ]
 };
@@ -158,7 +159,7 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
-    return html` <vaadin-app-layout theme="small">
+    return html` <vaadin-app-layout style="height: 100%;" theme="small">
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <h1>WarYes</h1>
