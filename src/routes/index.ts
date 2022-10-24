@@ -3,14 +3,11 @@ import {customElement} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
 import '@vaadin/multi-select-combo-box';
-import {
-  ComboBoxDataProviderCallback,
-  ComboBoxDataProviderParams,
-} from '@vaadin/combo-box/src/vaadin-combo-box';
-
-type Unit = {
-  id: string;
-};
+import '@vaadin/combo-box';
+import { UnitsDatabaseService } from "../services/units-db";
+import { Unit } from '../types/unit';
+import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
+import { Router } from '@vaadin/router';
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
@@ -33,7 +30,7 @@ export class IndexRoute extends LitElement {
         padding-right: var(--lumo-space-xl);
       }
 
-      vaadin-multi-select-combo-box {
+      vaadin-combo-box {
         font-size: var(--lumo-font-size-l);
         flex: 1 1 0;
         max-width: 512px;
@@ -47,11 +44,22 @@ export class IndexRoute extends LitElement {
     `;
   }
 
-  dataProvider(
-    params: ComboBoxDataProviderParams,
-    callback: ComboBoxDataProviderCallback<Unit>
-  ) {
-    console.log(params, callback);
+  units?: Unit[] = [];
+
+  async firstUpdated() {
+    const units = await UnitsDatabaseService.fetchUnits();
+
+    if(units !== null) {
+      this.units = units;
+      this.requestUpdate();
+    }
+  }
+
+  unitSelected(event: ComboBoxSelectedItemChangedEvent<Unit>)  {
+    if(event.detail.value) {
+      Router.go(`/unit/${event.detail.value?.descriptorName}`);
+    }
+    
   }
 
   render(): TemplateResult {
@@ -59,14 +67,16 @@ export class IndexRoute extends LitElement {
       <div class="splash">
         <img height="86" src=${WaryesImage} />
         <div class="search">
-          <vaadin-multi-select-combo-box
+          <vaadin-combo-box
             placeholder="Search for Warno unit"
-            .dataProvider=${this.dataProvider}
-          ></vaadin-multi-select-combo-box>
+            .items=${this.units}
+            item-label-path="descriptorName"
+            @selected-item-changed=${this.unitSelected}
+          ></vaadin-combo-box>
         </div>
         <div class="or">OR</div>
         <div>
-          <vaadin-button theme="large">View All</vaadin-button>
+          <vaadin-button @click=${() => {Router.go("/units/")}} theme="large">View All</vaadin-button>
         </div>
       </div>
     `;

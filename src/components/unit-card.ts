@@ -93,12 +93,9 @@ export class UnitCard extends LitElement {
 
       }
 
-      .unit-bottom-stats div:not(:last-child){
+
+      .unit-bottom-stats div {
         border-bottom: 1px solid var(--lumo-primary-color-10pct);
-      }
-
-      .unit-bottom-stats div:nth-child(odd) {
-
       }
 
       .unit-bottom-stats div p:nth-child(1) {
@@ -204,7 +201,7 @@ export class UnitCard extends LitElement {
   renderUnitBottomStats(): TemplateResult {
     return html`
       <div class="unit-bottom-stats">
-        ${this.renderUnitBottomStatsItem('Strength', 'DATA SOURCE: TODO')}
+        ${this.renderUnitBottomStatsItem('Strength', this.unit?.maxDamage)}
         ${this.renderUnitBottomStatsItem('Optics', this.unit?.optics)}
         ${this.renderUnitBottomStatsItem('Stealth', this.unit?.stealth)}
         ${this.renderUnitBottomStatsItem(
@@ -215,13 +212,12 @@ export class UnitCard extends LitElement {
         ${this.renderUnitBottomStatsItem('Air Optics', this.unit?.airOptics)}
         ${this.renderUnitBottomStatsItem('ECM', this.unit?.ecm)}
         ${this.renderUnitBottomStatsItem('Agility', this.unit?.agility)}
-        ${this.renderUnitBottomStatsItem('Trajectory', 'DATA SOURCE: TODO')}
+        ${this.renderUnitBottomStatsItem('Travel Time', this.unit?.travelTime)}
         ${this.renderUnitBottomStatsItem('Speed', this.unit?.speed)}
         ${this.renderUnitBottomStatsItem('Road Speed', this.unit?.roadSpeed)}
         ${this.renderUnitBottomStatsItem('Autonomy', 'DATA SOURCE: TODO')}
         ${this.renderUnitBottomStatsItem('Fuel', this.unit?.fuel)}
         ${this.renderUnitBottomStatsItem('Supply Cost', this.unit?.supply)}
-        ${this.renderUnitBottomStatsItem('Transport', 'DATA SOURCE: TODO')}
       </div>
     `;
   }
