@@ -7,6 +7,7 @@ import {FilterMetadata} from '../types/FilterMetadata';
 import '../components/filter/boolean-value';
 import '../components/filter/string-value';
 import '../components/filter/number-value';
+import './filter-chip';
 
 @customElement('filters-builder')
 export class FiltersBuilder extends LitElement {
@@ -33,7 +34,9 @@ export class FiltersBuilder extends LitElement {
         align-items: flex-end;
       }
 
-      filter-number-value, filter-string-value, filter-boolean-value {
+      filter-number-value,
+      filter-string-value,
+      filter-boolean-value {
         flex: 1 1 0;
       }
     `;
@@ -46,12 +49,11 @@ export class FiltersBuilder extends LitElement {
   @property()
   availableFields: AbstractFieldMetadata<unknown>[] = [];
 
-  @query("#field-select")
+  @query('#field-select')
   fieldSelectElement?: ComboBox;
 
-  @query("#operator-select")
+  @query('#operator-select')
   operatorSelectElement?: ComboBox;
-
 
   filterFieldSelected(
     event: ComboBoxSelectedItemChangedEvent<AbstractFieldMetadata<unknown>>
@@ -101,6 +103,7 @@ export class FiltersBuilder extends LitElement {
         item-label-path="label"
         item-value-path="name"
         @selected-item-changed=${this.filterFieldSelected}
+        .selectedItem=${this.activeFilter?.field || undefined}
       ></vaadin-combo-box>
     `;
   }
@@ -124,22 +127,20 @@ export class FiltersBuilder extends LitElement {
         .filter=${this.activeFilter}
         @value-changed=${() => this.requestUpdate()}
       ></filter-boolean-value>`;
-    }
-    else if(fieldType === 'number') {
+    } else if (fieldType === 'number') {
       componentHtml = html`<filter-number-value
-      .filter=${this.activeFilter}
-      @value-changed=${() => {
-        this.requestUpdate();
-      }}
-    ></filter-number-value>`;
-    }
-    else {
+        .filter=${this.activeFilter}
+        @value-changed=${() => {
+          this.requestUpdate();
+        }}
+      ></filter-number-value>`;
+    } else {
       componentHtml = html`<filter-string-value
-      .filter=${this.activeFilter}
-      @value-changed=${() => {
-        this.requestUpdate();
-      }}
-    ></filter-string-value>`;
+        .filter=${this.activeFilter}
+        @value-changed=${() => {
+          this.requestUpdate();
+        }}
+      ></filter-string-value>`;
     }
 
     return componentHtml;
@@ -178,24 +179,24 @@ export class FiltersBuilder extends LitElement {
         } else {
           value = filter.value as string;
         }
-        return html`<ion-chip
-          style="--background: var(--ion-text-color); max-height: 32px;"
-          @click=${() => {
-            this.removeFilterFromFilters(filter);
-          }}
-          ><ion-label
-            >${filter.field.label} - ${filter.operator} - ${value}</ion-label
+        return html`
+          <filter-chip
+            role="button"
+            @click=${() => {
+              this.removeFilterFromFilters(filter);
+            }}
           >
-          <ion-icon name="close-circle"></ion-icon
-        ></ion-chip>`;
+            ${filter.field.label} - ${filter.operator} - ${value}
+          </filter-chip>
+        `;
       })}
     </div>`;
   }
 
   render() {
     return html` <div class="filter-builder">
-      ${this.renderFilterSelection()}
-    </div>
-    ${this.renderChips()}`;
+        ${this.renderFilterSelection()}
+      </div>
+      ${this.renderChips()}`;
   }
 }

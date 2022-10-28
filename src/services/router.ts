@@ -11,6 +11,7 @@ router.setRoutes([
       {path: '/login', component: 'login-route'},
       {path: '/units', component: 'units-route'},
       {path: '/unit/:unitId', component: 'unit-view-route'},
+      {path: '/comparison', component: 'comparison-route'},
     ]
   }
 ]);
