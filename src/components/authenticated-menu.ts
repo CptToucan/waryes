@@ -31,31 +31,36 @@ type MenuDefinition = {
 const defaultMenu: MenuDefinition = {
   user: [
     {
-      name: 'Home',
-      icon: 'vaadin:dashboard',
+      name: 'Search',
+      icon: 'vaadin:search',
       href: '/',
     },
     {
       name: 'Units',
-      icon: 'vaadin:user-star',
+      icon: 'vaadin:table',
       href: '/units',
     },
     {
-      name: 'Unit',
-      icon: 'vaadin:dashboard',
-      href: '/',
+      name: 'Comparison',
+      icon: 'vaadin:pie-bar-chart',
+      href: '/comparison',
     },
   ],
   guest: [
     {
-      name: 'Home',
-      icon: 'vaadin:dashboard',
+      name: 'Search',
+      icon: 'vaadin:search',
       href: '/',
     },
     {
       name: 'Units',
-      icon: 'vaadin:dashboard',
+      icon: 'vaadin:table',
       href: '/units/',
+    },
+    {
+      name: 'Comparison',
+      icon: 'vaadin:pie-bar-chart',
+      href: '/comparison',
     },
   ]
 };
