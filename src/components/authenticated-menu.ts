@@ -9,6 +9,8 @@ import '@vaadin/app-layout';
 import {Router} from '@vaadin/router';
 import { ContextMenuItem, ContextMenuItemSelectedEvent } from '@vaadin/context-menu';
 import { notificationService } from '../services/notification';
+// @ts-ignore
+import WaryesImage from '../../images/waryes-transparent.png';
 
 interface MenuItem {
   name: string;
@@ -162,7 +164,7 @@ export class AuthenticatedMenu extends LitElement {
     return html` <vaadin-app-layout style="height: 100%;" theme="small">
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
-        <h1>WarYes</h1>
+        <img height="32" src=${WaryesImage} />
         ${this.renderAccountButton()}
       </div>
 
