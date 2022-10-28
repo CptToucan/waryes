@@ -14,6 +14,7 @@ import "./routes/register";
 import "./routes/login";
 import "./routes/units";
 import "./routes/unit-view";
+import "./routes/comparison"
 
 /** Components */
 import "./components/unit-card";
