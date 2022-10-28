@@ -1,4 +1,8 @@
-interface WeaponMetaData {
+import { AbstractFieldMetadata } from "./AbstractFieldMetadata";
+import { NumberFieldMetadata } from "./NumberFieldMetadata";
+import { StringFieldMetadata } from "./StringFieldMetadata";
+
+interface Weapon {
     showInInterface:    boolean
     ammoDescriptorName: string
     he?:                number
@@ -31,6 +35,10 @@ interface WeaponMetaData {
 }
 
 interface Unit {
+    name: string,
+    category: string,
+    id: string,
+    commandPoints: number,
     descriptorName:         string,
     frontArmor:             number,
     sideArmor:              number,
@@ -49,7 +57,7 @@ interface Unit {
     ecm:                    number,
     agility?:               number, 
     travelTime?:            number,
-    weapons:                WeaponMetaData[]
+    weapons:                Weapon[]
     
     // TODO: Audit / remove
     // old values missing or removed
@@ -65,4 +73,56 @@ interface Unit {
     // weaponMetadata:     WeaponMetaData[],
 }
 
-export {Unit, WeaponMetaData};
+
+enum UnitFieldType {
+  UNIT,
+  WEAPON
+}
+
+class FieldMetadata {
+  static fields: FieldMetadataMap = {
+    name: new StringFieldMetadata("name", "Name", UnitFieldType.UNIT),
+    category: new StringFieldMetadata("category", "Category", UnitFieldType.UNIT),
+    id: new StringFieldMetadata("id", "Id", UnitFieldType.UNIT),
+    commandPoints: new NumberFieldMetadata("commandPoints", "Command Points", UnitFieldType.UNIT),
+    descriptorName: new StringFieldMetadata("descriptorName", "Descriptor Name", UnitFieldType.UNIT),
+    frontArmor: new NumberFieldMetadata("frontArmor", "Front Armour", UnitFieldType.UNIT),
+    sideArmor: new NumberFieldMetadata("sideArmor", "Side Armor", UnitFieldType.UNIT),
+    rearArmor: new NumberFieldMetadata("rearArmor", "Rear Armor", UnitFieldType.UNIT),
+    topArmor: new NumberFieldMetadata("topArmor", "Top Armor", UnitFieldType.UNIT),
+    maxDamage: new NumberFieldMetadata("maxDamage", "Max Damage", UnitFieldType.UNIT),
+    speed: new NumberFieldMetadata("speed", "Speed", UnitFieldType.UNIT),
+    roadSpeed: new NumberFieldMetadata("roadSpeed", "Road Speed", UnitFieldType.UNIT),
+    optics: new NumberFieldMetadata("optics", "Optics", UnitFieldType.UNIT),
+    airOptics: new NumberFieldMetadata("airOptics", "Air Optics", UnitFieldType.UNIT),
+    stealth: new NumberFieldMetadata("stealth", "Stealth", UnitFieldType.UNIT),
+    advancedDeployment: new NumberFieldMetadata("advancedDeployment", "Advanced Deployment", UnitFieldType.UNIT),
+    fuel: new NumberFieldMetadata("fuel", "Fuel", UnitFieldType.UNIT),
+    fuelMove: new NumberFieldMetadata("fuelMove", "Fuel Move", UnitFieldType.UNIT),
+    supply: new NumberFieldMetadata("supply", "Supply", UnitFieldType.UNIT),
+    ecm: new NumberFieldMetadata("ecm", "ECM", UnitFieldType.UNIT),
+    agility: new NumberFieldMetadata("agility", "Agility", UnitFieldType.UNIT),
+    travelTime: new NumberFieldMetadata("travelTime", "Travel Time", UnitFieldType.UNIT),
+
+    ammoDescriptorName: new StringFieldMetadata("ammoDescriptorName", "Ammo Descriptor Name", UnitFieldType.WEAPON),
+    he: new NumberFieldMetadata("he", "HE", UnitFieldType.WEAPON),
+    suppress: new NumberFieldMetadata("suppress", "Suppress", UnitFieldType.WEAPON),
+    groundRange: new NumberFieldMetadata("groundRange", "Ground Range", UnitFieldType.WEAPON),
+    helicopterRange: new NumberFieldMetadata("helicopterRange", "Helicopter Range", UnitFieldType.WEAPON),
+    planeRange: new NumberFieldMetadata("planeRange", "Plane Range", UnitFieldType.WEAPON),
+    aimingTime: new NumberFieldMetadata("aimingTime", "Aiming Time", UnitFieldType.WEAPON),
+    reloadTime: new NumberFieldMetadata("reloadTime", "Reload Time", UnitFieldType.WEAPON),
+    salvoLength: new NumberFieldMetadata("salvoLength", "Salvo Length", UnitFieldType.WEAPON),
+    rateOfFire: new NumberFieldMetadata("rateOfFire", "Rate of Fire", UnitFieldType.WEAPON),
+    supplyCost: new NumberFieldMetadata("supplyCost", "Supply Cost", UnitFieldType.WEAPON),
+    staticAccuracy: new NumberFieldMetadata("staticAccuracy", "Static Accuracy", UnitFieldType.WEAPON),
+    movingAccuracy: new NumberFieldMetadata("movingAccuracy", "Moving Accuracy", UnitFieldType.WEAPON),
+    penetration: new NumberFieldMetadata("penetration", "Penetration", UnitFieldType.WEAPON)
+  }
+}
+
+type FieldMetadataMap = {
+  [key: string]: AbstractFieldMetadata<unknown>
+}
+
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType};

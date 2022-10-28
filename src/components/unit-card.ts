@@ -2,7 +2,7 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {TabsSelectedChangedEvent} from '@vaadin/tabs';
 import '@vaadin/tabs';
-import {Unit, WeaponMetaData} from '../types/unit';
+import {Unit, Weapon} from '../types/unit';
 
 @customElement('unit-card')
 export class UnitCard extends LitElement {
@@ -124,8 +124,8 @@ export class UnitCard extends LitElement {
 
   renderTitleRow(): TemplateResult {
     return html` <div class="unit-title">
-      <p class="unit-name">${this.unit?.descriptorName}</p>
-      <p class="unit-command-points">DATA SOURCE: TODO</p>
+      <p class="unit-name">${this.unit?.name}</p>
+      <p class="unit-command-points">${this.unit?.commandPoints}</p>
     </div>`;
   }
 
@@ -139,7 +139,7 @@ export class UnitCard extends LitElement {
     return tabs;
   }
 
-  renderWeaponStats(weapon: WeaponMetaData): TemplateResult {
+  renderWeaponStats(weapon: Weapon): TemplateResult {
     return html`
       <div class="weapons-tab">
         <table>
