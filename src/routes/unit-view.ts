@@ -35,9 +35,6 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
   render(): TemplateResult {
     return html`
     <div class='unit-view'>
-      <div style="width: 100%; display: flex; justify-content: center">
-        <img height="86" src=${WaryesImage} />
-      </div>
       <unit-card .unit=${this.unit}></unit-card>
     </div>
     `;

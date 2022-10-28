@@ -50,7 +50,17 @@ export class IndexRoute extends LitElement {
     const units = await UnitsDatabaseService.fetchUnits();
 
     if(units !== null) {
-      this.units = units;
+      const sortedUnits = units.filter(unit => unit.name !== "").sort((a,b) => {
+        if(a.name < b.name) {
+          return -1;
+        }
+        if(a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+
+      this.units = sortedUnits
       this.requestUpdate();
     }
   }
@@ -70,7 +80,7 @@ export class IndexRoute extends LitElement {
           <vaadin-combo-box
             placeholder="Search for Warno unit"
             .items=${this.units}
-            item-label-path="descriptorName"
+            item-label-path="name"
             @selected-item-changed=${this.unitSelected}
           ></vaadin-combo-box>
         </div>
