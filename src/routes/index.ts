@@ -4,10 +4,9 @@ import {customElement} from 'lit/decorators.js';
 import WaryesImage from '../../images/waryes-transparent.png';
 import '@vaadin/multi-select-combo-box';
 import '@vaadin/combo-box';
-import { UnitsDatabaseService } from "../services/units-db";
 import { Unit } from '../types/unit';
-import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
 import { Router } from '@vaadin/router';
+import "../components/unit-search";
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
@@ -30,11 +29,10 @@ export class IndexRoute extends LitElement {
         padding-right: var(--lumo-space-xl);
       }
 
-      vaadin-combo-box {
-        font-size: var(--lumo-font-size-l);
+      unit-search {
         flex: 1 1 0;
-        max-width: 512px;
       }
+
 
       .or {
         font-size: var(--lumo-font-size-l);   
@@ -44,45 +42,19 @@ export class IndexRoute extends LitElement {
     `;
   }
 
-  units?: Unit[] = [];
-
-  async firstUpdated() {
-    const units = await UnitsDatabaseService.fetchUnits();
-
-    if(units !== null) {
-      const sortedUnits = units.filter(unit => unit.name !== "").sort((a,b) => {
-        if(a.name < b.name) {
-          return -1;
-        }
-        if(a.name > b.name) {
-          return 1;
-        }
-        return 0;
-      });
-
-      this.units = sortedUnits
-      this.requestUpdate();
-    }
-  }
-
-  unitSelected(event: ComboBoxSelectedItemChangedEvent<Unit>)  {
-    if(event.detail.value) {
+  unitSelected(event: CustomEvent)  {
+    if(event.detail.value as Unit) {
       Router.go(`/unit/${event.detail.value?.descriptorName}`);
     }
-    
   }
+
 
   render(): TemplateResult {
     return html`
       <div class="splash">
         <img height="86" src=${WaryesImage} />
         <div class="search">
-          <vaadin-combo-box
-            placeholder="Search for Warno unit"
-            .items=${this.units}
-            item-label-path="name"
-            @selected-item-changed=${this.unitSelected}
-          ></vaadin-combo-box>
+          <unit-search @unit-selected=${this.unitSelected}></unit-search>
         </div>
         <div class="or">OR</div>
         <div>

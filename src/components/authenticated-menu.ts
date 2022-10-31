@@ -88,6 +88,12 @@ export class AuthenticatedMenu extends LitElement {
         width: 100%;
         justify-content: space-between;
         padding-right: var(--lumo-space-s);
+
+        :host {
+          display: flex;
+          flex-direction: column;
+          flex: 1 1 0;
+        }
       }
     `;
   }
