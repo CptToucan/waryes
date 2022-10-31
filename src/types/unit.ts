@@ -105,6 +105,7 @@ class FieldMetadata {
     travelTime: new NumberFieldMetadata("travelTime", "Travel Time", UnitFieldType.UNIT),
 
     ammoDescriptorName: new StringFieldMetadata("ammoDescriptorName", "Ammo Descriptor Name", UnitFieldType.WEAPON),
+    penetration: new NumberFieldMetadata("penetration", "Penetration", UnitFieldType.WEAPON),
     he: new NumberFieldMetadata("he", "HE", UnitFieldType.WEAPON),
     suppress: new NumberFieldMetadata("suppress", "Suppress", UnitFieldType.WEAPON),
     groundRange: new NumberFieldMetadata("groundRange", "Ground Range", UnitFieldType.WEAPON),
@@ -116,8 +117,7 @@ class FieldMetadata {
     rateOfFire: new NumberFieldMetadata("rateOfFire", "Rate of Fire", UnitFieldType.WEAPON),
     supplyCost: new NumberFieldMetadata("supplyCost", "Supply Cost", UnitFieldType.WEAPON),
     staticAccuracy: new NumberFieldMetadata("staticAccuracy", "Static Accuracy", UnitFieldType.WEAPON),
-    movingAccuracy: new NumberFieldMetadata("movingAccuracy", "Moving Accuracy", UnitFieldType.WEAPON),
-    penetration: new NumberFieldMetadata("penetration", "Penetration", UnitFieldType.WEAPON)
+    movingAccuracy: new NumberFieldMetadata("movingAccuracy", "Moving Accuracy", UnitFieldType.WEAPON)
   }
 }
 
