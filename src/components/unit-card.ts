@@ -20,10 +20,16 @@ export class UnitCard extends LitElement {
         justify-content: center;
         align-items: center;
         border-radius: var(--lumo-border-radius-m);
-        padding-left: var(--lumo-space-l);
-        padding-right: var(--lumo-space-l);
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
         padding-top: var(--lumo-space-s);
         padding-bottom: var(--lumo-space-s);
+        min-width: 400px;
+        overflow: hidden;
+      }
+
+      .unit-card {
+        width: 100%;
       }
 
       div.unit-title {
@@ -44,8 +50,16 @@ export class UnitCard extends LitElement {
         margin: 0;
       }
 
+      vaadin-tabs {
+
+      }
       vaadin-tab {
         padding: var(--lumo-space-m);
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 33%;
+        display: block;
+        
       }
 
       .weapons-tab table {
@@ -66,6 +80,9 @@ export class UnitCard extends LitElement {
 
       .weapons-tab table td:nth-child(2) {
         text-align: right;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 200px;
       }
 
       .weapons-tab table tr.weapon-stat-border-bottom td {
@@ -90,9 +107,7 @@ export class UnitCard extends LitElement {
       .unit-bottom-stats div p {
         flex-grow: 1;
         margin: 0;
-
       }
-
 
       .unit-bottom-stats div {
         border-bottom: 1px solid var(--lumo-primary-color-10pct);
@@ -133,7 +148,7 @@ export class UnitCard extends LitElement {
     const tabs = (this.unit?.weapons ?? [])
       .filter((w) => Object.keys(w).length > 0)
       .map((weapon) => {
-        return html`<vaadin-tab>${weapon.ammoDescriptorName}</vaadin-tab>`;
+        return html`<vaadin-tab>${weapon.weaponName}</vaadin-tab>`;
       });
 
     return tabs;
@@ -144,10 +159,9 @@ export class UnitCard extends LitElement {
       <div class="weapons-tab">
         <table>
           <tbody>
-            ${this.renderWeaponTabRow('Name', weapon.ammoDescriptorName)}
             ${this.renderWeaponTabRow(
-              'Ammunition',
-              'DATA SOURCE: TODO',
+              'Name',
+              weapon.weaponName,
               'weapon-stat-border-bottom'
             )}
             ${this.renderWeaponTabRow('Penetration', weapon.penetration)}
@@ -234,23 +248,22 @@ export class UnitCard extends LitElement {
   renderWeaponsRow(compact: boolean): TemplateResult {
     if (compact) {
       return html`
-        <vaadin-tabsheet>
-          <vaadin-tabs
-            theme="equal-width-tabs center"
-            slot="tabs"
-            @selected-changed="${this.selectedWeaponTabChanged}"
-          >
-            ${this.renderWeaponTabs()}
-          </vaadin-tabs>
+        <vaadin-tabs
+          theme="equal-width-tabs center"
+          slot="tabs"
+          @selected-changed="${this.selectedWeaponTabChanged}"
+        >
+          ${this.renderWeaponTabs()}
+        </vaadin-tabs>
 
-          ${this.unit && this.renderWeaponStats(
-            this.unit.weapons[this.selectedWeapon]
-          )}
-        </vaadin-tabsheet>
+        ${this.unit &&
+        this.renderWeaponStats(this.unit.weapons[this.selectedWeapon])}
       `;
     } else {
       return html`
-        <div style="display: flex; flex-direction: row; justify-content: space-between;">
+        <div
+          style="display: flex; flex-direction: row; justify-content: space-between;"
+        >
           ${this.unit?.weapons.map((weaponMetadata) =>
             this.renderWeaponStats(weaponMetadata)
           )}

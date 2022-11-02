@@ -4,9 +4,15 @@ import '@vaadin/details';
 import '@vaadin/split-layout';
 import '../components/unit-search';
 import '@vaadin/radio-group';
+import '@vaadin/scroller';
 import {Unit, Weapon, FieldMetadata} from '../types/unit';
-import { NumberFieldMetadata } from '../types/NumberFieldMetadata';
+import {NumberFieldMetadata} from '../types/NumberFieldMetadata';
 
+type masterState = {
+  units: Unit[];
+  weapons: Weapon[];
+  fields: NumberFieldMetadata[];
+};
 
 @customElement('comparison-route')
 export class ComparisonRoute extends LitElement {
@@ -27,15 +33,66 @@ export class ComparisonRoute extends LitElement {
         flex: 1 1 0;
       }
 
+      .weapon-selection {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .weapon-selection > vaadin-radio-group {
+        width: 100%;
+      }
+
       .detail-panel {
         padding-left: var(--lumo-space-m);
         padding-right: var(--lumo-space-m);
+      }
+
+      .button-bar {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .units-grid {
+        display: grid;
+        grid-template-columns: auto auto;
+        padding: var(--lumo-space-s);
+        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+
+        gap: var(--lumo-space-s);
+      }
+
+      .units-grid > unit-card {
       }
     `;
   }
 
   @state()
   selectedUnits: Unit[] = [];
+
+  @state()
+  masterState?: masterState;
+
+  firstUpdated() {
+    const fields: NumberFieldMetadata[] = [];
+    for (const fieldName in FieldMetadata.fields) {
+      const field = FieldMetadata.fields[fieldName];
+
+      if (field instanceof NumberFieldMetadata) {
+        fields.push(field);
+      }
+    }
+    this.comparableFields = fields;
+  }
+
+  applySettingsToMaster(): void {
+    const newState: masterState = {
+      units: this.selectedUnits,
+      weapons: [],
+      fields: [],
+    };
+
+    this.masterState = newState;
+  }
 
   comparableFields: NumberFieldMetadata[] = [];
 
@@ -68,17 +125,49 @@ export class ComparisonRoute extends LitElement {
     return weaponSelectionTemplates;
   }
 
-  firstUpdated() {
+  renderMasterContent(): TemplateResult {
+    return html` <vaadin-scroller
+      style="height: 100%;"
+      scroll-direction="vertical"
+    >
+      <div class="units-grid">
+        ${this.masterState?.units.map(
+          (unit) => html`<unit-card .unit=${unit}></unit-card>`
+        )}
+      </div>
+    </vaadin-scroller>`;
+  }
 
-    const fields: NumberFieldMetadata[] = [];
-    for(const fieldName in FieldMetadata.fields) {
-      const field = FieldMetadata.fields[fieldName];
+  renderDetailContent(): TemplateResult {
+    return html`<vaadin-details opened>
+        <div slot="summary">Units</div>
+        <unit-search
+          @units-selected=${this.unitsSelected}
+          .multi=${true}
+        ></unit-search>
+      </vaadin-details>
 
-      if(field instanceof NumberFieldMetadata) {
-        fields.push(field)
-      }
-    }
-    this.comparableFields = fields;
+      <vaadin-details class="weapon-selection">
+        <div slot="summary">Weapons</div>
+
+        ${this.renderWeaponsForSelectedUnits()}
+      </vaadin-details>
+
+      <vaadin-details opened>
+        <div slot="summary">Fields</div>
+
+        <vaadin-multi-select-combo-box
+          placeholder="Select fields"
+          .items=${this.comparableFields}
+          item-label-path="label"
+        >
+        </vaadin-multi-select-combo-box>
+      </vaadin-details>
+      <div class="button-bar">
+        <vaadin-button @click=${this.applySettingsToMaster}>
+          Apply
+        </vaadin-button>
+      </div>`;
   }
 
   render(): TemplateResult {
@@ -91,7 +180,7 @@ export class ComparisonRoute extends LitElement {
             theme="icon tertiary"
             aria-label="Expand/collapse sidebar"
             @click="${this.toggleSidebar}"
-            style="float: right;"
+            style="position: absolute;"
           >
             <vaadin-icon
               icon="${this.sidebarCollapsed
@@ -99,37 +188,13 @@ export class ComparisonRoute extends LitElement {
                 : 'vaadin:arrow-left'}"
             ></vaadin-icon>
           </vaadin-button>
-          Master
+          ${this.renderMasterContent()}
         </div>
         <div
           class="detail-panel"
           style="width: ${100 - sidebarWidthPercentage}%"
         >
-          <vaadin-details opened>
-            <div slot="summary">Units</div>
-            <unit-search
-              @units-selected=${this.unitsSelected}
-              .multi=${true}
-            ></unit-search>
-          </vaadin-details>
-
-          <vaadin-details opened>
-            <div slot="summary">Weapons</div>
-
-            ${this.renderWeaponsForSelectedUnits()}
-          </vaadin-details>
-
-          <vaadin-details opened>
-            <div slot="summary">Fields</div>
-
-            <vaadin-multi-select-combo-box
-            placeholder="Select fields"
-                .items=${this.comparableFields}
-                item-label-path="label"
-            >
-
-            </vaadin-multi-select-combo-box>
-          </vaadin-details>
+          ${this.renderDetailContent()}
         </div>
       </vaadin-split-layout>
     `;
