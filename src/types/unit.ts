@@ -5,6 +5,7 @@ import { StringFieldMetadata } from "./StringFieldMetadata";
 interface Weapon {
     showInInterface:    boolean
     ammoDescriptorName: string
+    weaponName: string
     he?:                number
     suppress?:          number
     groundRange?:       number
@@ -104,6 +105,7 @@ class FieldMetadata {
     agility: new NumberFieldMetadata("agility", "Agility", UnitFieldType.UNIT),
     travelTime: new NumberFieldMetadata("travelTime", "Travel Time", UnitFieldType.UNIT),
 
+    weaponName: new StringFieldMetadata("weaponName", "Name", UnitFieldType.WEAPON),
     ammoDescriptorName: new StringFieldMetadata("ammoDescriptorName", "Ammo Descriptor Name", UnitFieldType.WEAPON),
     penetration: new NumberFieldMetadata("penetration", "Penetration", UnitFieldType.WEAPON),
     he: new NumberFieldMetadata("he", "HE", UnitFieldType.WEAPON),
