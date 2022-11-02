@@ -14,7 +14,8 @@
     "typescript",
     "lit"
   ],
-  "author": "Google LLC",
+  "vaadin": { "disableUsageStatistics": true },
+
   "license": "BSD-3-Clause",
   "dependencies": {
     "@lit-labs/motion": "^1.0.2",
