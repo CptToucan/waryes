@@ -14,8 +14,9 @@
     "typescript",
     "lit"
   ],
-  "vaadin": { "disableUsageStatistics": true },
-
+  "vaadin": {
+    "disableUsageStatistics": true
+  },
   "license": "BSD-3-Clause",
   "dependencies": {
     "@lit-labs/motion": "^1.0.2",
@@ -63,7 +64,7 @@
     "@vaadin/time-picker": "^23.2.0",
     "@vaadin/upload": "^23.2.0",
     "@vaadin/virtual-list": "^23.2.0",
-    "echarts": "^5.3.2",
+    "echarts": "^5.4.0",
     "firebase": "^9.9.4",
     "lit": "^2.1.0"
   },
@@ -72,7 +73,6 @@
     "@11ty/eleventy-plugin-syntaxhighlight": "^3.0.1",
     "@babel/preset-typescript": "^7.17.12",
     "@custom-elements-manifest/analyzer": "^0.5.7",
-    "@types/tabulator-tables": "^5.1.2",
     "@typescript-eslint/eslint-plugin": "^4.3.0",
     "@typescript-eslint/parser": "^4.30.0",
     "@webcomponents/webcomponentsjs": "^2.6.0",
