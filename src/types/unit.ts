@@ -2,6 +2,9 @@ import { AbstractFieldMetadata } from "./AbstractFieldMetadata";
 import { NumberFieldMetadata } from "./NumberFieldMetadata";
 import { StringFieldMetadata } from "./StringFieldMetadata";
 
+/**
+ * This interface should have all of its values defined in FieldMetadata, this is the glue holding field metadata and interface types together
+ */
 interface Weapon {
     showInInterface:    boolean
     ammoDescriptorName: string
@@ -35,6 +38,9 @@ interface Weapon {
     // type?:              string,
 }
 
+/**
+ * This interface should have all of its values defined in FieldMetadata, this is the glue holding field metadata and interface types together
+ */
 interface Unit {
     name: string,
     category: string,

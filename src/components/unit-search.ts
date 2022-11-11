@@ -72,6 +72,7 @@ export class UnitSearch extends LitElement {
             .items=${this.units}
             item-label-path="name"
             @selected-items-changed=${this.multiSelectComboBoxUnitsSelected}
+            ?clear-button-visible=${true}
           ></vaadin-multi-select-combo-box>`
         : html` <vaadin-combo-box
             placeholder="Search for Warno unit"
