@@ -7,11 +7,14 @@ import '@vaadin/tabs';
 import '@vaadin/context-menu';
 import '@vaadin/app-layout';
 import {Router} from '@vaadin/router';
-import { ContextMenuItem, ContextMenuItemSelectedEvent } from '@vaadin/context-menu';
-import { notificationService } from '../services/notification';
+import {
+  ContextMenuItem,
+  ContextMenuItemSelectedEvent,
+} from '@vaadin/context-menu';
+import {notificationService} from '../services/notification';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
-import { router } from '../services/router';
+import {router} from '../services/router';
 import {ifDefined} from 'lit/directives/if-defined.js';
 
 interface MenuItem {
@@ -47,6 +50,11 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:pie-bar-chart',
       href: '/comparison',
     },
+    {
+      name: 'Discord',
+      icon: 'vaadin:comments',
+      href: 'https://discord.gg/gqBgvgGj8H'
+    }
   ],
   guest: [
     {
@@ -64,7 +72,12 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:pie-bar-chart',
       href: '/comparison',
     },
-  ]
+    {
+      name: 'Discord',
+      icon: 'vaadin:comments',
+      href: 'https://discord.gg/gqBgvgGj8H'
+    }
+  ],
 };
 
 @customElement('authenticated-menu')
@@ -109,11 +122,11 @@ export class AuthenticatedMenu extends LitElement {
   menuDefinition: MenuDefinition = defaultMenu;
 
   @state()
-  selectedMenuItemIndex?: number
+  selectedMenuItemIndex?: number;
 
   renderMenuItem: MenuItemRenderer = (menuItem) => {
     return html`
-      <vaadin-tab >
+      <vaadin-tab>
         <a tabindex="-1" href="${menuItem.href}">
           <vaadin-icon
             class="drawer-icon"
@@ -128,10 +141,11 @@ export class AuthenticatedMenu extends LitElement {
   firstUpdated() {
     const activePath = router.location?.route?.path;
 
-    if(activePath) {
+    if (activePath) {
       const menuItems = this.items();
-      const foundIndex = menuItems.findIndex(item => item.href === activePath);
-      console.log(foundIndex, "foundIndex");
+      const foundIndex = menuItems.findIndex(
+        (item) => item.href === activePath
+      );
       this.selectedMenuItemIndex = foundIndex;
     }
   }
@@ -141,18 +155,18 @@ export class AuthenticatedMenu extends LitElement {
   }
 
   getLoggedInContextMenuItems(): ContextMenuItem[] {
-    return [{text: 'Logout'}]
+    return [{text: 'Logout'}];
   }
 
   async contextMenuItemSelected(event: ContextMenuItemSelectedEvent) {
-    if(event.detail.value.text === "Logout") {
+    if (event.detail.value.text === 'Logout') {
       const auth = getAuth();
       await signOut(auth);
       Router.go('/login');
 
       notificationService.instance?.addNotification({
         duration: 3000,
-        content: "Successfully logged out",
+        content: 'Successfully logged out',
         theme: 'success',
       });
     }
@@ -161,7 +175,7 @@ export class AuthenticatedMenu extends LitElement {
   renderAccountButton(): TemplateResult {
     if (this.user) {
       return html` <vaadin-context-menu
-      @item-selected=${this.contextMenuItemSelected}
+        @item-selected=${this.contextMenuItemSelected}
         open-on="click"
         .items=${this.getLoggedInContextMenuItems()}
       >
@@ -188,14 +202,20 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
-    console.log(this.selectedMenuItemIndex);
     return html` <vaadin-app-layout style="height: 100%;" theme="small">
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <img height="32" src=${WaryesImage} />
         ${this.renderAccountButton()}
       </div>
-      <vaadin-tabs slot="drawer" orientation="vertical" selected=${ifDefined(this.selectedMenuItemIndex)}> ${menu} </vaadin-tabs>
+      <div class="drawer" slot="drawer">
+        <vaadin-tabs
+          orientation="vertical"
+          selected=${ifDefined(this.selectedMenuItemIndex)}
+        >
+          ${menu}
+        </vaadin-tabs>
+      </div>
 
       <slot></slot>
     </vaadin-app-layout>`;
