@@ -225,10 +225,8 @@ export class ComparisonRoute extends LitElement {
       for (const field of this.masterState?.fields || []) {
         let fieldValue;
         if (field.fieldType === UnitFieldType.UNIT) {
-          console.log(field.id, unitWeapon?.unit);
           fieldValue = unitWeapon?.unit[field.id as keyof Unit];
         } else if (field.fieldType === UnitFieldType.WEAPON) {
-          console.log(field.id, unitWeapon?.unit);
           fieldValue = unitWeapon?.weapon[field.id as keyof Weapon];
         }
         fieldValuesForUnit.push(fieldValue);
