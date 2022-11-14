@@ -93,7 +93,7 @@ class FieldMetadata {
     id: new StringFieldMetadata("id", "Id", UnitFieldType.UNIT),
     commandPoints: new NumberFieldMetadata("commandPoints", "Command Points", UnitFieldType.UNIT),
     descriptorName: new StringFieldMetadata("descriptorName", "Descriptor Name", UnitFieldType.UNIT),
-    frontArmor: new NumberFieldMetadata("frontArmor", "Front Armour", UnitFieldType.UNIT),
+    frontArmor: new NumberFieldMetadata("frontArmor", "Front Armor", UnitFieldType.UNIT),
     sideArmor: new NumberFieldMetadata("sideArmor", "Side Armor", UnitFieldType.UNIT),
     rearArmor: new NumberFieldMetadata("rearArmor", "Rear Armor", UnitFieldType.UNIT),
     topArmor: new NumberFieldMetadata("topArmor", "Top Armor", UnitFieldType.UNIT),

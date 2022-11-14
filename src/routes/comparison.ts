@@ -67,9 +67,67 @@ export class ComparisonRoute extends LitElement {
         width: 100%;
       }
 
+      h3 {
+        margin: 0;
+      }
+
+      .master-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: var(--lumo-space-xs);
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
+        border-bottom: 1px solid var(--lumo-contrast-10pct);
+      }
+
+      .master-panel {
+        width: 100%;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: var(--lumo-contrast-70pct);
+        padding: var(--lumo-space-m);
+        text-align: center;
+      }
+
+      .empty-state > div {
+        display: flex;
+        margin-top: var(--lumo-space-s);
+      }
+
+      vaadin-scroller {
+        flex: 1 1 100%;
+      }
+
       .detail-panel {
         padding-left: var(--lumo-space-m);
         padding-right: var(--lumo-space-m);
+        border-left: 1px solid var(--lumo-contrast-10pct);
+        width: 30%;
+      }
+
+      .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      @media only screen and (max-width: 700px) {
+        .detail-panel {
+          width: 100%;
+        }
+
+        .master-panel.master-sidebar-expanded {
+          display: none;
+        }
       }
 
       .button-bar {
@@ -159,7 +217,6 @@ export class ComparisonRoute extends LitElement {
       // Add unit to legend
       legend.push(unit.name);
 
- 
       const unitWeapon = this.masterState?.unitWeapons[unit.descriptorName];
 
       const fieldValuesForUnit = [];
@@ -176,7 +233,6 @@ export class ComparisonRoute extends LitElement {
         }
         fieldValuesForUnit.push(fieldValue);
       }
-
 
       seriesData.push({
         name: unit.name,
@@ -195,8 +251,6 @@ export class ComparisonRoute extends LitElement {
       });
     }
 
-
-    
     const chartOption = {
       legend: {
         data: legend,
@@ -240,7 +294,7 @@ export class ComparisonRoute extends LitElement {
         },
       ],
     };
-    
+
     return chartOption;
   }
 
@@ -322,16 +376,27 @@ export class ComparisonRoute extends LitElement {
   }
 
   renderMasterContent(): TemplateResult {
+    if (this.masterState == undefined || this.masterState?.units.length === 0) {
+      return html`<div class="empty-state">
+        No units selected. Configure selected units to compare them.
+        <div>
+          <vaadin-button @click=${this.toggleSidebar} theme="primary large">
+            <vaadin-icon icon="vaadin:cog" slot="prefix"></vaadin-icon>
+            Configure
+          </vaadin-button>
+        </div>
+      </div>`;
+    }
+
     let showChart = false;
 
-    if(this.masterState) {
-      showChart = this.masterState?.units.length > 0 && this.masterState?.fields.length > 0;
-    } 
+    if (this.masterState) {
+      showChart =
+        this.masterState?.units.length > 0 &&
+        this.masterState?.fields.length > 0;
+    }
 
-    return html` <vaadin-scroller
-      style="height: 100%;"
-      scroll-direction="vertical"
-    >
+    return html` <vaadin-scroller scroll-direction="vertical">
       ${showChart
         ? html` <div class="chart-panel">
             <e-chart .options=${this.generateChartOptions()}></e-chart>
@@ -376,39 +441,49 @@ export class ComparisonRoute extends LitElement {
         <vaadin-button @click=${this.clearSettingsOnMaster}>
           Clear
         </vaadin-button>
-        <vaadin-button @click=${this.applySettingsToMaster}>
+        <vaadin-button @click=${this.applySettingsToMaster} theme="primary">
           Apply
         </vaadin-button>
       </div>`;
   }
 
   render(): TemplateResult {
-    const sidebarWidthPercentage = this.sidebarCollapsed ? 40 : 100 - 40;
-
     return html`
-      <vaadin-split-layout @splitter-dragend=${this.splitterDragged}>
-        <div style="overflow: hidden; width: ${sidebarWidthPercentage}%">
-          <vaadin-button
-            theme="icon tertiary"
-            aria-label="Expand/collapse sidebar"
-            @click="${this.toggleSidebar}"
-            style="position: absolute;"
-          >
-            <vaadin-icon
-              icon="${this.sidebarCollapsed
-                ? 'vaadin:arrow-right'
-                : 'vaadin:arrow-left'}"
-            ></vaadin-icon>
-          </vaadin-button>
+      <div style="display: flex; height: 100%;">
+        <div
+          class="master-panel ${this.sidebarCollapsed
+            ? 'master-sidebar-collapsed'
+            : 'master-sidebar-expanded'}"
+        >
+          <div class="master-header">
+            <h3>Comparison</h3>
+            <vaadin-button
+              theme="icon secondary"
+              aria-label="Expand/collapse sidebar"
+              @click="${this.toggleSidebar}"
+            >
+              <vaadin-icon icon="vaadin:cog"></vaadin-icon>
+            </vaadin-button>
+          </div>
           ${this.renderMasterContent()}
         </div>
-        <div
-          class="detail-panel"
-          style="width: ${100 - sidebarWidthPercentage}%"
-        >
-          ${this.renderDetailContent()}
-        </div>
-      </vaadin-split-layout>
+        ${this.sidebarCollapsed
+          ? html``
+          : html`<div class="detail-panel">
+              <div class="detail-header">
+                <h3>Settings</h3>
+                <vaadin-button
+                  theme="icon tertiary"
+                  aria-label="Expand/collapse sidebar"
+                  @click="${this.toggleSidebar}"
+                >
+                  <vaadin-icon icon="vaadin:close"></vaadin-icon>
+                </vaadin-button>
+              </div>
+
+              ${this.renderDetailContent()}
+            </div>`}
+      </div>
     `;
   }
 
@@ -416,18 +491,3 @@ export class ComparisonRoute extends LitElement {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 }
-
-/*
-
-
-        <vaadin-details opened>
-        <div slot="summary">Units</div>
-      </vaadin-details>
-      <vaadin-details opened>
-        <div slot="summary">Weapons</div>
-      </vaadin-details>
-      <vaadin-details opened>
-        <div slot="summary">Fields</div>
-      </vaadin-details>
-
-      */

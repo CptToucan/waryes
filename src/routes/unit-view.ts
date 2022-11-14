@@ -12,7 +12,16 @@ import '@vaadin/tabs';
 export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
   static get styles() {
     return css`
-       
+      :host {
+        display: flex;
+        align-items: center;
+        justify-content: center; 
+      }
+
+       .unit-view {
+         padding: var(--lumo-space-s);
+         max-width: 400px;
+       }
     `;
   }
 

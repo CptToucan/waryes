@@ -17,7 +17,7 @@ export class UnitCard extends LitElement {
         background-color: var(--lumo-contrast-5pct);
         display: flex;
         flex-direction: column;
-        justify-content: center;
+        justify-content: flex-start;
         align-items: center;
         border-radius: var(--lumo-border-radius-m);
         padding-left: var(--lumo-space-s);
@@ -54,11 +54,8 @@ export class UnitCard extends LitElement {
 
       }
       vaadin-tab {
-        padding: var(--lumo-space-m);
-        text-overflow: ellipsis;
-        overflow: hidden;
-        max-width: 33%;
-        display: block;
+
+
         
       }
 
@@ -213,15 +210,17 @@ export class UnitCard extends LitElement {
   }
 
   renderUnitBottomStats(): TemplateResult {
+    /*
+            ${this.renderUnitBottomStatsItem(
+          'Reveal Influence',
+          'DATA SOURCE: TODO'
+        )}
+        */
     return html`
       <div class="unit-bottom-stats">
         ${this.renderUnitBottomStatsItem('Strength', this.unit?.maxDamage)}
         ${this.renderUnitBottomStatsItem('Optics', this.unit?.optics)}
         ${this.renderUnitBottomStatsItem('Stealth', this.unit?.stealth)}
-        ${this.renderUnitBottomStatsItem(
-          'Reveal Influence',
-          'DATA SOURCE: TODO'
-        )}
         ${this.renderUnitBottomStatsItem('Max Damage', this.unit?.maxDamage)}
         ${this.renderUnitBottomStatsItem('Air Optics', this.unit?.airOptics)}
         ${this.renderUnitBottomStatsItem('ECM', this.unit?.ecm)}
@@ -229,7 +228,7 @@ export class UnitCard extends LitElement {
         ${this.renderUnitBottomStatsItem('Travel Time', this.unit?.travelTime)}
         ${this.renderUnitBottomStatsItem('Speed', this.unit?.speed)}
         ${this.renderUnitBottomStatsItem('Road Speed', this.unit?.roadSpeed)}
-        ${this.renderUnitBottomStatsItem('Autonomy', 'DATA SOURCE: TODO')}
+        ${this.renderUnitBottomStatsItem('Fuel Move', this.unit?.fuelMove)}
         ${this.renderUnitBottomStatsItem('Fuel', this.unit?.fuel)}
         ${this.renderUnitBottomStatsItem('Supply Cost', this.unit?.supply)}
       </div>
@@ -250,7 +249,7 @@ export class UnitCard extends LitElement {
       return html`
         <vaadin-tabs
           theme="equal-width-tabs center"
-          slot="tabs"
+          style="max-width: 100%;"
           @selected-changed="${this.selectedWeaponTabChanged}"
         >
           ${this.renderWeaponTabs()}
