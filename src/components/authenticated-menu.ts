@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import {User, getAuth, signOut} from 'firebase/auth';
 import '@vaadin/icon';
 import '@vaadin/icons';
@@ -11,6 +11,8 @@ import { ContextMenuItem, ContextMenuItemSelectedEvent } from '@vaadin/context-m
 import { notificationService } from '../services/notification';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
+import { router } from '../services/router';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 interface MenuItem {
   name: string;
@@ -55,7 +57,7 @@ const defaultMenu: MenuDefinition = {
     {
       name: 'Units',
       icon: 'vaadin:table',
-      href: '/units/',
+      href: '/units',
     },
     {
       name: 'Comparison',
@@ -106,9 +108,12 @@ export class AuthenticatedMenu extends LitElement {
   @property()
   menuDefinition: MenuDefinition = defaultMenu;
 
+  @state()
+  selectedMenuItemIndex?: number
+
   renderMenuItem: MenuItemRenderer = (menuItem) => {
     return html`
-      <vaadin-tab>
+      <vaadin-tab >
         <a tabindex="-1" href="${menuItem.href}">
           <vaadin-icon
             class="drawer-icon"
@@ -119,6 +124,17 @@ export class AuthenticatedMenu extends LitElement {
       </vaadin-tab>
     `;
   };
+
+  firstUpdated() {
+    const activePath = router.location?.route?.path;
+
+    if(activePath) {
+      const menuItems = this.items();
+      const foundIndex = menuItems.findIndex(item => item.href === activePath);
+      console.log(foundIndex, "foundIndex");
+      this.selectedMenuItemIndex = foundIndex;
+    }
+  }
 
   items(): MenuItem[] {
     return this.user ? this.menuDefinition.user : this.menuDefinition.guest;
@@ -172,20 +188,16 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
+    console.log(this.selectedMenuItemIndex);
     return html` <vaadin-app-layout style="height: 100%;" theme="small">
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <img height="32" src=${WaryesImage} />
         ${this.renderAccountButton()}
       </div>
-
-      <vaadin-tabs slot="drawer" orientation="vertical"> ${menu} </vaadin-tabs>
+      <vaadin-tabs slot="drawer" orientation="vertical" selected=${ifDefined(this.selectedMenuItemIndex)}> ${menu} </vaadin-tabs>
 
       <slot></slot>
     </vaadin-app-layout>`;
   }
 }
-
-/**
- *     <vaadin-button aria-label="Sign in" theme="icon" ><vaadin-icon icon="vaadin:sign-in"></vaadin-icon></vaadin-button>
- */
