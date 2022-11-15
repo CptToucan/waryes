@@ -16,6 +16,7 @@ import {notificationService} from '../services/notification';
 import WaryesImage from '../../images/waryes-transparent.png';
 import {router} from '../services/router';
 import {ifDefined} from 'lit/directives/if-defined.js';
+import { Features, featureService } from '../services/features';
 
 interface MenuItem {
   name: string;
@@ -206,7 +207,7 @@ export class AuthenticatedMenu extends LitElement {
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <img height="32" src=${WaryesImage} />
-        ${this.renderAccountButton()}
+        ${ featureService.enabled(Features.firebase_auth) ? this.renderAccountButton(): ''}
       </div>
       <div class="drawer" slot="drawer">
         <vaadin-tabs
