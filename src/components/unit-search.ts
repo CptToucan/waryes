@@ -4,7 +4,7 @@ import {Unit} from '../types/unit';
 import {UnitsDatabaseService} from '../services/units-db';
 import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
 import '@vaadin/multi-select-combo-box';
-import { MultiSelectComboBoxSelectedItemsChangedEvent } from '@vaadin/multi-select-combo-box';
+import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 
 @customElement('unit-search')
 export class UnitSearch extends LitElement {
@@ -14,7 +14,8 @@ export class UnitSearch extends LitElement {
         max-width: 512px;
       }
 
-      vaadin-combo-box, vaadin-multi-select-combo-box {
+      vaadin-combo-box,
+      vaadin-multi-select-combo-box {
         font-size: var(--lumo-font-size-l);
         flex: 1 1 0;
         width: 100%;
@@ -24,6 +25,9 @@ export class UnitSearch extends LitElement {
 
   @property()
   multi = false;
+
+  @property()
+  selectedUnits: Unit[] = [];
 
   units?: Unit[] = [];
 
@@ -35,7 +39,9 @@ export class UnitSearch extends LitElement {
     }
   }
 
-  multiSelectComboBoxUnitsSelected(event: MultiSelectComboBoxSelectedItemsChangedEvent<Unit>) {
+  multiSelectComboBoxUnitsSelected(
+    event: MultiSelectComboBoxSelectedItemsChangedEvent<Unit>
+  ) {
     if (event.detail.value) {
       this.dispatchEvent(
         new CustomEvent('units-selected', {detail: {value: event.detail.value}})
@@ -64,16 +70,21 @@ export class UnitSearch extends LitElement {
     }
   }
 
+  renderMulti() {
+    return html` <vaadin-multi-select-combo-box
+      placeholder="Search for Warno unit"
+      .items=${this.units}
+      .selectedItems=${this.selectedUnits}
+      @selected-items-changed=${this.multiSelectComboBoxUnitsSelected}
+      item-label-path="name"
+      ?clear-button-visible=${true}
+    ></vaadin-multi-select-combo-box>`;
+  }
+
   render(): TemplateResult {
     return html`
       ${this.multi
-        ? html` <vaadin-multi-select-combo-box
-            placeholder="Search for Warno unit"
-            .items=${this.units}
-            item-label-path="name"
-            @selected-items-changed=${this.multiSelectComboBoxUnitsSelected}
-            ?clear-button-visible=${true}
-          ></vaadin-multi-select-combo-box>`
+        ? this.renderMulti()
         : html` <vaadin-combo-box
             placeholder="Search for Warno unit"
             .items=${this.units}
