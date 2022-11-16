@@ -1,7 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import '@vaadin/details';
-import '@vaadin/split-layout';
 import '../components/unit-search';
 import '@vaadin/radio-group';
 import '@vaadin/scroller';
@@ -11,6 +10,8 @@ import {Unit, Weapon, FieldMetadata, UnitFieldType} from '../types/unit';
 import {NumberFieldMetadata} from '../types/NumberFieldMetadata';
 import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 import {RadioGroupValueChangedEvent} from '@vaadin/radio-group';
+import {notificationService} from '../services/notification';
+import {ifDefined} from 'lit/directives/if-defined.js';
 
 type MasterState = {
   units: Unit[];
@@ -36,10 +37,6 @@ export class ComparisonRoute extends LitElement {
     return css`
       :host {
         flex: 1 1 0;
-        height: 100%;
-      }
-
-      vaadin-split-layout {
         height: 100%;
       }
 
@@ -128,6 +125,16 @@ export class ComparisonRoute extends LitElement {
         .master-panel.master-sidebar-expanded {
           display: none;
         }
+
+        .show-on-large-screens {
+          display: none;
+        }
+      }
+
+      @media only screen and (min-width: 701px) {
+        .show-on-small-screens {
+          display: none;
+        }
       }
 
       .button-bar {
@@ -141,9 +148,8 @@ export class ComparisonRoute extends LitElement {
 
       .units-grid {
         display: grid;
-        grid-template-columns: auto auto;
         padding: var(--lumo-space-s);
-        grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 
         gap: var(--lumo-space-s);
       }
@@ -159,19 +165,16 @@ export class ComparisonRoute extends LitElement {
   /**
    * Units selected in sidebar
    */
-  @state()
   selectedUnits: Unit[] = [];
 
   /**
    * Weapons selected in sidebar
    */
-  @state()
   selectedUnitWeapons: UnitWeaponMap = {};
 
   /**
    * Fields selected in sidebar
    */
-  @state()
   selectedFields: NumberFieldMetadata[] = [];
 
   /**
@@ -183,6 +186,7 @@ export class ComparisonRoute extends LitElement {
   /**
    * Fields that are available to compare
    */
+  @state()
   comparableFields: NumberFieldMetadata[] = [];
 
   /**
@@ -194,7 +198,7 @@ export class ComparisonRoute extends LitElement {
   /**
    * Applies the settings from the detail panel to the master state
    */
-  applySettingsToMaster(): void {
+  applySettingsToMaster(closeDetail?: boolean): void {
     const newState: MasterState = {
       units: [...this.selectedUnits],
       unitWeapons: {...this.selectedUnitWeapons},
@@ -202,6 +206,16 @@ export class ComparisonRoute extends LitElement {
     };
 
     this.masterState = newState;
+
+    if (closeDetail) {
+      this.toggleSidebar();
+    }
+
+    notificationService.instance?.addNotification({
+      content: 'Settings applied',
+      duration: 3000,
+      theme: 'primary',
+    });
   }
 
   generateChartOptions() {
@@ -314,14 +328,12 @@ export class ComparisonRoute extends LitElement {
 
   weaponsSelected(weapon: Weapon, unit: Unit) {
     this.selectedUnitWeapons[unit.descriptorName] = {weapon, unit};
-    this.requestUpdate();
   }
 
   fieldsSelected(
     event: MultiSelectComboBoxSelectedItemsChangedEvent<NumberFieldMetadata>
   ) {
     this.selectedFields = event.detail.value;
-    this.requestUpdate();
   }
 
   splitterDragged() {
@@ -345,7 +357,6 @@ export class ComparisonRoute extends LitElement {
 
   renderWeaponsForSelectedUnits(): TemplateResult[] {
     const weaponSelectionTemplates: TemplateResult[] = [];
-
     for (const unit of this.selectedUnits) {
       weaponSelectionTemplates.push(html`<vaadin-radio-group
         label=${unit.name}
@@ -360,17 +371,46 @@ export class ComparisonRoute extends LitElement {
           }
         }}
       >
-        ${unit.weapons.map(
-          (weapon: Weapon) =>
-            html`<vaadin-radio-button
-              value=${weapon.ammoDescriptorName}
-              label=${weapon.weaponName}
-            ></vaadin-radio-button>`
-        )}
+        ${unit.weapons.map((weapon: Weapon) => {
+          const masterActiveWeapon =
+            this?.selectedUnitWeapons[unit.descriptorName]?.weapon
+              ?.ammoDescriptorName;
+          const shouldBeActive =
+            (masterActiveWeapon !== undefined &&
+              masterActiveWeapon === weapon.ammoDescriptorName) ||
+            undefined;
+
+          return html`<vaadin-radio-button
+            value=${weapon.ammoDescriptorName}
+            label=${weapon.weaponName}
+            checked=${ifDefined(shouldBeActive)}
+          ></vaadin-radio-button>`;
+        })}
       </vaadin-radio-group>`);
     }
 
     return weaponSelectionTemplates;
+  }
+
+  renderSelectedFields(): TemplateResult {
+    if ((this.selectedFields?.length || []) > 0) {
+      return html`<vaadin-multi-select-combo-box
+        placeholder="Select fields"
+        .items=${this.comparableFields}
+        .selectedItems=${this.masterState?.fields}
+        item-label-path="label"
+        @selected-items-changed=${this.fieldsSelected}
+      >
+      </vaadin-multi-select-combo-box>`;
+    }
+
+    return html`<vaadin-multi-select-combo-box
+    placeholder="Select fields"
+    .items=${this.comparableFields}
+    item-label-path="label"
+    @selected-items-changed=${this.fieldsSelected}
+  >
+  </vaadin-multi-select-combo-box>`; 
   }
 
   renderMasterContent(): TemplateResult {
@@ -415,6 +455,7 @@ export class ComparisonRoute extends LitElement {
         <unit-search
           @units-selected=${this.unitsSelected}
           .multi=${true}
+          .selectedUnits=${this.selectedUnits}
         ></unit-search>
       </vaadin-details>
 
@@ -426,21 +467,25 @@ export class ComparisonRoute extends LitElement {
 
       <vaadin-details opened>
         <div slot="summary">Fields</div>
-
-        <vaadin-multi-select-combo-box
-          placeholder="Select fields"
-          .items=${this.comparableFields}
-          item-label-path="label"
-          @selected-items-changed=${this.fieldsSelected}
-        >
-        </vaadin-multi-select-combo-box>
+        ${this.renderSelectedFields()}
       </vaadin-details>
       <div class="button-bar">
         <vaadin-button @click=${this.clearSettingsOnMaster}>
           Clear
         </vaadin-button>
-        <vaadin-button @click=${this.applySettingsToMaster} theme="primary">
+        <vaadin-button
+          class="show-on-large-screens"
+          @click=${() => this.applySettingsToMaster()}
+          theme="primary"
+        >
           Apply
+        </vaadin-button>
+        <vaadin-button
+          class="show-on-small-screens"
+          @click=${() => this.applySettingsToMaster(true)}
+          theme="primary"
+        >
+          Apply and Close
         </vaadin-button>
       </div>`;
   }

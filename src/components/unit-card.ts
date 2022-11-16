@@ -24,7 +24,7 @@ export class UnitCard extends LitElement {
         padding-right: var(--lumo-space-s);
         padding-top: var(--lumo-space-s);
         padding-bottom: var(--lumo-space-s);
-        min-width: 400px;
+        min-width: 300px;
         overflow: hidden;
       }
 
