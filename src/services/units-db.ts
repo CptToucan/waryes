@@ -3,8 +3,8 @@ import { FirebaseService, FirebaseServiceClass } from "./firebase";
 import { getStorage, ref, getBlob } from "firebase/storage";
 import { Unit } from "../types/unit";
 
-const CURRENT_FILE_NAME = 'unit-bundle-suchet.txt'
-const CURRENT_NAMED_QUERY = 'units-suchet'
+const CURRENT_FILE_NAME = 'unit-bundle-post-suchet.txt'
+const CURRENT_NAMED_QUERY = 'units-post-suchet'
 
 enum UnitFetchStrategy {
     cache,
