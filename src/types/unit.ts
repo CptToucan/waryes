@@ -64,8 +64,10 @@ interface Unit {
     ecm:                    number,
     agility?:               number, 
     travelTime?:            number,
-    weapons:                Weapon[]
-    
+    weapons:                Weapon[],
+
+    _searchNameHelper:      string,
+
     // TODO: Audit / remove
     // old values missing or removed
     // _name:              string,

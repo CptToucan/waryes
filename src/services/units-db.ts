@@ -6,6 +6,9 @@ import { Unit } from "../types/unit";
 const CURRENT_FILE_NAME = 'unit-bundle-post-suchet.txt'
 const CURRENT_NAMED_QUERY = 'units-post-suchet'
 
+// Regex to remove a lot of punctuation found in unit names, helps search methods
+export const UNIT_SEARCH_IGNORED_CHARACTERS = /[.,-\/#!$%\^\*\(\)\[\]\{\}]/g
+
 enum UnitFetchStrategy {
     cache,
     forceDirect
@@ -78,7 +81,11 @@ class UnitsDatabaseServiceClass {
         const unitsQuery = await getDocsFromCache(query);
 
         this.units = unitsQuery.docs.map( function(doc) {
-            return doc.data() as Unit
+            let unitData = doc.data() as Unit;
+            return {
+                ...unitData,
+                _searchNameHelper: unitData.name.toLowerCase().replace(UNIT_SEARCH_IGNORED_CHARACTERS, "")
+            }
         });
 
         this._readCounter += this.units.length;
