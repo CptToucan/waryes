@@ -47,6 +47,8 @@ interface Unit {
     id: string,
     commandPoints: number,
     descriptorName:         string,
+    factoryDescriptor:      string,
+    specialities:           string[],
     frontArmor:             number,
     sideArmor:              number,
     rearArmor:              number,
@@ -133,4 +135,9 @@ type FieldMetadataMap = {
   [key: string]: AbstractFieldMetadata<unknown>
 }
 
-export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType};
+type UnitMap = {
+  [key: string]: Unit
+}
+
+
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap};

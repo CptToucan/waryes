@@ -52,10 +52,15 @@ const defaultMenu: MenuDefinition = {
       href: '/comparison',
     },
     {
+      name: 'Deck Builder',
+      icon: 'vaadin:tools',
+      href: '/deck-builder'
+    },
+    {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H'
-    }
+    },
   ],
   guest: [
     {
@@ -72,6 +77,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Comparison',
       icon: 'vaadin:pie-bar-chart',
       href: '/comparison',
+    },
+    {
+      name: 'Deck Builder',
+      icon: 'vaadin:tools',
+      href: '/deck-builder'
     },
     {
       name: 'Discord',
@@ -203,7 +213,7 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
-    return html` <vaadin-app-layout style="height: 100%;" theme="small">
+    return html` <vaadin-app-layout style="height: 100%;" theme="small" .drawerOpened=${false}>
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <img height="32" src=${WaryesImage} />

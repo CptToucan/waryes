@@ -19,6 +19,7 @@
   },
   "license": "BSD-3-Clause",
   "dependencies": {
+    "@izohek/warno-deck-utils": "0.2.1",
     "@lit-labs/motion": "^1.0.2",
     "@vaadin/accordion": "^23.2.0",
     "@vaadin/app-layout": "^23.2.0",

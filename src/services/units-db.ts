@@ -2,11 +2,15 @@ import { collection, getDocs, getDocsFromCache, Firestore, loadBundle, namedQuer
 import { FirebaseService, FirebaseServiceClass } from "./firebase";
 import { getStorage, ref, getBlob } from "firebase/storage";
 import { Unit } from "../types/unit";
+// @ts-ignore
+import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
+
 
 const CURRENT_FILE_NAME = 'unit-bundle-post-suchet.txt'
 const CURRENT_NAMED_QUERY = 'units-post-suchet'
 
 enum UnitFetchStrategy {
+    local,
     cache,
     forceDirect
 }
@@ -32,8 +36,11 @@ class UnitsDatabaseServiceClass {
      * @param strategy 
      * @returns 
      */
-    public async fetchUnits(strategy: UnitFetchStrategy = UnitFetchStrategy.cache) {
+    public async fetchUnits(strategy: UnitFetchStrategy = UnitFetchStrategy.local) {
         switch (strategy) {
+
+            case UnitFetchStrategy.local:
+                return await DeckBuilderJson.units as Unit[]
             case UnitFetchStrategy.cache:
                 if (this.debug) { console.log("Loading units from cache") }
                 return await this.fetchUnitsCache()
