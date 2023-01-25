@@ -26,6 +26,9 @@ export class PackArmouryCard extends LitElement {
   @property()
   unitMap?: UnitMap;
 
+  @property()
+  disabled = false;
+
   @state()
   showTransportSelection = false;
 
@@ -137,6 +140,7 @@ export class PackArmouryCard extends LitElement {
 
         <armoury-card
           .options=${armouryCardOptions}
+          .disabled=${this.disabled}
           @add-button-clicked=${
             (event: CustomEvent) =>
               this.unitAddButtonClicked(event.detail.unit, event.detail.veterancy)

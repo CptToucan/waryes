@@ -6,6 +6,7 @@ import './deck-card';
 import '@vaadin/scroller';
 import {Division, MatrixRow, Pack} from '../../types/deck-builder';
 import {Unit, UnitMap} from '../../types/unit';
+import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
 // import { UnitCardCategories } from '@izohek/warno-deck-utils';
 
 type GroupedPacks = {
@@ -13,19 +14,19 @@ type GroupedPacks = {
 };
 
 type GroupedPackConfigs = {
-  [key: string]: SelectedPackConfigs[];
+  [key: string]: SelectedPackConfig[];
 };
 
 type FactoryDescriptorMap = {
   [key: string]: string;
 };
 
-export interface SelectedPackConfigs {
+export interface SelectedPackConfig {
   id: number;
   unit: Unit;
   veterancy: number;
   transport?: Unit;
-  pack: Pack
+  pack: Pack;
 }
 
 const factoryDescriptorMap: FactoryDescriptorMap = {
@@ -144,38 +145,75 @@ export class EditDeck extends LitElement {
   @property()
   unitMap?: UnitMap;
 
-  lastPackId = 0;
+  /**
+   * Tracks the last ID used in the pack config, so a unique index is always used
+   */
+  _lastPackId = 0;
 
   @state()
-  builtDeck: SelectedPackConfigs[] = [];
+  builtDeck: SelectedPackConfig[] = [];
 
+  /**
+   * Convert descriptor from bad format to good format. Probably not needed anymore now that the descriptors have the ~ removed
+   * @param descriptor
+   */
   parseDescriptorName(descriptor: string): string {
     const splitDescriptor = descriptor.split('/');
     return splitDescriptor[splitDescriptor.length - 1];
   }
 
-  packSelected(event: CustomEvent) {
-    console.log(event.detail);
-    const packConfig: SelectedPackConfigs = {
-      id: this.lastPackId++,
+  /**
+   * When a pack is fully selected from the pack-armoury-card this even is fired
+   * Triggers adding packs to the deck structure
+   * @param event
+   */
+  packConfigSelected(event: CustomEvent) {
+    const packConfig: SelectedPackConfig = {
+      id: this._lastPackId++,
       unit: event.detail.unit,
       veterancy: event.detail.veterancy,
       transport: event.detail.transport,
-      pack: event.detail.pack
+      pack: event.detail.pack,
     };
     this.addPackToDeck(packConfig);
   }
 
-  addPackToDeck(packConfig: SelectedPackConfigs) {
+  packConfigRemoved(event: CustomEvent) {
+    const packConfig: SelectedPackConfig = event.detail.packConfig;
+    this.removePackFromDeck(packConfig);
+  }
+
+  /**
+   * Adds pack to the deck config
+   * @param packConfig
+   */
+  addPackToDeck(packConfig: SelectedPackConfig) {
     this.builtDeck = [...this.builtDeck, packConfig];
   }
 
+  /**
+   * Removes pack from the deck config
+   * @param packConfig 
+   */
+  removePackFromDeck(packConfig: SelectedPackConfig) {
+    const deckWithoutPack = this.builtDeck.filter((config) => packConfig.id !== config.id)
+    this.builtDeck = [...deckWithoutPack];
+  }
+
+  /**
+   * Render the content of the side drawer
+   * @param groupedDeck
+   */
   renderDeck(groupedDeck: GroupedPackConfigs): TemplateResult[] {
     const renderOutput: TemplateResult[] = [];
     if (this.division?.costMatrix?.matrix) {
       for (const matrixRow of this.division?.costMatrix?.matrix) {
         renderOutput.push(
-          this.renderDeckCategory(matrixRow, groupedDeck[matrixRow.name])
+          this.renderDeckCategory(
+            matrixRow,
+            groupedDeck[matrixRow.name],
+            this.division
+          )
         );
       }
     }
@@ -183,24 +221,54 @@ export class EditDeck extends LitElement {
     return renderOutput;
   }
 
-  renderDeckCategory(matrixRow: MatrixRow, groupedUnits: SelectedPackConfigs[]): TemplateResult {
+  /**
+   * Render a section of the deck category, renders all selected deck cards
+   * @param matrixRow
+   * @param groupedUnits
+   * @param division
+   */
+  renderDeckCategory(
+    matrixRow: MatrixRow,
+    groupedUnits: SelectedPackConfig[],
+    division: Division
+  ): TemplateResult {
+    let totalUnitsInCategory = 0;
+    console.log(division);
+
+    const deckCards: TemplateResult[] = [];
+    for (const config of groupedUnits) {
+      const veterancies = getQuantitiesForUnitVeterancies({
+        defaultUnitQuantity: config.pack.numberOfUnitsInPack,
+        unitQuantityMultipliers: config.pack.numberOfUnitInPackXPMultiplier,
+      });
+
+      totalUnitsInCategory += veterancies[config.veterancy];
+
+      deckCards.push(html`<deck-card .packConfig=${config} @pack-config-removed=${this.packConfigRemoved}></deck-card>`);
+    }
     return html`<div class="deck-section">
       <div class="deck-category-headings">
         <div class="deck-category-heading-row">
           <h3 class="deck-category-heading-title">${matrixRow.name}</h3>
-          <div>22 units</div>
+          <div>${totalUnitsInCategory} units</div>
         </div>
         <div class="deck-category-heading-row">
-          <div>${groupedUnits.length} / ${matrixRow.activationCosts.length} slots</div>
-          <div>Next slot: ${matrixRow.activationCosts[groupedUnits.length]} points</div>
+          <div>
+            ${groupedUnits.length} / ${matrixRow.activationCosts.length} slots
+          </div>
+          <div>
+            Next slot: ${matrixRow.activationCosts[groupedUnits.length]} points
+          </div>
         </div>
       </div>
-      <div class="deck-category-cards">
-        ${groupedUnits.map((packConfig) => html`<deck-card .packConfig=${packConfig}></deck-card>`)}
-      </div>
+      <div class="deck-category-cards">${deckCards}</div>
     </div>`;
   }
 
+  /**
+   * Render the groups of the armoury card categories
+   * @param groupedUnits
+   */
   renderCardCategories(groupedUnits: GroupedPacks) {
     const renderOutput: TemplateResult[] = [];
 
@@ -215,19 +283,33 @@ export class EditDeck extends LitElement {
     return renderOutput;
   }
 
+  /**
+   * Render a specific deck category
+   * @param name
+   * @param packs
+   */
   renderCardCategory(name: string, packs: Pack[]): TemplateResult {
     return html`<div class="card-section">
       <div><h3>${name}</h3></div>
 
       <div class="armoury-category-cards">
-        ${packs.map(
-          (pack) =>
-            html`<pack-armoury-card
-              .pack=${pack}
-              .unitMap=${this.unitMap}
-              @pack-selected=${this.packSelected}
-            ></pack-armoury-card>`
-        )}
+        ${packs.map((pack) => {
+          /**
+           * TODO:
+           * Check a data structure instead, this is potentially an expensive operation if being done every render
+           */
+          const currentQuantitySelectedOfThisPack = this.builtDeck.filter((packConfig => packConfig.pack.packDescriptor === pack.packDescriptor)).length;
+          let disabled = false;
+          if(currentQuantitySelectedOfThisPack >= pack.numberOfCards) {
+            disabled = true;
+          }
+          return html`<pack-armoury-card
+            .pack=${pack}
+            .unitMap=${this.unitMap}
+            @pack-selected=${this.packConfigSelected}
+            .disabled=${disabled}
+          ></pack-armoury-card>`;
+        })}
       </div>
     </div>`;
   }

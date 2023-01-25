@@ -6,7 +6,7 @@ import {Unit} from '../../types/unit';
 import '@vaadin/dialog';
 import {getIconForUnit} from '../../utils/get-icon-for-unit';
 import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
-import { getIconForVeterancy } from '../../utils/get-icon-for-veterancy';
+import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 // import {dialogFooterRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 
 export interface ArmouryCardOptions {
@@ -24,6 +24,10 @@ export class ArmouryCard extends LitElement {
   static get styles() {
     return css`
       :host {
+        display: flex;
+        flex-direction: column;
+      }
+      .main {
         background-color: var(--lumo-contrast-5pct);
         display: flex;
         flex-direction: column;
@@ -38,6 +42,10 @@ export class ArmouryCard extends LitElement {
         overflow: hidden;
 
         color: white;
+      }
+
+      .main.disabled {
+        opacity: 50%;
       }
 
       .body {
@@ -72,6 +80,11 @@ export class ArmouryCard extends LitElement {
       .veterancy > div.disabled {
         opacity: 20%;
         cursor: initial;
+        pointer-events: none;
+      }
+
+      .main.disabled .veterancy > div {
+        pointer-events: none !important;
       }
 
       .points {
@@ -144,6 +157,9 @@ export class ArmouryCard extends LitElement {
   @state()
   selectedVeterancy?: number;
 
+  @property()
+  disabled = false;
+
   clickedAddButton(unit: Unit, veterancy?: number) {
     // Fire event
     this.dispatchEvent(
@@ -184,20 +200,18 @@ export class ArmouryCard extends LitElement {
           getQuantitiesForUnitVeterancies(this.options.veterancyOptions);
 
         veterancySelection = html`<div class="veterancy">
-          ${[0,1,2,3].map((_, index) => {
+          ${[0, 1, 2, 3].map((_, index) => {
             const isDisabled =
               numberOfUnitsInPacksAfterXPMultiplier[index] === 0;
 
             return html`<div
               role="button"
-              @click=${() =>
-                isDisabled ? null : (this.selectedVeterancy = index)}
+              @click=${() => this.selectedVeterancy = index}
               class="${activeVeterancy === index ? 'active' : ''} ${isDisabled
                 ? 'disabled'
                 : ''}"
             >
-            ${getIconForVeterancy(index)}
-            
+              ${getIconForVeterancy(index)}
             </div>`;
           })}
         </div>`;
@@ -208,35 +222,41 @@ export class ArmouryCard extends LitElement {
       }
 
       return html`
-        <div class="body">
-          <div class="top-section">
-            <vaadin-button
-              class="add-button"
-              theme="icon medium secondary"
-              aria-label="Add unit"
-              style="padding: 0;"
-              @click=${() => this.clickedAddButton(unit, activeVeterancy)}
-            >
-              <vaadin-icon icon="vaadin:plus"></vaadin-icon>
-            </vaadin-button>
+        <div class="main ${this.disabled ? "disabled" : ""}">
+          <div class="body">
+            <div class="top-section">
+              <vaadin-button
+                class="add-button"
+                ?disabled=${this.disabled}
+                theme="icon medium secondary"
+                aria-label="Add unit"
+                style="padding: 0;"
+                @click=${() => this.clickedAddButton(unit, activeVeterancy)}
+              >
+                <vaadin-icon icon="vaadin:plus"></vaadin-icon>
+              </vaadin-button>
 
-            <vaadin-icon
-              class="info-icon"
-              icon="vaadin:info-circle-o"
-            ></vaadin-icon>
+              <vaadin-icon
+                class="info-icon"
+                icon="vaadin:info-circle-o"
+              ></vaadin-icon>
 
-            <div class="points">${unit?.commandPoints}</div>
-            <vaadin-icon style="font-size: 48px;" icon="${icon}"></vaadin-icon>
+              <div class="points">${unit?.commandPoints}</div>
+              <vaadin-icon
+                style="font-size: 48px;"
+                icon="${icon}"
+              ></vaadin-icon>
 
-            ${quantityDisplaySelection}
+              ${quantityDisplaySelection}
+            </div>
           </div>
-        </div>
 
-        <div class="bottom-section">
-          <div class="name">${unit?.name}</div>
-        </div>
+          <div class="bottom-section">
+            <div class="name">${unit?.name}</div>
+          </div>
 
-        ${veterancySelection}
+          ${veterancySelection}
+        </div>
       `;
     }
 
