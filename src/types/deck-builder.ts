@@ -12,6 +12,7 @@ interface Pack {
   packDescriptor: string
   unitDescriptor: string
   availableWithoutTransport: boolean
+  availableTransportList: string[]
   numberOfUnitsInPack: number
   numberOfUnitInPackXPMultiplier: number[]
   numberOfCards: number
