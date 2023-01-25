@@ -1,33 +1,23 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/icon';
-import {Pack} from '../../types/deck-builder';
-import {Unit, UnitMap} from '../../types/unit';
-import '@vaadin/menu-bar';
+// import {Pack} from '../../types/deck-builder';
+import {Unit} from '../../types/unit';
+import '@vaadin/dialog';
+import {getIconForUnit} from '../../utils/get-icon-for-unit';
+import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
+import { getIconForVeterancy } from '../../utils/get-icon-for-veterancy';
+// import {dialogFooterRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 
-type IconMap = {
-  [key: string]: string;
-};
+export interface ArmouryCardOptions {
+  unit: Unit;
+  veterancyOptions?: ArmouryCardVeterancyOptions;
+}
 
-const iconMap: IconMap = {
-  hq: 'command',
-  hq_veh: 'command',
-  hq_inf: 'command',
-  hq_tank: 'command',
-  reco: 'recon',
-  AT: 'at',
-  supply: 'supply',
-  transport: 'transport',
-  infantry: 'infantry',
-  engineer: 'assault-infantry',
-  mortar: 'mortar',
-  howitzer: 'artillery',
-  armor: 'tank',
-  AA: 'aa',
-  sead: 'sead',
-};
-
-const veterancy: string[] = ['recruit', 'trained', 'veteran', 'elite'];
+export interface ArmouryCardVeterancyOptions {
+  unitQuantityMultipliers: number[];
+  defaultUnitQuantity: number;
+}
 
 @customElement('armoury-card')
 export class ArmouryCard extends LitElement {
@@ -46,7 +36,7 @@ export class ArmouryCard extends LitElement {
         padding-top: var(--lumo-space-xs);
         padding-bottom: var(--lumo-space-xs);
         overflow: hidden;
-        height: 140px;
+
         color: white;
       }
 
@@ -149,56 +139,72 @@ export class ArmouryCard extends LitElement {
   }
 
   @property()
-  pack?: Pack;
-
-  @property()
-  unitMap?: UnitMap;
+  options?: ArmouryCardOptions;
 
   @state()
   selectedVeterancy?: number;
 
-  clickedAddButton(unit: Unit, veterancy: number) {
-    console.log(unit, veterancy);
-    /*
-    if(this.pack) {
-      
-      const unit: Unit = this.unitMap?.[this.pack.unitDescriptor];
-
-      console.log(unit, this.);
-    }
-    else {
-      console.error("No pack to add");
-    }
-  */ 
-    // this.dispatchEvent(new CustomEvent("unit-added", {}))
+  clickedAddButton(unit: Unit, veterancy?: number) {
+    // Fire event
+    this.dispatchEvent(
+      new CustomEvent('add-button-clicked', {
+        detail: {unit, veterancy},
+      })
+    );
   }
 
+  // Unit quantity for veterancy determines OR XP Multiplier for veterancy is enabled
+  // XP Multiplier determines what the default veterancy setting is
+
   render(): TemplateResult {
-    if (this.unitMap && this.pack?.unitDescriptor && this.pack !== undefined) {
-      const unit: Unit = this.unitMap?.[this.pack.unitDescriptor];
-      const unitPackMultipliers = this.pack.numberOfUnitInPackXPMultiplier;
+    if (this.options) {
+      const unit: Unit = this.options.unit;
 
-      const defaultVeterancy = unitPackMultipliers.findIndex(
-        (multiplier) => multiplier === 1
-      );
+      const icon = getIconForUnit(unit);
 
-      // This is the veterancy to use when firing the add action
-      let activeVeterancy = defaultVeterancy;
+      let veterancySelection: TemplateResult = html``;
+      let quantityDisplaySelection: TemplateResult = html``;
+      let activeVeterancy: number | undefined = undefined;
 
-      if (this.selectedVeterancy !== undefined) {
-        activeVeterancy = this.selectedVeterancy;
-      }
+      if (this.options?.veterancyOptions) {
+        const unitVeterancyQuantityMultipliers =
+          this.options.veterancyOptions.unitQuantityMultipliers;
+        const defaultVeterancy = unitVeterancyQuantityMultipliers.findIndex(
+          (multiplier) => multiplier === 1
+        );
 
-      const numberOfUnitsInPacksAfterXPMultiplier = unitPackMultipliers.map((multiplier) => Math.round(multiplier * (this?.pack?.numberOfUnitsInPack || 0)))
+        // This is the veterancy to use when firing the add action
+        activeVeterancy = defaultVeterancy;
 
-      let icon;
+        if (this.selectedVeterancy !== undefined) {
+          activeVeterancy = this.selectedVeterancy;
+        }
 
-      if (iconMap[unit.specialities[0]] !== undefined) {
-        icon = iconMap[unit.specialities[0]];
-      } else if (unit.category === 'air') {
-        icon = 'jet';
-      } else {
-        icon = 'support';
+        const numberOfUnitsInPacksAfterXPMultiplier =
+          getQuantitiesForUnitVeterancies(this.options.veterancyOptions);
+
+        veterancySelection = html`<div class="veterancy">
+          ${[0,1,2,3].map((_, index) => {
+            const isDisabled =
+              numberOfUnitsInPacksAfterXPMultiplier[index] === 0;
+
+            return html`<div
+              role="button"
+              @click=${() =>
+                isDisabled ? null : (this.selectedVeterancy = index)}
+              class="${activeVeterancy === index ? 'active' : ''} ${isDisabled
+                ? 'disabled'
+                : ''}"
+            >
+            ${getIconForVeterancy(index)}
+            
+            </div>`;
+          })}
+        </div>`;
+
+        quantityDisplaySelection = html`<div class="quantity">
+          x${numberOfUnitsInPacksAfterXPMultiplier[activeVeterancy]}
+        </div>`;
       }
 
       return html`
@@ -220,11 +226,9 @@ export class ArmouryCard extends LitElement {
             ></vaadin-icon>
 
             <div class="points">${unit?.commandPoints}</div>
-            <vaadin-icon
-              style="font-size: 48px;"
-              icon="waryes-svg:${icon}"
-            ></vaadin-icon>
-            <div class="quantity">x${numberOfUnitsInPacksAfterXPMultiplier[activeVeterancy]}</div>
+            <vaadin-icon style="font-size: 48px;" icon="${icon}"></vaadin-icon>
+
+            ${quantityDisplaySelection}
           </div>
         </div>
 
@@ -232,26 +236,15 @@ export class ArmouryCard extends LitElement {
           <div class="name">${unit?.name}</div>
         </div>
 
-        <div class="veterancy">
-          ${veterancy.map((rank, index) => {
-
-            const isDisabled = numberOfUnitsInPacksAfterXPMultiplier[index] === 0;
-
-            return html`<div
-              role="button"
-              @click=${() => (isDisabled ? null : this.selectedVeterancy = index)}
-              class="${activeVeterancy === index ? 'active' : ''} ${isDisabled ? 'disabled' : ''}"
-            >
-              <vaadin-icon
-                style=${rank !== 'elite' ? 'transform: rotate(180deg)' : ''}
-                icon="waryes-svg:${rank}"
-              ></vaadin-icon>
-            </div>`;
-          })}
-        </div>
+        ${veterancySelection}
       `;
-    } else {
-      return html`ERROR`;
     }
+
+    return html`ERROR`;
   }
 }
+
+/*
+
+
+*/

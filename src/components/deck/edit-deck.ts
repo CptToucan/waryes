@@ -1,18 +1,32 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import './armoury-card';
+import './pack-armoury-card';
 import './deck-card';
 import '@vaadin/scroller';
-import {Division, Pack} from '../../types/deck-builder';
-import {UnitMap} from '../../types/unit';
+import {Division, MatrixRow, Pack} from '../../types/deck-builder';
+import {Unit, UnitMap} from '../../types/unit';
+// import { UnitCardCategories } from '@izohek/warno-deck-utils';
 
-type GroupedUnits = {
+type GroupedPacks = {
   [key: string]: Pack[];
+};
+
+type GroupedPackConfigs = {
+  [key: string]: SelectedPackConfigs[];
 };
 
 type FactoryDescriptorMap = {
   [key: string]: string;
 };
+
+export interface SelectedPackConfigs {
+  id: number;
+  unit: Unit;
+  veterancy: number;
+  transport?: Unit;
+  pack: Pack
+}
 
 const factoryDescriptorMap: FactoryDescriptorMap = {
   'EDefaultFactories/Helis': 'EDefaultFactories/Helis',
@@ -130,30 +144,64 @@ export class EditDeck extends LitElement {
   @property()
   unitMap?: UnitMap;
 
+  lastPackId = 0;
+
+  @state()
+  builtDeck: SelectedPackConfigs[] = [];
+
   parseDescriptorName(descriptor: string): string {
     const splitDescriptor = descriptor.split('/');
     return splitDescriptor[splitDescriptor.length - 1];
   }
 
-  renderDeckCategory(name: string, cards: number[]): TemplateResult {
+  packSelected(event: CustomEvent) {
+    console.log(event.detail);
+    const packConfig: SelectedPackConfigs = {
+      id: this.lastPackId++,
+      unit: event.detail.unit,
+      veterancy: event.detail.veterancy,
+      transport: event.detail.transport,
+      pack: event.detail.pack
+    };
+    this.addPackToDeck(packConfig);
+  }
+
+  addPackToDeck(packConfig: SelectedPackConfigs) {
+    this.builtDeck = [...this.builtDeck, packConfig];
+  }
+
+  renderDeck(groupedDeck: GroupedPackConfigs): TemplateResult[] {
+    const renderOutput: TemplateResult[] = [];
+    if (this.division?.costMatrix?.matrix) {
+      for (const matrixRow of this.division?.costMatrix?.matrix) {
+        renderOutput.push(
+          this.renderDeckCategory(matrixRow, groupedDeck[matrixRow.name])
+        );
+      }
+    }
+
+    return renderOutput;
+  }
+
+  renderDeckCategory(matrixRow: MatrixRow, groupedUnits: SelectedPackConfigs[]): TemplateResult {
     return html`<div class="deck-section">
       <div class="deck-category-headings">
         <div class="deck-category-heading-row">
-          <h3 class="deck-category-heading-title">${name}</h3>
+          <h3 class="deck-category-heading-title">${matrixRow.name}</h3>
           <div>22 units</div>
         </div>
         <div class="deck-category-heading-row">
-          <div>8 / 10 slots</div>
-          <div>Next slot: 3 points</div>
+          <div>${groupedUnits.length} / ${matrixRow.activationCosts.length} slots</div>
+          <div>Next slot: ${matrixRow.activationCosts[groupedUnits.length]} points</div>
         </div>
       </div>
       <div class="deck-category-cards">
-        ${cards.map(() => html`<deck-card></deck-card>`)}
+        ${groupedUnits.map((packConfig) => html`<deck-card .packConfig=${packConfig}></deck-card>`)}
       </div>
     </div>`;
   }
 
-  renderCardCategories(groupedUnits: GroupedUnits) {
+  renderCardCategories(groupedUnits: GroupedPacks) {
     const renderOutput: TemplateResult[] = [];
 
     if (this.division?.costMatrix?.matrix) {
@@ -173,23 +221,30 @@ export class EditDeck extends LitElement {
 
       <div class="armoury-category-cards">
         ${packs.map(
-          (pack) => html`<armoury-card .pack=${pack} .unitMap=${this.unitMap}></armoury-card>`
+          (pack) =>
+            html`<pack-armoury-card
+              .pack=${pack}
+              .unitMap=${this.unitMap}
+              @pack-selected=${this.packSelected}
+            ></pack-armoury-card>`
         )}
       </div>
     </div>`;
   }
 
   render(): TemplateResult {
-
-    const groupedUnits: GroupedUnits = {};
+    const groupedArmouryUnits: GroupedPacks = {};
+    const groupedDeckUnits: GroupedPackConfigs = {};
 
     if (this.division?.costMatrix?.matrix) {
       for (const category of this.division?.costMatrix?.matrix) {
-        groupedUnits[category.name] = [];
+        groupedArmouryUnits[category.name] = [];
+        groupedDeckUnits[category.name] = [];
       }
     }
 
-    groupedUnits['NOT_DEFINED'] = [];
+    groupedArmouryUnits['NOT_DEFINED'] = [];
+    groupedDeckUnits['NOT_DEFINED'] = [];
 
     if (this?.division?.packs) {
       for (const pack of this.division.packs) {
@@ -199,24 +254,33 @@ export class EditDeck extends LitElement {
           const parsedFactoryDescriptor =
             factoryDescriptorMap[unit.factoryDescriptor];
           if (parsedFactoryDescriptor !== undefined) {
-            groupedUnits[parsedFactoryDescriptor].push(pack);
+            groupedArmouryUnits[parsedFactoryDescriptor].push(pack);
           } else {
-            groupedUnits['NOT_DEFINED'].push(pack);
+            groupedArmouryUnits['NOT_DEFINED'].push(pack);
           }
         }
       }
     }
 
+    for (const packConfig of this.builtDeck) {
+      const parsedFactoryDescriptor =
+        factoryDescriptorMap[packConfig.unit.factoryDescriptor];
 
+      if (parsedFactoryDescriptor !== undefined) {
+        groupedDeckUnits[parsedFactoryDescriptor].push(packConfig);
+      } else {
+        groupedDeckUnits['NOT_DEFINED'].push(packConfig);
+      }
+    }
 
     return html`
       <div class="container">
         <div class="deck">
           <h3 class="deck-title">${this.division?.descriptor}</h3>
-
+          ${this.renderDeck(groupedDeckUnits)}
         </div>
         <div class="cards">
-          ${this.renderCardCategories(groupedUnits)}
+          ${this.renderCardCategories(groupedArmouryUnits)}
           <div class="filters">Filters</div>
         </div>
       </div>
