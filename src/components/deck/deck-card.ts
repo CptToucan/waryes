@@ -1,10 +1,10 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import '@vaadin/icon';
-import {SelectedPackConfigs} from './edit-deck';
+import {SelectedPackConfig} from './edit-deck';
 import {getIconForUnit} from '../../utils/get-icon-for-unit';
 import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
-import { getIconForVeterancy } from '../../utils/get-icon-for-veterancy';
+import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 @customElement('deck-card')
 export class DeckCard extends LitElement {
   static get styles() {
@@ -65,7 +65,15 @@ export class DeckCard extends LitElement {
   }
 
   @property()
-  packConfig?: SelectedPackConfigs;
+  packConfig?: SelectedPackConfig;
+
+  removeButtonClicked() {
+    this.dispatchEvent(
+      new CustomEvent('pack-config-removed', {
+        detail: {packConfig: this.packConfig}
+      })
+    );
+  }
 
   render(): TemplateResult {
     if (this.packConfig) {
@@ -77,7 +85,8 @@ export class DeckCard extends LitElement {
           this.packConfig.pack.numberOfUnitInPackXPMultiplier,
       });
 
-      const unitQuantity = unitQuantityForVeterancies[this.packConfig.veterancy];
+      const unitQuantity =
+        unitQuantityForVeterancies[this.packConfig.veterancy];
       // const transport = this.packConfig.transport;
       const veterancy = this.packConfig.veterancy;
 
@@ -90,6 +99,15 @@ export class DeckCard extends LitElement {
         <div class="end-section">
           ${getIconForVeterancy(veterancy)}
           <div class="quantity">x${unitQuantity}</div>
+          <vaadin-button
+            theme="icon tertiary"
+            @click=${this.removeButtonClicked}
+          >
+            <vaadin-button theme="icon" aria-label="Remove" style="padding: 0;">
+              <vaadin-icon
+                icon="vaadin:close-small"
+              ></vaadin-icon> </vaadin-button
+          ></vaadin-button>
         </div>
       `;
     }
