@@ -211,8 +211,7 @@ export class EditDeck extends LitElement {
         renderOutput.push(
           this.renderDeckCategory(
             matrixRow,
-            groupedDeck[matrixRow.name],
-            this.division
+            groupedDeck[matrixRow.name]
           )
         );
       }
@@ -229,11 +228,9 @@ export class EditDeck extends LitElement {
    */
   renderDeckCategory(
     matrixRow: MatrixRow,
-    groupedUnits: SelectedPackConfig[],
-    division: Division
+    groupedUnits: SelectedPackConfig[]
   ): TemplateResult {
     let totalUnitsInCategory = 0;
-    console.log(division);
 
     const deckCards: TemplateResult[] = [];
     for (const config of groupedUnits) {
@@ -244,7 +241,7 @@ export class EditDeck extends LitElement {
 
       totalUnitsInCategory += veterancies[config.veterancy];
 
-      deckCards.push(html`<deck-card .packConfig=${config} @pack-config-removed=${this.packConfigRemoved}></deck-card>`);
+      deckCards.push(html`<deck-card .packConfig=${config} @pack-config-removed=${this.packConfigRemoved} .unitMap=${this.unitMap}></deck-card>`);
     }
     return html`<div class="deck-section">
       <div class="deck-category-headings">
@@ -295,8 +292,7 @@ export class EditDeck extends LitElement {
       <div class="armoury-category-cards">
         ${packs.map((pack) => {
           /**
-           * TODO:
-           * Check a data structure instead, this is potentially an expensive operation if being done every render
+           * TODO: Check a data structure instead, this is potentially an expensive operation if being done every render
            */
           const currentQuantitySelectedOfThisPack = this.builtDeck.filter((packConfig => packConfig.pack.packDescriptor === pack.packDescriptor)).length;
           let disabled = false;

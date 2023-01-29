@@ -2,116 +2,73 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {SelectedPackConfig} from './edit-deck';
-import {getIconForUnit} from '../../utils/get-icon-for-unit';
-import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
-import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
+import './armoury-with-transport-card';
+import {ArmouryCardOptions} from './armoury-with-transport-card';
+import { UnitMap } from '../../types/unit';
+
+/**
+ * Card that shows in the side drawer for the created deck.
+ */
 @customElement('deck-card')
 export class DeckCard extends LitElement {
   static get styles() {
-    return css`
-      :host {
-        background-color: var(--lumo-contrast-5pct);
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        border-radius: var(--lumo-border-radius-m);
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
-        padding-top: var(--lumo-space-s);
-        padding-bottom: var(--lumo-space-s);
-        overflow: hidden;
-        height: 32px;
-        cursor: pointer;
-      }
-
-      .start-section,
-      .end-section {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-      }
-
-      .end-section {
-        justify-content: space-between;
-      }
-
-      :host(:hover) {
-        background-color: var(--lumo-contrast-10pct);
-      }
-
-      vaadin-icon {
-        font-size: 24px;
-      }
-
-      .points {
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
-        color: var(--lumo-primary-color);
-      }
-
-      .name {
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
-        color: var(--lumo-contrast);
-      }
-
-      .quantity {
-        color: var(--lumo-contrast);
-        width: 2rem;
-        text-align: end;
-      }
-    `;
+    return css``;
   }
+
+  @property()
+  unitMap?: UnitMap;
 
   @property()
   packConfig?: SelectedPackConfig;
 
-  removeButtonClicked() {
-    this.dispatchEvent(
-      new CustomEvent('pack-config-removed', {
-        detail: {packConfig: this.packConfig}
-      })
-    );
-  }
-
   render(): TemplateResult {
     if (this.packConfig) {
-      const unit = this.packConfig.unit;
+      const options: ArmouryCardOptions = {
+        unit: this.packConfig.unit,
+        transport: this.packConfig.transport,
+        veterancyOptions: {
+          unitQuantityMultipliers:
+            this.packConfig.pack.numberOfUnitInPackXPMultiplier,
+          defaultUnitQuantity: this.packConfig.pack.numberOfUnitsInPack,
+        },
+      };
 
-      const unitQuantityForVeterancies = getQuantitiesForUnitVeterancies({
-        defaultUnitQuantity: this.packConfig.pack.numberOfUnitsInPack,
-        unitQuantityMultipliers:
-          this.packConfig.pack.numberOfUnitInPackXPMultiplier,
-      });
-
-      const unitQuantity =
-        unitQuantityForVeterancies[this.packConfig.veterancy];
-      // const transport = this.packConfig.transport;
-      const veterancy = this.packConfig.veterancy;
-
-      return html`
-        <div class="start-section">
-          <vaadin-icon icon=${getIconForUnit(unit)}></vaadin-icon>
-          <div class="points">${unit.commandPoints}</div>
-          <div class="name">${unit.name}</div>
-        </div>
-        <div class="end-section">
-          ${getIconForVeterancy(veterancy)}
-          <div class="quantity">x${unitQuantity}</div>
-          <vaadin-button
-            theme="icon tertiary"
-            @click=${this.removeButtonClicked}
-          >
-            <vaadin-button theme="icon" aria-label="Remove" style="padding: 0;">
-              <vaadin-icon
-                icon="vaadin:close-small"
-              ></vaadin-icon> </vaadin-button
-          ></vaadin-button>
-        </div>
-      `;
+      return html`<armoury-with-transport-card
+        .options=${options}
+        @veterancy-changed=${(event: CustomEvent) => {this.packConfig!.veterancy = event.detail.veterancy;}}
+        @transport-changed=${(event: CustomEvent) => {this.packConfig!.transport = event.detail.transport; this.requestUpdate()}}
+        @unit-removed=${() =>
+          this.dispatchEvent(
+            new CustomEvent('pack-config-removed', {
+              detail: {packConfig: this.packConfig},
+            })
+          )}
+         .availableTransports=${this.availableTransportsArmouryCardOptions}
+      ></armoury-with-transport-card>`;
     }
 
     return html`ERROR`;
+  }
+  
+  get availableTransportsArmouryCardOptions(): ArmouryCardOptions[] {
+    if (this.packConfig && this.packConfig.pack && this.packConfig.pack.availableTransportList?.length > 0) {
+      const transportsOptions: ArmouryCardOptions[] =
+        this.packConfig.pack.availableTransportList.map((transportDescriptor) => {
+          return {unit: this.unitMap?.[transportDescriptor]};
+        }) as ArmouryCardOptions[];
+
+      return transportsOptions;
+    }
+
+    return [];
+  }
+}
+
+
+
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'deck-card': DeckCard;
   }
 }

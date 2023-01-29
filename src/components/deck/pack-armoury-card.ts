@@ -1,12 +1,12 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {Pack} from '../../types/deck-builder';
 import {Unit, UnitMap} from '../../types/unit';
 import '@vaadin/dialog';
-import {dialogFooterRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
-import type {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {ArmouryCardOptions} from './armoury-card';
+import './transport-selection';
+import { TransportSelection } from './transport-selection';
 
 interface UnitVeterancyOptions {
   unit: Unit,
@@ -29,13 +29,16 @@ export class PackArmouryCard extends LitElement {
   @property()
   disabled = false;
 
+  @query("transport-selection")
+  transportDialog!: TransportSelection 
+
   @state()
   showTransportSelection = false;
 
   unitVeterancyOptions: UnitVeterancyOptions | null = null;
 
   openTransportDialog(unit: Unit, veterancy: number) {
-    this.showTransportSelection = true;
+    this.transportDialog.showTransportDialog();
     this.unitVeterancyOptions = {
       unit,
       veterancy
@@ -43,7 +46,7 @@ export class PackArmouryCard extends LitElement {
   }
 
   closeTransportDialog() {
-    this.showTransportSelection = false;
+    this.transportDialog.closeTransportDialog();
     this.unitVeterancyOptions = null
   }
 
@@ -72,7 +75,7 @@ export class PackArmouryCard extends LitElement {
     }
   }
 
-  transportUnitAddButtonClicked(transport: Unit) {
+  transportSelected(transport: Unit) {
     this.dispatchEvent(new CustomEvent("pack-selected", {detail: {
       transport,
       unit: this.unitVeterancyOptions?.unit,
@@ -81,46 +84,6 @@ export class PackArmouryCard extends LitElement {
     }}))
     this.closeTransportDialog();
   }
-
-  renderTransportSelection() {
-    if (
-      this.availableTransportsArmouryCardOptions &&
-      this.availableTransportsArmouryCardOptions.length > 0
-    ) {
-      return html` <vaadin-dialog
-        header-title="Select Transport"
-        @opened-changed="${(e: DialogOpenedChangedEvent) =>
-          ( e.detail.value === false ? this.closeTransportDialog() : null )}"
-        ${dialogRenderer(
-          () =>
-            html`${this.availableTransportsArmouryCardOptions?.map(
-              (options) =>
-                html`<armoury-card
-                  style="margin-bottom: var(--lumo-space-s);"
-                  .options=${options}
-                  @add-button-clicked=${(event: CustomEvent) => this.transportUnitAddButtonClicked(event.detail.transport)}
-                ></armoury-card>`
-            )}`,
-          []
-        )}
-        ${dialogFooterRenderer(
-          () =>
-            html`<vaadin-button @click="${this.closeTransportDialog}"
-              >Cancel</vaadin-button>
-              
-              ${this.pack?.availableWithoutTransport ? html`<vaadin-button @click="${undefined}"
-              >No Transport</vaadin-button>` : html``}
-              `,
-          []
-        )}
-        .opened="${true}"
-      ></vaadin-dialog>`;
-    }
-
-    return html``;
-  }
-
-  renderDialog() {}
 
   render(): TemplateResult {
     if (this.unitMap && this.pack?.unitDescriptor && this.pack !== undefined) {
@@ -134,10 +97,7 @@ export class PackArmouryCard extends LitElement {
         },
       };
       return html`
-        ${this.showTransportSelection
-          ? this.renderTransportSelection()
-          : html``}
-
+        <transport-selection @transport-selected=${(event: CustomEvent) => this.transportSelected(event.detail.transport)} .availableTransports=${this.availableTransportsArmouryCardOptions}></transport-selection>
         <armoury-card
           .options=${armouryCardOptions}
           .disabled=${this.disabled}
@@ -152,3 +112,9 @@ export class PackArmouryCard extends LitElement {
     }
   }
 }
+
+/*
+${this.showTransportSelection
+  ? this.renderTransportSelection()
+  : html``}
+  */
