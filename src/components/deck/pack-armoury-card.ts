@@ -29,6 +29,9 @@ export class PackArmouryCard extends LitElement {
   @property()
   disabled = false;
 
+  @property()
+  remaining = 0;
+
   @query("transport-selection")
   transportDialog!: TransportSelection 
 
@@ -101,6 +104,7 @@ export class PackArmouryCard extends LitElement {
         <armoury-card
           .options=${armouryCardOptions}
           .disabled=${this.disabled}
+          .remaining=${this.remaining}
           @add-button-clicked=${
             (event: CustomEvent) =>
               this.unitAddButtonClicked(event.detail.unit, event.detail.veterancy)
@@ -113,8 +117,9 @@ export class PackArmouryCard extends LitElement {
   }
 }
 
-/*
-${this.showTransportSelection
-  ? this.renderTransportSelection()
-  : html``}
-  */
+declare global {
+  interface HTMLElementTagNameMap {
+    'pack-armoury-card': PackArmouryCard;
+  }
+}
+

@@ -8,6 +8,9 @@ import {Division, MatrixRow, Pack} from '../../types/deck-builder';
 import {Unit, UnitMap} from '../../types/unit';
 import {getQuantitiesForUnitVeterancies} from '../../utils/get-quantities-for-unit-veterancies';
 // import { UnitCardCategories } from '@izohek/warno-deck-utils';
+import 'side-drawer';
+import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
+import {deckCategoryIsDeprecated} from '../../utils/deck-category-is-deprecated';
 
 type GroupedPacks = {
   [key: string]: Pack[];
@@ -40,44 +43,24 @@ const factoryDescriptorMap: FactoryDescriptorMap = {
   'EDefaultFactories/Tanks': 'EDefaultFactories/tank',
 };
 
-@customElement('edit-deck')
-export class EditDeck extends LitElement {
-  static get styles() {
-    return css`
-      :host {
-        display: flex;
-        flex: 0 0 100%;
-        height: 100%;
-      }
-      .container {
-        grid-template-areas: 'deck cards cards cards cards cards cards filters';
-        display: grid;
-        flex: 1 1 0;
-        max-height: 100%;
-        padding-top: var(--lumo-space-s);
-        padding-bottom: var(--lumo-space-s);
-
-        overflow: hidden;
-      }
-
-      .deck {
+/**
+ *       .deck {
         grid-area: deck;
         border-right: 1px solid var(--lumo-contrast-10pct);
         padding: var(--lumo-space-s);
         height: 100%;
         overflow: auto;
       }
+ */
 
+@customElement('edit-deck')
+export class EditDeck extends LitElement {
+  static get styles() {
+    return css`
       .card-section h3 {
         padding-left: var(--lumo-space-s);
         padding-right: var(--lumo-space-s);
         color: var(--lumo-contrast-90pct);
-      }
-
-      .cards {
-        grid-area: cards;
-        height: 100%;
-        overflow: auto;
       }
 
       .filters {
@@ -111,7 +94,7 @@ export class EditDeck extends LitElement {
       .armoury-category-cards {
         display: grid;
         padding: var(--lumo-space-s);
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 
         gap: var(--lumo-space-xs);
       }
@@ -130,8 +113,97 @@ export class EditDeck extends LitElement {
         color: var(--lumo-primary-color-50pct);
         text-transform: uppercase;
       }
+
+      side-drawer {
+        background-color: var(--lumo-base-color);
+        max-width: 95vw;
+      }
+
+      side-drawer > .deck {
+        height: 100%;
+        overflow: auto;
+      }
+
+      :host {
+        display: flex;
+        flex: 0 0 100%;
+        height: 100%;
+      }
+      .container {
+        flex: 1 1 0;
+        max-height: 100%;
+        padding-top: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-s);
+
+        overflow: hidden;
+      }
+
+      .cards {
+        height: 100%;
+        overflow: auto;
+        position: relative;
+      }
+
+      .deck {
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
+      }
+
+      .desktop {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+      }
+
+      .desktop > .cards {
+        flex: 1 1 80%;
+      }
+
+      .desktop > .deck {
+        flex: 1 0 20%;
+        height: 100%;
+        overflow-y: auto;
+        min-width: 300px;
+        border-right: 1px solid var(--lumo-contrast-20pct);
+      }
+
+      .button-drawer {
+        position: fixed;
+        bottom: 0;
+        height: 60px;
+        width: 100%;
+        background-color: var(--lumo-base-color);
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--lumo-contrast-20pct);
+      }
+
+      .button-drawer > vaadin-button {
+        flex: 1 1 100%;
+        margin-left: var(--lumo-space-s);
+        margin-right: var(--lumo-space-s);
+      }
+
+      @media only screen and (min-width: 701px) {
+        .button-drawer {
+          display: none
+        }
+      }
+
+      @media only screen and (max-width: 700px) {
+        .desktop > .deck {
+          display: none;
+        }
+
+ 
+      }
     `;
   }
+
+  @state()
+  deckOpen = false;
 
   /**
    * Division that is being edited
@@ -193,10 +265,12 @@ export class EditDeck extends LitElement {
 
   /**
    * Removes pack from the deck config
-   * @param packConfig 
+   * @param packConfig
    */
   removePackFromDeck(packConfig: SelectedPackConfig) {
-    const deckWithoutPack = this.builtDeck.filter((config) => packConfig.id !== config.id)
+    const deckWithoutPack = this.builtDeck.filter(
+      (config) => packConfig.id !== config.id
+    );
     this.builtDeck = [...deckWithoutPack];
   }
 
@@ -208,12 +282,11 @@ export class EditDeck extends LitElement {
     const renderOutput: TemplateResult[] = [];
     if (this.division?.costMatrix?.matrix) {
       for (const matrixRow of this.division?.costMatrix?.matrix) {
-        renderOutput.push(
-          this.renderDeckCategory(
-            matrixRow,
-            groupedDeck[matrixRow.name]
-          )
-        );
+        if (!deckCategoryIsDeprecated(matrixRow.name)) {
+          renderOutput.push(
+            this.renderDeckCategory(matrixRow, groupedDeck[matrixRow.name])
+          );
+        }
       }
     }
 
@@ -241,12 +314,20 @@ export class EditDeck extends LitElement {
 
       totalUnitsInCategory += veterancies[config.veterancy];
 
-      deckCards.push(html`<deck-card .packConfig=${config} @pack-config-removed=${this.packConfigRemoved} .unitMap=${this.unitMap}></deck-card>`);
+      deckCards.push(
+        html`<deck-card
+          .packConfig=${config}
+          @pack-config-removed=${this.packConfigRemoved}
+          .unitMap=${this.unitMap}
+        ></deck-card>`
+      );
     }
     return html`<div class="deck-section">
       <div class="deck-category-headings">
         <div class="deck-category-heading-row">
-          <h3 class="deck-category-heading-title">${matrixRow.name}</h3>
+          <h3 class="deck-category-heading-title">
+            ${getCodeForFactoryDescriptor(matrixRow.name)}
+          </h3>
           <div>${totalUnitsInCategory} units</div>
         </div>
         <div class="deck-category-heading-row">
@@ -271,9 +352,14 @@ export class EditDeck extends LitElement {
 
     if (this.division?.costMatrix?.matrix) {
       for (const matrixRow of this.division?.costMatrix?.matrix) {
-        renderOutput.push(
-          this.renderCardCategory(matrixRow.name, groupedUnits[matrixRow.name])
-        );
+        if (!deckCategoryIsDeprecated(matrixRow.name)) {
+          renderOutput.push(
+            this.renderCardCategory(
+              getCodeForFactoryDescriptor(matrixRow.name) || '',
+              groupedUnits[matrixRow.name]
+            )
+          );
+        }
       }
     }
 
@@ -294,9 +380,15 @@ export class EditDeck extends LitElement {
           /**
            * TODO: Check a data structure instead, this is potentially an expensive operation if being done every render
            */
-          const currentQuantitySelectedOfThisPack = this.builtDeck.filter((packConfig => packConfig.pack.packDescriptor === pack.packDescriptor)).length;
+          const currentQuantitySelectedOfThisPack = this.builtDeck.filter(
+            (packConfig) =>
+              packConfig.pack.packDescriptor === pack.packDescriptor
+          ).length;
+
+          const remaining =
+            pack.numberOfCards - currentQuantitySelectedOfThisPack;
           let disabled = false;
-          if(currentQuantitySelectedOfThisPack >= pack.numberOfCards) {
+          if (currentQuantitySelectedOfThisPack >= pack.numberOfCards) {
             disabled = true;
           }
           return html`<pack-armoury-card
@@ -304,6 +396,7 @@ export class EditDeck extends LitElement {
             .unitMap=${this.unitMap}
             @pack-selected=${this.packConfigSelected}
             .disabled=${disabled}
+            .remaining=${remaining}
           ></pack-armoury-card>`;
         })}
       </div>
@@ -353,13 +446,35 @@ export class EditDeck extends LitElement {
 
     return html`
       <div class="container">
-        <div class="deck">
-          <h3 class="deck-title">${this.division?.descriptor}</h3>
-          ${this.renderDeck(groupedDeckUnits)}
-        </div>
-        <div class="cards">
-          ${this.renderCardCategories(groupedArmouryUnits)}
-          <div class="filters">Filters</div>
+        <side-drawer
+          .open=${this.deckOpen}
+          @close=${() => (this.deckOpen = false)}
+          @open=${() => (this.deckOpen = true)}
+        >
+          <div class="deck">
+            <h3 class="deck-title">${this.division?.descriptor}</h3>
+            ${this.renderDeck(groupedDeckUnits)}
+          </div>
+        </side-drawer>
+        <div class="desktop">
+          <div class="deck">
+            <h3 class="deck-title">${this.division?.descriptor}</h3>
+            ${this.renderDeck(groupedDeckUnits)}
+          </div>
+
+          <div class="cards">
+            <div class="button-drawer">
+              <vaadin-button @click=${() => (this.deckOpen = !this.deckOpen)} theme="large"
+                >Deck</vaadin-button
+              >
+              <vaadin-button @click=${() => (this.deckOpen = !this.deckOpen)} theme="large"
+                >Filters</vaadin-button
+              >
+            </div>
+
+            ${this.renderCardCategories(groupedArmouryUnits)}
+            <div style="height: 60px;"></div>
+          </div>
         </div>
       </div>
     `;

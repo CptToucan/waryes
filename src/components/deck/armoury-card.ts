@@ -113,8 +113,8 @@ export class ArmouryCard extends LitElement {
     }
 
     .name {
-      padding-left: var(--lumo-space-s);
-      padding-right: var(--lumo-space-s);
+      margin-left: var(--lumo-space-l);
+      margin-right: var(--lumo-space-l);
       font-size: 12px;
       display: flex;
       align-items: center;
@@ -143,11 +143,24 @@ export class ArmouryCard extends LitElement {
 
     .bottom-section {
       display: flex;
+      position: relative;
       align-items: space-between;
       justify-content: center;
       width: 100%;
       flex: 1 1 100%;
       border-bottom: 1px solid var(--lumo-contrast-10pct);
+    }
+
+    .remaining {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--lumo-contrast-70pct);
+
     }
   ` as CSSResultGroup;
 
@@ -156,6 +169,12 @@ export class ArmouryCard extends LitElement {
 
   @state()
   selectedVeterancy?: number;
+
+  @property()
+  remaining = 0;
+
+  @property()
+  hideRemaining = false;
 
   @property()
   disabled = false;
@@ -227,6 +246,7 @@ export class ArmouryCard extends LitElement {
 
   renderBottomSection(unit: Unit, veterancySelectionRender: TemplateResult) {
     return html` <div class="bottom-section">
+        ${this.hideRemaining ? html`` : html`<div class="remaining">(${this.remaining})</div>`}
         <div class="name">${unit?.name}</div>
       </div>
       ${veterancySelectionRender}`;
@@ -299,4 +319,11 @@ function findDefaultVeterancy(unitVeterancyQuantityMultipliers: number[]) {
   return unitVeterancyQuantityMultipliers.findIndex(
     (multiplier) => multiplier === 1
   );
+}
+
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'armoury-card': ArmouryCard;
+  }
 }
