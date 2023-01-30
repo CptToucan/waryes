@@ -44,6 +44,7 @@ export class TransportSelection extends LitElement {
               (options) =>
                 html`<armoury-card
                   style="margin-bottom: var(--lumo-space-s);"
+                  .hideRemaining=${true}
                   .options=${options}
                   @add-button-clicked=${() =>
                     this.dispatchEvent(

@@ -67,7 +67,8 @@
     "@vaadin/virtual-list": "^23.2.0",
     "echarts": "^5.4.0",
     "firebase": "^9.9.4",
-    "lit": "^2.1.0"
+    "lit": "^2.1.0",
+    "side-drawer": "^3.1.0"
   },
   "devDependencies": {
     "@11ty/eleventy": "^0.12.1",

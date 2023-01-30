@@ -35,7 +35,7 @@ export class DeckCard extends LitElement {
 
       return html`<armoury-with-transport-card
         .options=${options}
-        @veterancy-changed=${(event: CustomEvent) => {this.packConfig!.veterancy = event.detail.veterancy;}}
+        @veterancy-changed=${(event: CustomEvent) => {this.packConfig!.veterancy = event.detail.veterancy; this.requestUpdate()}}
         @transport-changed=${(event: CustomEvent) => {this.packConfig!.transport = event.detail.transport; this.requestUpdate()}}
         @unit-removed=${() =>
           this.dispatchEvent(

@@ -213,7 +213,7 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
-    return html` <vaadin-app-layout style="height: 100%;" theme="small" .drawerOpened=${false}>
+    return html` <vaadin-app-layout style="height: 100%; --vaadin-app-layout-drawer-overlay: true" theme="small" .drawerOpened=${false}>
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <img height="32" src=${WaryesImage} />
