@@ -3,14 +3,10 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/icon';
 import '@vaadin/dialog';
 import {dialogFooterRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
-// import type {DialogOpenedChangedEvent} from '@vaadin/dialog';
-import {ArmouryCardOptions} from './armoury-with-transport-card';
 import {Unit} from '../../types/unit';
-
-export interface TranpostSelectionOptions {
-  open: boolean,
-  transport: Unit
-}
+import {Pack} from '../../types/deck-builder';
+import {Deck} from '../../classes/deck';
+import './transport-card';
 
 @customElement('transport-selection')
 export class TransportSelection extends LitElement {
@@ -19,10 +15,20 @@ export class TransportSelection extends LitElement {
   }
 
   @property()
-  availableTransports?: ArmouryCardOptions[];
+  pack?: Pack;
+
+  @property()
+  deck?: Deck;
+
+  get availableTransports(): Unit[] | undefined {
+    if(this.deck && this.pack) {
+      return this.deck.getTransportsForPack(this.pack) ;
+    }
+    return []
+  }
 
   public showTransportDialog() {
-    this.showing = true
+    this.showing = true;
   }
   public closeTransportDialog() {
     this.showing = false;
@@ -31,28 +37,27 @@ export class TransportSelection extends LitElement {
   @state()
   private showing = false;
 
-
   renderTransportSelection() {
-    if (this.availableTransports && this.availableTransports.length > 0) {
-      return html` <vaadin-dialog
+    if (this.availableTransports && this.availableTransports.length > 0 && this.deck && this.pack) {
 
+      return html` <vaadin-dialog
         header-title="Select Transport"
-        
         ${dialogRenderer(
           () =>
             html`${this.availableTransports?.map(
-              (options) =>
-                html`<armoury-card
+              (transport) =>
+                html`<transport-card
+                .unit=${transport}
+                .pack=${this.pack}
+                .deck=${this.deck}
                   style="margin-bottom: var(--lumo-space-s);"
-                  .hideRemaining=${true}
-                  .options=${options}
                   @add-button-clicked=${() =>
                     this.dispatchEvent(
                       new CustomEvent('transport-selected', {
-                        detail: {transport: options.unit},
+                        detail: {transport: transport},
                       })
                     )}
-                ></armoury-card>`
+                ></transport-card>`
             )}`,
           []
         )}
@@ -71,14 +76,8 @@ export class TransportSelection extends LitElement {
   }
 }
 
-
 declare global {
   interface HTMLElementTagNameMap {
-    'transport-selection': TransportSelection
+    'transport-selection': TransportSelection;
   }
 }
-
-/**
- * @opened-changed="${(e: DialogOpenedChangedEvent) =>
-          e.detail.value === false ? this.closeTransportDialog() : null}"
- */

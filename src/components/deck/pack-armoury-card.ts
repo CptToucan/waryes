@@ -1,17 +1,13 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, query, state} from 'lit/decorators.js';
+import {customElement, property, query} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {Pack} from '../../types/deck-builder';
-import {Unit, UnitMap} from '../../types/unit';
+import {Unit} from '../../types/unit';
 import '@vaadin/dialog';
-import {ArmouryCardOptions} from './armoury-card';
 import './transport-selection';
+import './armoury-card';
 import { TransportSelection } from './transport-selection';
-
-interface UnitVeterancyOptions {
-  unit: Unit,
-  veterancy: number
-}
+import { Deck } from '../../classes/deck';
 
 
 @customElement('pack-armoury-card')
@@ -24,7 +20,7 @@ export class PackArmouryCard extends LitElement {
   pack?: Pack;
 
   @property()
-  unitMap?: UnitMap;
+  deck?: Deck;
 
   @property()
   disabled = false;
@@ -35,85 +31,45 @@ export class PackArmouryCard extends LitElement {
   @query("transport-selection")
   transportDialog!: TransportSelection 
 
-  @state()
-  showTransportSelection = false;
+  selectedUnitVeterancy: number | null = null;
 
-  unitVeterancyOptions: UnitVeterancyOptions | null = null;
-
-  openTransportDialog(unit: Unit, veterancy: number) {
+  openTransportDialog(veterancy: number) {
     this.transportDialog.showTransportDialog();
-    this.unitVeterancyOptions = {
-      unit,
-      veterancy
-    }
+    this.selectedUnitVeterancy = veterancy
   }
 
   closeTransportDialog() {
     this.transportDialog.closeTransportDialog();
-    this.unitVeterancyOptions = null
+    this.selectedUnitVeterancy = null
   }
 
-  get availableTransportsArmouryCardOptions(): ArmouryCardOptions[] {
-    if (this.pack && this.pack.availableTransportList?.length > 0) {
-      const transportsOptions: ArmouryCardOptions[] =
-        this.pack.availableTransportList.map((transportDescriptor) => {
-          return {unit: this.unitMap?.[transportDescriptor]};
-        }) as ArmouryCardOptions[];
 
-      return transportsOptions;
-    }
-
-    return [];
-  }
-
-  unitAddButtonClicked(unit: Unit, veterancy: number) {
+  armouryCardSelected(veterancy: number) {
     if (this.pack) {
-      if (this.availableTransportsArmouryCardOptions.length > 0) {
-        this.openTransportDialog(unit, veterancy);
+      if (this.deck?.getTransportsForPack(this.pack)) {
+        this.openTransportDialog(veterancy);
       } else {
-        this.dispatchEvent(new CustomEvent("pack-selected", {detail: {
-          unit, veterancy, transport: undefined, pack: this.pack
-        }}))
+        this.deck?.addUnit({veterancy, pack: this.pack});
       }
     }
   }
 
   transportSelected(transport: Unit) {
-    this.dispatchEvent(new CustomEvent("pack-selected", {detail: {
-      transport,
-      unit: this.unitVeterancyOptions?.unit,
-      veterancy: this.unitVeterancyOptions?.veterancy,
-      pack: this.pack
-    }}))
+    if(this.pack && this.selectedUnitVeterancy !== null) {
+      this.deck?.addUnit({transport, veterancy: this.selectedUnitVeterancy, pack: this.pack})
+    }
     this.closeTransportDialog();
   }
 
   render(): TemplateResult {
-    if (this.unitMap && this.pack?.unitDescriptor && this.pack !== undefined) {
-      const unit = this.unitMap[this.pack.unitDescriptor];
 
-      const armouryCardOptions: ArmouryCardOptions = {
-        unit,
-        veterancyOptions: {
-          unitQuantityMultipliers: this.pack.numberOfUnitInPackXPMultiplier,
-          defaultUnitQuantity: this.pack.numberOfUnitsInPack,
-        },
-      };
+    if(this.deck && this.pack) {
       return html`
-        <transport-selection @transport-selected=${(event: CustomEvent) => this.transportSelected(event.detail.transport)} .availableTransports=${this.availableTransportsArmouryCardOptions}></transport-selection>
-        <armoury-card
-          .options=${armouryCardOptions}
-          .disabled=${this.disabled}
-          .remaining=${this.remaining}
-          @add-button-clicked=${
-            (event: CustomEvent) =>
-              this.unitAddButtonClicked(event.detail.unit, event.detail.veterancy)
-          }
-        ></armoury-card>
-      `;
-    } else {
-      return html`ERROR`;
+        <transport-selection .pack=${this.pack} .deck=${this.deck} @transport-selected=${(event: CustomEvent) => this.transportSelected(event.detail.transport)}></transport-selection>
+        <armoury-card .pack=${this.pack} .deck=${this.deck} @add-button-clicked=${(event: CustomEvent) => this.armouryCardSelected(event.detail.veterancy)}></armoury-card>`
     }
+
+    return html`NO DECK SUPPLED OR NO PACK SUPPLIED`;
   }
 }
 

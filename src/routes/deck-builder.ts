@@ -11,6 +11,7 @@ import { BeforeEnterObserver } from '@vaadin/router';
 import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
 import {Division} from '../types/deck-builder';
 import { UnitMap } from '../types/unit';
+import { Deck } from '../classes/deck';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver {
@@ -30,7 +31,7 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
     super()
     const divisionData: Division[] = DeckBuilderJson.divisions;
     this.availableDivisions = divisionData;
-    this.selectedDivision = this.availableDivisions[12];
+    // this.selectedDivision = this.availableDivisions[12];
     // console.log(divisionData);
     // console.log(decodeDeckString("FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA=="))
   }
@@ -48,38 +49,43 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
       }
     }
 
-    this.unitMap = unitMap
+    this.unitMap = unitMap;
   }
 
 
 
-  /**
-   * Currently selected division
-   */
-  @state()
-  selectedDivision?: Division ;
+
 
 
   /**
    * Available divisions for selections
    */
-  availableDivisions: Division[]
+  availableDivisions: Division[];
+
+  @state()
+  deckToEdit?: Deck;
 
 
 
   selectDivision(division: Division) {
-    this.selectedDivision = division;
+    if(this.unitMap) {
+      this.deckToEdit = new Deck(division, this.unitMap);
+    }
+    else {
+      throw new Error("Unit Map not loaded");
+    }
+
   }
 
   render(): TemplateResult {
-    if(this.selectedDivision && this.unitMap) {
-      return this.renderDeckEditorForDivision(this.selectedDivision, this.unitMap)
+    if(this.deckToEdit) {
+      return this.renderDeckEditor(this.deckToEdit)
     }
     return this.renderDivisionSelection()
   }
 
-  renderDeckEditorForDivision(division: Division, unitMap: UnitMap): TemplateResult {
-    return html`<edit-deck .division=${division} .unitMap=${unitMap}></edit-deck>`;
+  renderDeckEditor(deck: Deck): TemplateResult {
+    return html`<edit-deck .deck=${deck}></edit-deck>`;
   }
 
   renderDivisionSelection(): TemplateResult {

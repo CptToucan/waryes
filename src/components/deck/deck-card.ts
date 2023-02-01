@@ -1,3 +1,4 @@
+/*
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import '@vaadin/icon';
@@ -5,10 +6,12 @@ import {SelectedPackConfig} from './edit-deck';
 import './armoury-with-transport-card';
 import {ArmouryCardOptions} from './armoury-with-transport-card';
 import { UnitMap } from '../../types/unit';
+*/
 
 /**
  * Card that shows in the side drawer for the created deck.
  */
+/*
 @customElement('deck-card')
 export class DeckCard extends LitElement {
   static get styles() {
@@ -72,3 +75,5 @@ declare global {
     'deck-card': DeckCard;
   }
 }
+
+*/

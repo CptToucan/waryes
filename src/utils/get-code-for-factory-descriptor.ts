@@ -1,24 +1,22 @@
-type StringMap = {
-  [key: string]: string;
+import { UnitCategory } from "../types/deck-builder";
+
+type CategoryEnumMap = {
+  [key in UnitCategory]: string;
 };
 
-export const categoryNames: StringMap = {
-  'EDefaultFactories/Helis': 'HEL',
-  'EDefaultFactories/Logistic': 'LOG',
-  'EDefaultFactories/Planes': 'AIR',
-  'EDefaultFactories/Support': 'ART',
-  'EDefaultFactories/AT': 'AA',
-  'EDefaultFactories/Infantry': 'INF',
-  'EDefaultFactories/Recons': 'REC',
-  'EDefaultFactories/Tanks': 'TNK',
-  'EDefaultFactories/air': 'AIR',
-  'EDefaultFactories/support': 'ART',
-  'EDefaultFactories/at': 'AA',
-  'EDefaultFactories/infanterie': 'INF',
-  'EDefaultFactories/reco': 'REC',
-  'EDefaultFactories/tank': 'TNK'
+const categoryNamesByEnum: CategoryEnumMap = {
+  [UnitCategory.LOG]: 'LOG',
+  [UnitCategory.REC]: 'REC',
+  [UnitCategory.INF]: 'INF',
+  [UnitCategory.TNK]: 'TNK',
+  [UnitCategory.ART]: 'ART',
+  [UnitCategory.AA]: 'AA',
+  [UnitCategory.HEL]: 'HEL',
+  [UnitCategory.AIR]: 'AIR',
 };
 
-export function getCodeForFactoryDescriptor(descriptor: string): string | undefined {
-  return categoryNames[descriptor];
+export function getCodeForFactoryDescriptor(
+  descriptor: UnitCategory
+): string {
+  return categoryNamesByEnum[descriptor];
 }
