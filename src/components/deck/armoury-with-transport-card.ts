@@ -1,8 +1,8 @@
 import {customElement, property, query} from 'lit/decorators.js';
-import {css, html, TemplateResult} from 'lit';
+import {css/*, html*/} from 'lit';
 import {Unit} from '../../types/unit';
 import {ArmouryCard} from './armoury-card';
-import {getIconForUnit} from '../../utils/get-icon-for-unit';
+// import {getIconForUnit} from '../../utils/get-icon-for-unit';
 import {TransportSelection} from './transport-selection';
 import './transport-selection';
 import {Pack} from '../../types/deck-builder';
@@ -91,6 +91,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
     this.dispatchEvent(new CustomEvent('unit-removed', {detail: unit}));
   }
 
+  /*
   renderBottomSection(unit: Unit, veterancySelection: TemplateResult) {
     let unitHtml = html`<div class="details-row">
       <span
@@ -139,7 +140,9 @@ export class ArmouryWithTransportCard extends ArmouryCard {
       ${veterancySelection}
     `;
   }
+  */
 
+  /*
   renderCommandPoints(unit: Unit) {
     let commandPoints: number = unit.commandPoints;
 
@@ -149,7 +152,9 @@ export class ArmouryWithTransportCard extends ArmouryCard {
 
     return html` <div class="points">${commandPoints}</div>`;
   }
+  */
 
+  /*
   renderUnitIcon(unit: Unit) {
     const unitIcon = html`<vaadin-icon
       style="font-size: 32px;"
@@ -166,21 +171,9 @@ export class ArmouryWithTransportCard extends ArmouryCard {
 
     return unitIcon;
   }
-
-  renderButton(
-    unit: Unit /*, disabled: boolean, activeVeterancy?: number* .*/
-  ) {
-    return html` <vaadin-button
-      class="add-button"
-      theme="icon medium secondary"
-      aria-label="Add unit"
-      style="padding: 0;"
-      @click=${() => this.clickedRemoveButton(unit)}
-    >
-      <vaadin-icon icon="vaadin:minus"></vaadin-icon>
-    </vaadin-button>`;
-  }
+  */
 }
+
 
 declare global {
   interface HTMLElementTagNameMap {
