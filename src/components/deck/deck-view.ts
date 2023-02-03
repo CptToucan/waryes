@@ -2,17 +2,23 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import './deck-card';
 import {Deck} from '../../classes/deck';
-import { UnitCategory } from '../../types/deck-builder';
-import { getCodeForFactoryDescriptor } from '../../utils/get-code-for-factory-descriptor';
+import {UnitCategory} from '../../types/deck-builder';
+import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
   static get styles() {
     return css`
+      .deck {
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
+      }
+
       h3.deck-title {
         max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
+        margin: 0;
       }
 
       .deck-category-cards {
@@ -39,17 +45,12 @@ export class DeckView extends LitElement {
     `;
   }
 
-  @property()
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    },
+  })
   deck?: Deck;
-
-  /*
-   removePackFromDeck(packConfig: SelectedPackConfig) {
-    const deckWithoutPack = this.builtDeck.filter(
-      (config) => packConfig.id !== config.id
-    );
-    this.builtDeck = [...deckWithoutPack];
-  }
-  */
 
   render(): TemplateResult {
     if (this.deck) {
@@ -67,7 +68,7 @@ export class DeckView extends LitElement {
     for (const category of deck.unitCategories) {
       renderOutput.push(this.renderDeckCategory(category, deck));
     }
-    return html`DECK`;
+    return html`${renderOutput}`;
   }
 
   renderDeckCategory(category: UnitCategory, deck: Deck) {
@@ -75,7 +76,6 @@ export class DeckView extends LitElement {
       deck.unitsInDeckGroupedUnitsByCategory[category];
     const deckUnitsInCategoryToRender: TemplateResult[] = [];
 
-    // const totalUnitsInCategory = deckUnitsInCategory.length;
     const numberOfCardsInCategory = deckUnitsInCategory.length;
 
     for (const deckUnit of deckUnitsInCategory) {
@@ -94,7 +94,8 @@ export class DeckView extends LitElement {
         </div>
         <div class="deck-category-heading-row">
           <div>
-            ${numberOfCardsInCategory} / ${deck.getTotalSlotsForCategory(category)} slots
+            ${numberOfCardsInCategory} /
+            ${deck.getTotalSlotsForCategory(category)} slots
           </div>
           <div>
             Next slot: ${deck.getNextSlotCostForCategory(category)} points
@@ -104,69 +105,6 @@ export class DeckView extends LitElement {
       <div class="deck-category-cards">${deckUnitsInCategoryToRender}</div>
     </div>`;
   }
-
-  /*
-  renderDeck(groupedDeck: GroupedPackConfigs): TemplateResult[] {
-    const renderOutput: TemplateResult[] = [];
-    if (this.division?.costMatrix?.matrix) {
-      for (const matrixRow of this.division?.costMatrix?.matrix) {
-        if (!deckCategoryIsDeprecated(matrixRow.name)) {
-          renderOutput.push(
-            this.renderDeckCategory(matrixRow, groupedDeck[matrixRow.name])
-          );
-        }
-      }
-    }
-
-    return renderOutput;
-  }
-  */
-
-  /*
-  renderDeckCategory(
-    matrixRow: MatrixRow,
-    groupedUnits: SelectedPackConfig[]
-  ): TemplateResult {
-    let totalUnitsInCategory = 0;
-
-    const deckCards: TemplateResult[] = [];
-    for (const config of groupedUnits) {
-      const veterancies = getQuantitiesForUnitVeterancies({
-        defaultUnitQuantity: config.pack.numberOfUnitsInPack,
-        unitQuantityMultipliers: config.pack.numberOfUnitInPackXPMultiplier,
-      });
-
-      totalUnitsInCategory += veterancies[config.veterancy];
-
-      deckCards.push(
-        html`<deck-card
-          .packConfig=${config}
-          @pack-config-removed=${this.packConfigRemoved}
-          .unitMap=${this.unitMap}
-        ></deck-card>`
-      );
-    }
-    return html`<div class="deck-section">
-      <div class="deck-category-headings">
-        <div class="deck-category-heading-row">
-          <h3 class="deck-category-heading-title">
-            ${getCodeForFactoryDescriptor(matrixRow.name)}
-          </h3>
-          <div>${totalUnitsInCategory} units</div>
-        </div>
-        <div class="deck-category-heading-row">
-          <div>
-            ${groupedUnits.length} / ${matrixRow.activationCosts.length} slots
-          </div>
-          <div>
-            Next slot: ${matrixRow.activationCosts[groupedUnits.length]} points
-          </div>
-        </div>
-      </div>
-      <div class="deck-category-cards">${deckCards}</div>
-    </div>`;
-  }
-  */
 }
 
 declare global {

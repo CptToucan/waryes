@@ -19,7 +19,11 @@ export class PackArmouryCard extends LitElement {
   @property()
   pack?: Pack;
 
-  @property()
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    }
+  })
   deck?: Deck;
 
   @property()
@@ -64,9 +68,13 @@ export class PackArmouryCard extends LitElement {
   render(): TemplateResult {
 
     if(this.deck && this.pack) {
+
+      const disabled = this.deck.getAvailableQuantityOfPack(this.pack) > 0 ? false : true; 
+
+
       return html`
         <transport-selection .pack=${this.pack} .deck=${this.deck} @transport-selected=${(event: CustomEvent) => this.transportSelected(event.detail.transport)}></transport-selection>
-        <armoury-card .pack=${this.pack} .deck=${this.deck} @add-button-clicked=${(event: CustomEvent) => this.armouryCardSelected(event.detail.veterancy)}></armoury-card>`
+        <armoury-card .pack=${this.pack} .deck=${this.deck} @add-button-clicked=${(event: CustomEvent) => this.armouryCardSelected(event.detail.veterancy)} .disabled=${disabled}></armoury-card>`
     }
 
     return html`NO DECK SUPPLED OR NO PACK SUPPLIED`;

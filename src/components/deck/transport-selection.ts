@@ -42,6 +42,7 @@ export class TransportSelection extends LitElement {
 
       return html` <vaadin-dialog
         header-title="Select Transport"
+        @opened-changed=${(event: CustomEvent) => {if(event.detail.value === false) {this.closeTransportDialog()}}}
         ${dialogRenderer(
           () =>
             html`${this.availableTransports?.map(

@@ -8,7 +8,6 @@ import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 import {Pack} from '../../types/deck-builder';
 import {Deck} from '../../classes/deck';
 import {armouryCardStyles} from './armoury-card-styles';
-import { DeckController } from '../../controllers/deck-controller';
 
 export interface ArmouryCardOptions {
   unit: Unit;
@@ -27,13 +26,6 @@ export interface ArmouryCardVeterancyOptions {
 export class ArmouryCard extends LitElement {
   static styles: CSSResultGroup = [armouryCardStyles];
 
-  constructor() {
-    super();
-    this.DeckController = new DeckController(this);
-  }
-
-  DeckController?: DeckController;
-
   @state()
   selectedVeterancy?: number;
 
@@ -51,7 +43,11 @@ export class ArmouryCard extends LitElement {
   @property()
   pack?: Pack;
 
-  @property()
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    }
+  })
   deck?: Deck;
 
   veterancySelected(veterancy: number) {
@@ -61,10 +57,19 @@ export class ArmouryCard extends LitElement {
     );
   }
 
-  firstUpdated() {
-    if(this.deck !== undefined && this.pack && this.DeckController) {
-      this.DeckController.initialiseControllerAgainstDeck(this.deck, this.pack)
+  get activeVeterancy() {
+    if(this.deck && this.pack) {
+      const defaultVeterancy = this.deck.getDefaultVeterancyForPack(this.pack);
+      let activeVeterancy = defaultVeterancy;
+  
+      if (this.selectedVeterancy !== undefined) {
+        activeVeterancy = this.selectedVeterancy;
+      }
+
+      return activeVeterancy;
     }
+
+    return 0;
   }
 
   render(): TemplateResult {
@@ -81,25 +86,21 @@ export class ArmouryCard extends LitElement {
 
   protected renderDetailsForUnit(unit: Unit, pack: Pack, deck: Deck) {
     const veterancyQuantities = deck.getVeterancyQuantitiesForPack(pack);
-    const defaultVeterancy = deck.getDefaultVeterancyForPack(pack);
-    let activeVeterancy = defaultVeterancy;
+    
 
-    if (this.selectedVeterancy !== undefined) {
-      activeVeterancy = this.selectedVeterancy;
-    }
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
       <div class="body">
         <div class="top-section">
-          ${this.renderButton(activeVeterancy, unit, pack, deck)}
+          ${this.renderButton(this.activeVeterancy, unit, pack, deck)}
           ${this.renderCommandPoints(unit, pack, deck)}
           ${this.renderInfoIcon(unit, pack, deck)}
           ${this.renderUnitIcon(unit, pack, deck)}
-          ${this.renderQuantity(activeVeterancy, veterancyQuantities, unit)}
+          ${this.renderQuantity(this.activeVeterancy, veterancyQuantities, unit)}
         </div>
       </div>
       ${this.renderBottomSection(
-        activeVeterancy,
+        this.activeVeterancy,
         veterancyQuantities,
         unit,
         pack,
@@ -112,7 +113,7 @@ export class ArmouryCard extends LitElement {
     if (unit) {
       return html` <vaadin-button
         class="add-button"
-        ?disabled=${false}
+        ?disabled=${this.disabled}
         theme="icon medium secondary"
         aria-label="Add unit"
         style="padding: 0;"

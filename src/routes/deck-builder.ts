@@ -2,19 +2,21 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import '../components/deck/edit-deck';
 import '@vaadin/scroller';
-import { UnitsDatabaseService } from '../services/units-db';
-import { BeforeEnterObserver } from '@vaadin/router';
+import {UnitsDatabaseService} from '../services/units-db';
+import {BeforeEnterObserver} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
-
 
 // @ts-ignore
 import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
 import {Division} from '../types/deck-builder';
-import { UnitMap } from '../types/unit';
-import { Deck } from '../classes/deck';
+import {UnitMap} from '../types/unit';
+import {Deck} from '../classes/deck';
 
 @customElement('deck-builder-route')
-export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver {
+export class DeckBuilderRoute
+  extends LitElement
+  implements BeforeEnterObserver
+{
   static get styles() {
     return css`
       vaadin-button {
@@ -24,16 +26,12 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
     `;
   }
 
-
   unitMap?: UnitMap;
 
   constructor() {
-    super()
+    super();
     const divisionData: Division[] = DeckBuilderJson.divisions;
     this.availableDivisions = divisionData;
-    // this.selectedDivision = this.availableDivisions[12];
-    // console.log(divisionData);
-    // console.log(decodeDeckString("FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA=="))
   }
 
   /**
@@ -43,19 +41,16 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
     const units = await UnitsDatabaseService.fetchUnits();
     const unitMap: UnitMap = {};
 
-    if(units) {
-      for(const unit of units) {
-        unitMap[unit.descriptorName] = unit
+    if (units) {
+      for (const unit of units) {
+        unitMap[unit.descriptorName] = unit;
       }
     }
 
     this.unitMap = unitMap;
+
+    this.deckToEdit = new Deck(this.availableDivisions[3], this.unitMap);
   }
-
-
-
-
-
 
   /**
    * Available divisions for selections
@@ -65,23 +60,19 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
   @state()
   deckToEdit?: Deck;
 
-
-
   selectDivision(division: Division) {
-    if(this.unitMap) {
+    if (this.unitMap) {
       this.deckToEdit = new Deck(division, this.unitMap);
+    } else {
+      throw new Error('Unit Map not loaded');
     }
-    else {
-      throw new Error("Unit Map not loaded");
-    }
-
   }
 
   render(): TemplateResult {
-    if(this.deckToEdit) {
-      return this.renderDeckEditor(this.deckToEdit)
+    if (this.deckToEdit) {
+      return this.renderDeckEditor(this.deckToEdit);
     }
-    return this.renderDivisionSelection()
+    return this.renderDivisionSelection();
   }
 
   renderDeckEditor(deck: Deck): TemplateResult {
@@ -89,7 +80,6 @@ export class DeckBuilderRoute extends LitElement implements BeforeEnterObserver 
   }
 
   renderDivisionSelection(): TemplateResult {
-
     return html`<div>
       ${this.availableDivisions.map(
         (div) =>

@@ -4,6 +4,7 @@ import {Deck} from '../../classes/deck';
 import './armoury-view';
 import './deck-view';
 import 'side-drawer';
+import { DeckController } from '../../controllers/deck-controller';
 
 @customElement('edit-deck')
 export class EditDeck extends LitElement {
@@ -58,11 +59,6 @@ export class EditDeck extends LitElement {
         position: relative;
       }
 
-      .deck {
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
-      }
-
       .desktop {
         display: flex;
         flex-direction: row;
@@ -107,18 +103,35 @@ export class EditDeck extends LitElement {
       }
 
       @media only screen and (max-width: 700px) {
-        .desktop > .deck {
+        .desktop > deck-view {
           display: none;
         }
       }
     `;
   }
 
-  @property()
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    }
+  })
   deck?: Deck;
 
   @state()
   deckOpen = false;
+
+  constructor() {
+    super();
+    this.deckController = new DeckController(this);
+  }
+
+  deckController?: DeckController;
+
+  firstUpdated() {
+    if(this.deck !== undefined && this.deckController) {
+      this.deckController.initialiseControllerAgainstDeck(this.deck)
+    }
+  }
 
   render(): TemplateResult {
     return html`

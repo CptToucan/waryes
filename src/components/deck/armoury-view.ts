@@ -11,6 +11,10 @@ export class ArmouryView extends LitElement {
   static get styles() {
     return css`
 
+      h3 {
+        margin: 0;
+      }
+
       .armoury-category-cards {
         display: grid;
         padding: var(--lumo-space-s);
@@ -26,7 +30,11 @@ export class ArmouryView extends LitElement {
     `;
   }
 
-  @property()
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    }
+  })
   deck?: Deck;
 
   render(): TemplateResult {
