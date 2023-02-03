@@ -2,6 +2,13 @@ import {DeckController} from '../controllers/deck-controller';
 import {Division, Pack, UnitCategory} from '../types/deck-builder';
 import {Unit, UnitMap} from '../types/unit';
 import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../utils/convert-unit-factory-descriptor-to-category-descriptor';
+import { Deck as DeckBuilder, /* decodeDeckString ,*/ encodeDeck } from '@izohek/warno-deck-utils';
+
+export interface DeckConstructorOptions  {
+  division: Division,
+  unitMap: UnitMap,
+  deckString?: string
+}
 
 export type DeckUnit = {
   veterancy: number;
@@ -33,9 +40,9 @@ export interface PackMap {
 }
 
 export class Deck {
-  constructor(division: Division, unitMap: UnitMap) {
-    this.division = division;
-    this.unitMap = unitMap;
+  constructor(options: DeckConstructorOptions) {
+    this.division = options.division;
+    this.unitMap = options.unitMap;
 
     this._groupedAvailableUnits = this._groupAvailableUnits(
       this.division
@@ -65,6 +72,12 @@ export class Deck {
     }
 
     this.slotCosts = slotCosts;
+
+    if(options.deckString) {
+      // const _deck: DeckBuilder = decodeDeckString(options.deckString);
+      // TODO: For Izohek to convert in to a good way of setting properties
+    }
+    
   }
 
   division: Division;
@@ -331,6 +344,27 @@ export class Deck {
     return convertUnitFactoryDescriptorToCategoryDescriptor(
       this.getUnitForPack(pack)?.factoryDescriptor || ''
     );
+  }
+
+  public toDeckCode() {
+    const deckBuilder = new DeckBuilder();
+
+    for(const deckUnit of this.units) {
+      const unit = this.getUnitForPack(deckUnit.pack);
+      if(unit) {
+        deckBuilder.addUnitWithId(unit.descriptorName, deckUnit.veterancy, deckUnit.transport?.descriptorName);
+      }
+      
+    }
+
+    const deckString = encodeDeck(deckBuilder);
+    return deckString;
+  }
+
+  public fromDeckCode(_deckString: string) {
+    // const deckBuilder = decodeDeckString(deckString);
+
+    // TODO: for Izohek to import back in to deck structure
   }
 
   register(host: DeckController) {

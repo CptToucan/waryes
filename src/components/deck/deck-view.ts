@@ -55,7 +55,7 @@ export class DeckView extends LitElement {
   render(): TemplateResult {
     if (this.deck) {
       return html` <div class="deck">
-        <h3 class="deck-title">Deck Name</h3>
+        <div><h3 class="deck-title">Deck Name</h3></div>
         ${this.renderDeck(this.deck)}
       </div>`;
     } else {
