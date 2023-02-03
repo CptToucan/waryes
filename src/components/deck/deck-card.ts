@@ -1,79 +1,79 @@
-/*
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
-import '@vaadin/icon';
-import {SelectedPackConfig} from './edit-deck';
+import {css, LitElement, TemplateResult, html} from 'lit';
+import {customElement, property, query} from 'lit/decorators.js';
+import {Deck, DeckUnit} from '../../classes/deck';
 import './armoury-with-transport-card';
-import {ArmouryCardOptions} from './armoury-with-transport-card';
-import { UnitMap } from '../../types/unit';
-*/
+import {TransportSelection} from './transport-selection';
+import './transport-selection';
+import {Unit} from '../../types/unit';
 
-/**
- * Card that shows in the side drawer for the created deck.
- */
-/*
 @customElement('deck-card')
 export class DeckCard extends LitElement {
   static get styles() {
     return css``;
   }
 
-  @property()
-  unitMap?: UnitMap;
+  @property({
+    hasChanged(_value: Deck, _oldValue: Deck) {
+      return true;
+    },
+  })
+  deck?: Deck;
+  deckUnit?: DeckUnit;
 
-  @property()
-  packConfig?: SelectedPackConfig;
+  @query('transport-selection')
+  transportDialog!: TransportSelection;
+
+  openTransportDialog() {
+    this.transportDialog.showTransportDialog();
+  }
+
+  closeTransportDialog() {
+    this.transportDialog.closeTransportDialog();
+  }
+
+  transportSelected(_transport: Unit) {
+    if(this.deckUnit) {
+      this.deckUnit.transport = _transport;
+      this.transportDialog.closeTransportDialog();
+      this.requestUpdate();
+    }
+  }
+
+  veterancyChanged(veterancy: number) {
+    if(this.deckUnit) {
+      this.deckUnit.veterancy = veterancy;
+      this.requestUpdate();
+    }
+  }
+
+  unitRemoved() {
+    if(this.deck && this.deckUnit) {
+      this.deck.removeUnit(this.deckUnit);
+      this.requestUpdate();
+    }
+  }
 
   render(): TemplateResult {
-    if (this.packConfig) {
-      const options: ArmouryCardOptions = {
-        unit: this.packConfig.unit,
-        transport: this.packConfig.transport,
-        veterancyOptions: {
-          unitQuantityMultipliers:
-            this.packConfig.pack.numberOfUnitInPackXPMultiplier,
-          defaultUnitQuantity: this.packConfig.pack.numberOfUnitsInPack,
-        },
-      };
-
-      return html`<armoury-with-transport-card
-        .options=${options}
-        @veterancy-changed=${(event: CustomEvent) => {this.packConfig!.veterancy = event.detail.veterancy; this.requestUpdate()}}
-        @transport-changed=${(event: CustomEvent) => {this.packConfig!.transport = event.detail.transport; this.requestUpdate()}}
-        @unit-removed=${() =>
-          this.dispatchEvent(
-            new CustomEvent('pack-config-removed', {
-              detail: {packConfig: this.packConfig},
-            })
-          )}
-         .availableTransports=${this.availableTransportsArmouryCardOptions}
+    return html` <transport-selection
+        .pack=${this.deckUnit?.pack}
+        .deck=${this.deck}
+        @transport-selected=${(event: CustomEvent) =>
+          this.transportSelected(event.detail.transport)}
+      ></transport-selection>
+      <armoury-with-transport-card
+        .deck=${this.deck}
+        .pack=${this.deckUnit?.pack}
+        .transport=${this.deckUnit?.transport}
+        .selectedVeterancy=${this.deckUnit?.veterancy}
+        @transport-change-clicked=${() => this.openTransportDialog()}
+        @veterancy-changed=${(event: CustomEvent) => this.veterancyChanged(event.detail.veterancy)}
+        @unit-removed=${() => this.unitRemoved()}
       ></armoury-with-transport-card>`;
-    }
-
-    return html`ERROR`;
-  }
-  
-  get availableTransportsArmouryCardOptions(): ArmouryCardOptions[] {
-    if (this.packConfig && this.packConfig.pack && this.packConfig.pack.availableTransportList?.length > 0) {
-      const transportsOptions: ArmouryCardOptions[] =
-        this.packConfig.pack.availableTransportList.map((transportDescriptor) => {
-          return {unit: this.unitMap?.[transportDescriptor]};
-        }) as ArmouryCardOptions[];
-
-      return transportsOptions;
-    }
-
-    return [];
   }
 }
-
-
-
 
 declare global {
   interface HTMLElementTagNameMap {
     'deck-card': DeckCard;
   }
 }
-
-*/

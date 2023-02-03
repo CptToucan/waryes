@@ -9,21 +9,6 @@ export type DeckUnit = {
   pack: Pack;
 };
 
-
-
-function parseDescriptorName(descriptor: string): string {
-  const splitDescriptor = descriptor.split('/');
-  return splitDescriptor[splitDescriptor.length - 1];
-}
-
-/*
-function findDefaultVeterancy(unitVeterancyQuantityMultipliers: number[]) {
-  return unitVeterancyQuantityMultipliers.findIndex(
-    (multiplier) => multiplier === 1
-  );
-}
-*/
-
 export type GroupedPacks = {
   [key in UnitCategory]: Pack[];
 };
@@ -47,22 +32,13 @@ export interface PackMap {
   [key: string]: Pack;
 }
 
-export interface DeckPackControllerMap {
-  [key: string]: DeckController[];
-}
-
-export type DeckCategoryControllerMap = {
-  [key in UnitCategory]: DeckController[];
-};
-
 export class Deck {
   constructor(division: Division, unitMap: UnitMap) {
     this.division = division;
     this.unitMap = unitMap;
 
     this._groupedAvailableUnits = this._groupAvailableUnits(
-      this.division,
-      this.unitMap
+      this.division
     );
 
     const packMap: PackMap = {};
@@ -96,15 +72,7 @@ export class Deck {
   packMap: PackMap;
   slotCosts: SlotCosts;
 
-  hostComponentsForPacks: DeckPackControllerMap = {};
-  hostComponentsForCategories: DeckCategoryControllerMap = {    [UnitCategory.LOG]: [],
-    [UnitCategory.REC]: [],
-    [UnitCategory.INF]: [],
-    [UnitCategory.TNK]: [],
-    [UnitCategory.ART]: [],
-    [UnitCategory.AA]: [],
-    [UnitCategory.HEL]: [],
-    [UnitCategory.AIR]: [],};
+  deckController?: DeckController;
 
   private _units: DeckUnit[] = [];
 
@@ -193,8 +161,7 @@ export class Deck {
   }
 
   private _groupAvailableUnits(
-    division: Division,
-    unitMap: UnitMap
+    division: Division
   ): GroupedPacks {
     const groupedPacks: GroupedPacks = {
       [UnitCategory.LOG]: [],
@@ -208,40 +175,51 @@ export class Deck {
     };
 
     for (const pack of division.packs) {
-      const unitDescriptor = parseDescriptorName(pack.unitDescriptor);
-      const unit = unitMap[unitDescriptor];
+      const categoryDescriptor = this.getCategoryForPack(pack);
 
-      if (unit?.factoryDescriptor) {
-        const categoryDescriptor =
-          convertUnitFactoryDescriptorToCategoryDescriptor(
-            unit.factoryDescriptor
-          );
-
-        if (categoryDescriptor !== undefined) {
-          groupedPacks[categoryDescriptor].push(pack);
-        }
+      if (categoryDescriptor !== undefined) {
+        groupedPacks[categoryDescriptor].push(pack);
       }
     }
     return groupedPacks;
   }
 
   public addUnit(deckUnit: DeckUnit) {
-    this.units = [...this._units, deckUnit];
-    this.triggerRendersForPack(deckUnit.pack);
+   
 
-    const unit = this.getUnitForPack(deckUnit.pack);
-    if(unit) {
-      const category = convertUnitFactoryDescriptorToCategoryDescriptor(unit.descriptorName);
-      if(category) {
-        this.triggerRendersForCategory(category);
+   const availableQuantityOfPack = this.getAvailableQuantityOfPack(deckUnit.pack);
+
+   if(availableQuantityOfPack === 0) {
+    return;
+   }
+
+    const unitCategory = this.getCategoryForPack(deckUnit.pack);
+
+    if (unitCategory) {
+      const nextSlotCost = this.getNextSlotCostForCategory(unitCategory);
+
+
+      if(nextSlotCost === undefined) {
+        return
       }
+
+      const nextTotalCost = this.usedActivationPoints + nextSlotCost; 
+
+      if(nextTotalCost > this.division.maxActivationPoints) {
+        return
+      }
+
+      this.units = [...this._units, deckUnit];
+      this.deckChanged();
+      
+
     }
   }
 
   public removeUnit(unit: DeckUnit) {
     const deckWithoutUnit = this.units.filter((_unit) => unit !== _unit);
     this.units = [...deckWithoutUnit];
-    this.triggerRendersForPack(unit.pack);
+    this.deckChanged();
   }
 
   public get unitCategories(): UnitCategory[] {
@@ -306,7 +284,7 @@ export class Deck {
     return remainingCards;
   }
 
-  public getNextSlotCostForCategory(category: UnitCategory): number {
+  public getNextSlotCostForCategory(category: UnitCategory): number | undefined {
     const unitsInDeckCategory =
       this.unitsInDeckGroupedUnitsByCategory[category];
     const numberOfUnitsInCategory = unitsInDeckCategory.length;
@@ -333,59 +311,37 @@ export class Deck {
     return unitCount;
   }
 
-  register(host: DeckController, packOrCategory: Pack | UnitCategory) {
-    if (isPack(packOrCategory)) {
-      const packId = packOrCategory.packDescriptor;
-      if (this.hostComponentsForPacks[packId] === undefined) {
-        this.hostComponentsForPacks[packId] = [];
-      }
-      this.hostComponentsForPacks[packId].push(host);
-    } else if (isUnitCategory(packOrCategory)) {
-      this.hostComponentsForCategories[packOrCategory].push(host);
+  public get usedActivationPoints() {
+    let totalPoints = 0;
+    for(const category  in this.unitsInDeckGroupedUnitsByCategory) {
+      const categoryEnum: UnitCategory = category as UnitCategory;
+      const slotsCostsForCategory = this.slotCosts[categoryEnum];
+      const unitsInDeckCategory = this.unitsInDeckGroupedUnitsByCategory[categoryEnum];
+      const numberOfUnitsInDeckCategory = unitsInDeckCategory.length;
+
+      const occupiedSlotCosts = slotsCostsForCategory.slice(0, numberOfUnitsInDeckCategory);
+      const slotPointsOccupied = occupiedSlotCosts.reduce((partialSum, a) => partialSum + a, 0);
+      totalPoints += slotPointsOccupied;
     }
+
+    return totalPoints;
   }
 
-  unregister(host: DeckController, packOrCategory: Pack | UnitCategory) {
-    if (isPack(packOrCategory)) {
-      const packId = packOrCategory.packDescriptor;
-      if (this.hostComponentsForPacks[packId]) {
-        this.hostComponentsForPacks[packId] = this.hostComponentsForPacks[
-          packId
-        ].filter((_host) => _host !== host);
-      }
-    } else if (isUnitCategory(packOrCategory)) {
-      this.hostComponentsForCategories[packOrCategory] =
-        this.hostComponentsForCategories[packOrCategory].filter(
-          (_host) => _host !== host
-        );
-    }
+  public getCategoryForPack(pack: Pack) {
+    return convertUnitFactoryDescriptorToCategoryDescriptor(
+      this.getUnitForPack(pack)?.factoryDescriptor || ''
+    );
   }
 
-  triggerRendersForPack(pack: Pack) {
-    const hostComponentsForPack =
-      this.hostComponentsForPacks[pack.packDescriptor];
-    for (const controller of hostComponentsForPack) {
-      controller.triggerRender();
-    }
+  register(host: DeckController) {
+    this.deckController = host;
   }
 
-  triggerRendersForCategory(category: UnitCategory) {
-    const hostComponentsForCategory =
-      this.hostComponentsForCategories[category];
+  unregister(_host: DeckController) {
+    this.deckController = undefined;
+  }
 
-    for (const controller of hostComponentsForCategory) {
-      controller.triggerRender();
-    }
+  deckChanged() {
+    this.deckController?.triggerRender();
   }
 }
-
-function isPack(object: unknown): object is Pack {
-  return (object as Pack)?.packDescriptor !== undefined;
-}
-
-const isSomeEnum =
-  <T>(e: T) =>
-  (token: unknown): token is T[keyof T] =>
-    Object.values(e as never).includes(token as T[keyof T]);
-
-const isUnitCategory = isSomeEnum(UnitCategory);

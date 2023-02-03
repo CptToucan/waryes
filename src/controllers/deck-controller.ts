@@ -1,6 +1,5 @@
 import { ReactiveController, ReactiveControllerHost } from 'lit';
 import { Deck } from '../classes/deck';
-import { Pack, UnitCategory } from '../types/deck-builder';
 
 
 /**
@@ -10,22 +9,19 @@ class DeckController implements ReactiveController {
 
   host: ReactiveControllerHost;
   deck?: Deck;
-  
-  linkedProperty?: (Pack | UnitCategory);
+ 
 
   constructor(host: ReactiveControllerHost) {
    (this.host = host).addController(this);
   }
 
-  initialiseControllerAgainstDeck(deck: Deck, linkedProperty: (Pack | UnitCategory)) {
+  initialiseControllerAgainstDeck(deck: Deck) {
     this.deck = deck;
-    this.deck?.register(this, linkedProperty);
+    this.deck?.register(this);
   }
 
   hostDisconnected() {
-    if(this.linkedProperty) {
-      this.deck?.unregister(this, this.linkedProperty as (Pack | UnitCategory));
-    }
+    this.deck?.unregister(this);
   }
 
   triggerRender() {
