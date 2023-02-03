@@ -49,7 +49,7 @@ export class DeckBuilderRoute
 
     this.unitMap = unitMap;
 
-    this.deckToEdit = new Deck(this.availableDivisions[3], this.unitMap);
+    this.deckToEdit = new Deck({division: this.availableDivisions[3], unitMap: this.unitMap});
   }
 
   /**
@@ -62,7 +62,7 @@ export class DeckBuilderRoute
 
   selectDivision(division: Division) {
     if (this.unitMap) {
-      this.deckToEdit = new Deck(division, this.unitMap);
+      this.deckToEdit = new Deck({division, unitMap: this.unitMap});
     } else {
       throw new Error('Unit Map not loaded');
     }
