@@ -8,9 +8,10 @@ import {BeforeEnterObserver} from '@vaadin/router';
 
 // @ts-ignore
 import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
-import {Division} from '../types/deck-builder';
+import {Division, DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
+import { DivisionsDatabaseService } from '../services/divisions-db';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -27,17 +28,32 @@ export class DeckBuilderRoute
   }
 
   unitMap?: UnitMap;
+  divisionsMap?: DivisionsMap;
 
   constructor() {
-    super();
-    const divisionData: Division[] = DeckBuilderJson.divisions;
-    this.availableDivisions = divisionData;
+    super()
+    // console.log(divisionData);
+    // console.log(decodeDeckString("FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA=="))
   }
 
   /**
    * Converts unit array in to a map to be used by the edit-deck component
    */
   async onBeforeEnter() {
+    this.unitMap = await this.fetchUnitMap();
+
+    const [units, divisions] = await Promise.all([
+      this.fetchUnitMap(),
+      this.fetchDivisionMap()
+    ])
+
+    this.unitMap = units
+    this.divisionsMap = divisions
+
+    this.availableDivisions = Object.values(this.divisionsMap);
+  }
+
+  async fetchUnitMap() {
     const units = await UnitsDatabaseService.fetchUnits();
     const unitMap: UnitMap = {};
 
@@ -47,15 +63,34 @@ export class DeckBuilderRoute
       }
     }
 
-    this.unitMap = unitMap;
-
-    this.deckToEdit = new Deck({division: this.availableDivisions[3], unitMap: this.unitMap});
+    return unitMap;
   }
+
+  async fetchDivisionMap() {
+    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisionMap: DivisionsMap = {};
+
+    if (divisions) {
+      for (const division of divisions) {
+        divisionMap[division.descriptor] = division
+      }
+    }
+
+    return divisionMap;
+  }
+
+
+  /**
+   * Currently selected division
+   */
+  @state()
+  selectedDivision?: Division ;
+
 
   /**
    * Available divisions for selections
    */
-  availableDivisions: Division[];
+  availableDivisions: Division[] = []
 
   @state()
   deckToEdit?: Deck;
