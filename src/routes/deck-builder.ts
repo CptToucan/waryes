@@ -51,6 +51,17 @@ export class DeckBuilderRoute
     this.divisionsMap = divisions
 
     this.availableDivisions = Object.values(this.divisionsMap);
+
+    // TODO: this is hard coded for testing, remove to show division list to start a new deck instead
+    let deckString = "FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA==";
+    let deckFromString = Deck.fromDeckCode(deckString, {
+      unitMap: units,
+      divisions: this.availableDivisions
+    });
+
+    this.selectedDivision = deckFromString.division
+    this.deckToEdit = deckFromString
+    // end-todo
   }
 
   async fetchUnitMap() {

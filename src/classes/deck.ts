@@ -2,12 +2,16 @@ import {DeckController} from '../controllers/deck-controller';
 import {Division, Pack, UnitCategory} from '../types/deck-builder';
 import {Unit, UnitMap} from '../types/unit';
 import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../utils/convert-unit-factory-descriptor-to-category-descriptor';
-import { Deck as DeckBuilder, /* decodeDeckString ,*/ encodeDeck } from '@izohek/warno-deck-utils';
+import { Deck as DeckBuilder, decodeDeckString, encodeDeck } from '@izohek/warno-deck-utils';
 
 export interface DeckConstructorOptions  {
   division: Division,
+  unitMap: UnitMap
+}
+
+export interface DeckStringOptions {
   unitMap: UnitMap,
-  deckString?: string
+  divisions: Division[]
 }
 
 export type DeckUnit = {
@@ -72,12 +76,6 @@ export class Deck {
     }
 
     this.slotCosts = slotCosts;
-
-    if(options.deckString) {
-      // const _deck: DeckBuilder = decodeDeckString(options.deckString);
-      // TODO: For Izohek to convert in to a good way of setting properties
-    }
-    
   }
 
   division: Division;
@@ -361,10 +359,65 @@ export class Deck {
     return deckString;
   }
 
-  public fromDeckCode(_deckString: string) {
-    // const deckBuilder = decodeDeckString(deckString);
+  /**
+   * Create a new Deck object from a deck code
+   * 
+   * @param _deckString 
+   * @param options 
+   * @returns 
+   */
+  public static fromDeckCode(_deckString: string, options: DeckStringOptions) {
+    const deckStringDeck = decodeDeckString(_deckString);
 
-    // TODO: for Izohek to import back in to deck structure
+    const decodedDivision = options.divisions?.find( (d) => {
+      return d.descriptor == deckStringDeck.division?.descriptor;
+    })
+
+    // We must have a division to continue
+    if (!decodedDivision) {
+      throw new Error("Deck division not set")
+    }
+
+    const builtDeck = new Deck({
+      unitMap: options.unitMap,
+      division: decodedDivision
+    });
+
+    // Convert decoded cards into this objects internal structure
+    for (const card of deckStringDeck.cards) {
+      if (!card.descriptor) {
+        throw new Error("Decoded invalid unit card descriptor");
+      }
+      const pack = builtDeck.division.packs.find((divisionPack) => {
+        return divisionPack.unitDescriptor === card.descriptor;
+      })
+
+      // NOTE: we currently bail hard if we can't find a unit with the thinking
+      // that we would rather error out than have an incomplete deck that does not
+      // represent the deck code.
+      if (!pack) {
+        throw new Error("Decoded pack could not find pack for: " + card.descriptor)
+      }
+
+      const transport = pack.availableTransportList?.find((transport) => {
+        return card.transport?.descriptor?.toLowerCase() === transport.toLowerCase()
+      })
+
+      const transportUnit = transport ? options.unitMap[transport] : undefined
+
+      // If we have transports then availableWithoutTransport must be set to skip adding a transport
+      if (pack.availableTransportList && pack.availableWithoutTransport && !transportUnit) {
+        throw new Error("Decoded pack unit must have transport")
+      }
+
+      builtDeck.addUnit({
+        pack: pack,
+        transport: transportUnit,
+        veterancy: card.veterancy
+      })
+    }
+    
+    return builtDeck;
   }
 
   register(host: DeckController) {
