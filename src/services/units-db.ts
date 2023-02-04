@@ -35,7 +35,7 @@ class UnitsDatabaseServiceClass {
      * @param strategy 
      * @returns 
      */
-    public async fetchUnits(strategy: UnitFetchStrategy = UnitFetchStrategy.local) {
+    public async fetchUnits(strategy: UnitFetchStrategy = UnitFetchStrategy.cache) {
         switch (strategy) {
 
             case UnitFetchStrategy.local:
