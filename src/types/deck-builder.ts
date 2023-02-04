@@ -40,5 +40,8 @@ interface Division {
   costMatrix: CostMatrix
   packs: Pack[]
 }
+interface DivisionsMap {
+  [key: string]: Division
+}
 
-export { Division, Pack, MatrixRow, CostMatrix, UnitCategory}
+export { Division, DivisionsMap, Pack, MatrixRow, CostMatrix, UnitCategory}

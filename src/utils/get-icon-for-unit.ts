@@ -25,7 +25,7 @@ const iconMap: IconMap = {
 export function getIconForUnit(unit: Unit) {
   let icon: string;
 
-  if (iconMap[unit.specialities[0]] !== undefined) {
+  if (unit.specialities && iconMap[unit.specialities[0]] !== undefined) {
     icon = iconMap[unit.specialities[0]];
   } else if (unit.category === 'air') {
     icon = 'jet';
