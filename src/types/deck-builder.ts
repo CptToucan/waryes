@@ -10,6 +10,15 @@ enum UnitCategory {
   AIR = 'EDefaultFactories/air',
 }
 
+enum Country {
+  FR = "FR",
+  UK = "UK",
+  RFA = "RFA",
+  US = "US",
+  SOV = "SOV",
+  DDR = "DDR"
+}
+
 interface CostMatrix {
   name: string
   matrix: MatrixRow[]
@@ -34,7 +43,7 @@ interface Division {
   descriptor: string
   alliance: string
   availableForPlay: boolean
-  country: string
+  country: Country
   tags: string[]
   maxActivationPoints: number
   costMatrix: CostMatrix
@@ -44,4 +53,4 @@ interface DivisionsMap {
   [key: string]: Division
 }
 
-export { Division, DivisionsMap, Pack, MatrixRow, CostMatrix, UnitCategory}
+export { Division, DivisionsMap, Pack, MatrixRow, CostMatrix, UnitCategory, Country}

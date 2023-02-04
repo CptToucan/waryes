@@ -35,7 +35,7 @@ class DivisionDatabaseServiceClass {
      * @param strategy 
      * @returns 
      */
-    public async fetchDivisions(strategy: DivisionsFetchStrategy = DivisionsFetchStrategy.local) {
+    public async fetchDivisions(strategy: DivisionsFetchStrategy = DivisionsFetchStrategy.cache) {
         switch (strategy) {
             case DivisionsFetchStrategy.local:
                 return await DeckBuilderJson.divisions as Division[]
