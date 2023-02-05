@@ -57,6 +57,11 @@ const defaultMenu: MenuDefinition = {
       href: '/deck-builder'
     },
     {
+      name: 'Import Deck',
+      icon: 'vaadin:code',
+      href: '/deck-import'
+    },
+    {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H'
@@ -82,6 +87,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Deck Builder',
       icon: 'vaadin:tools',
       href: '/deck-builder'
+    },
+    {
+      name: 'Import Deck',
+      icon: 'vaadin:code',
+      href: '/deck-import'
     },
     {
       name: 'Discord',

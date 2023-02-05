@@ -18,6 +18,7 @@ import "./routes/units";
 import "./routes/unit-view";
 import "./routes/comparison"
 import "./routes/deck-builder"
+import "./routes/deck-import";
 
 /** Components */
 import "./components/unit-card";
