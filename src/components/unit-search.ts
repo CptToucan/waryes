@@ -16,9 +16,10 @@ export class UnitSearch extends LitElement {
 
       vaadin-combo-box,
       vaadin-multi-select-combo-box {
-        font-size: var(--lumo-font-size-l);
+        font-size: var(--lumo-font-size-xl);
         flex: 1 1 0;
         width: 100%;
+        height: var(--lumo-size-xl);
       }
     `;
   }
@@ -92,5 +93,11 @@ export class UnitSearch extends LitElement {
             @selected-item-changed=${this.comboBoxUnitSelected}
           ></vaadin-combo-box>`}
     `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'unit-search': UnitSearch;
   }
 }

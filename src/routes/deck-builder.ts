@@ -3,7 +3,7 @@ import {customElement, state} from 'lit/decorators.js';
 import '../components/deck/edit-deck';
 import '@vaadin/scroller';
 import {UnitsDatabaseService} from '../services/units-db';
-import {BeforeEnterObserver} from '@vaadin/router';
+import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
 
 // @ts-ignore
@@ -13,6 +13,7 @@ import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
 import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
+import '@vaadin/text-area';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -25,33 +26,81 @@ export class DeckBuilderRoute
         margin: 0;
       }
 
-      vaadin-button {
-        margin-left: var(--lumo-space-s);
-        margin-right: var(--lumo-space-s);
-      }
-
       button {
         all: unset;
         cursor: pointer;
       }
 
+      :host {
+        height: 100%;
+        display: flex;
+      }
+
+      .container {
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
+        display: flex;
+        overflow-x: hidden;
+        width: 100%;
+      }
+
+      .full-screen-buttons {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 100%;
+        align-items: stretch;
+        padding: var(--lumo-space-s);
+      }
+
       .division-selection {
         display: flex;
         flex-direction: column;
+        width: 100%;
       }
 
-      button.division-selector {
+      button.choice-button {
         border-radius: var(--lumo-border-radius-m);
         padding: var(--lumo-space-m);
         background-color: var(--lumo-contrast-5pct);
         margin-bottom: var(--lumo-space-s);
         display: flex;
         align-items: center;
+        justify-content: center;
+        flex-direction: column;
         color: var(--lumo-contrast-80pct);
+        border: 2px solid transparent;
+        flex: 1 1 0;
+        font-size: var(--lumo-font-size-xxl);
       }
 
-      button.division-selector:hover {
+
+      button.division-selector {
+        border-radius: var(--lumo-border-radius-m);
+        padding: var(--lumo-space-l);
+        background-color: var(--lumo-contrast-5pct);
+        margin-bottom: var(--lumo-space-s);
+        display: flex;
+        align-items: center;
+        color: var(--lumo-contrast-80pct);
+        border: 2px solid transparent;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
+        
+      }
+
+      button.division-selector span {
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
+      }
+
+      button:hover {
         background-color: var(--lumo-contrast-10pct);
+      }
+
+      button:focus {
+        border: 2px solid var(--lumo-primary-color-50pct);
       }
 
       .button-content {
@@ -78,16 +127,25 @@ export class DeckBuilderRoute
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
 
-  constructor() {
-    super();
-    // console.log(divisionData);
-    // console.log(decodeDeckString("FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA=="))
-  }
+  /**
+   * Currently selected division
+   */
+  @state()
+  selectedDivision?: Division;
+
+  /**
+   * Available divisions for selections
+   */
+  availableDivisions: Division[] = [];
+
+  @state()
+  deckToEdit?: Deck;
+
 
   /**
    * Converts unit array in to a map to be used by the edit-deck component
    */
-  async onBeforeEnter() {
+  async onBeforeEnter(location: RouterLocation) {
     this.unitMap = await this.fetchUnitMap();
 
     const [units, divisions] = await Promise.all([
@@ -102,20 +160,21 @@ export class DeckBuilderRoute
       alphabeticalCompare
     );
 
-    console.log(this.availableDivisions);
 
-    // TODO: this is hard coded for testing, remove to show division list to start a new deck instead
-    // let deckString = "FBF8aMS0fYAEfYANEgAGMQAKL4AKO0RFkBBsq5BkeIAEgoAKNQ/WNRBkq0Vkq0VktZ82NsRKU0RKT4AKKsVFtYAGLwAGOsVFOwAMfgAGI0RErERGPIAGPgAGMoAGPQAFrx80gcREgcRKT4AGNEVAgA==";
-    /*
-    let deckFromString = Deck.fromDeckCode(deckString, {
-      unitMap: units,
-      divisions: this.availableDivisions
-    });
+    const params = new URLSearchParams(location.search);
+    let deckCode = params.get("code");
 
-    this.selectedDivision = deckFromString.division
-    this.deckToEdit = deckFromString
-    */
-    // end-todo
+    if(deckCode) {
+      deckCode = decodeURIComponent(deckCode);
+      const deckFromString = Deck.fromDeckCode(deckCode, {
+        unitMap: units,
+        divisions: this.availableDivisions
+      });
+
+      this.selectedDivision = deckFromString.division;
+      this.deckToEdit = deckFromString;
+  
+    }
   }
 
   async fetchUnitMap() {
@@ -144,19 +203,9 @@ export class DeckBuilderRoute
     return divisionMap;
   }
 
-  /**
-   * Currently selected division
-   */
-  @state()
-  selectedDivision?: Division;
-
-  /**
-   * Available divisions for selections
-   */
-  availableDivisions: Division[] = [];
-
-  @state()
-  deckToEdit?: Deck;
+  clearDeckParameters() {
+    Router.go("/deck-builder")
+  }
 
   selectDivision(division: Division) {
     if (this.unitMap) {
@@ -170,33 +219,29 @@ export class DeckBuilderRoute
     if (this.deckToEdit) {
       return this.renderDeckEditor(this.deckToEdit);
     }
+
     return this.renderDivisionSelection();
   }
 
+
   renderDeckEditor(deck: Deck): TemplateResult {
-    return html`<edit-deck .deck=${deck}></edit-deck>`;
+    return html`<edit-deck @deck-cleared=${this.clearDeckParameters} .deck=${deck}></edit-deck>`;
   }
 
   renderDivisionSelection(): TemplateResult {
-    return html`<div class="division-selection">
-      <h3>Import a deck</h3>
-      <vaadin-text-field
-        label="Deck Code"
-        clear-button-visible
-      >
-        <vaadin-icon slot="prefix" icon="vaadin:code"></vaadin-icon>
-      </vaadin-text-field>
-      <h3>Select a deck to edit</h3>
-      ${this.availableDivisions.map((div) => {
-        console.log(div);
-        return html`<button
-          class="division-selector"
-          @click=${() => this.selectDivision(div)}
-        >
-          <country-flag .country=${div.country}></country-flag>
-          <span>${div.descriptor}</span>
-        </button>`;
-      })}
+    return html`<div class="container">
+      <div class="division-selection">
+        <h3>Select a deck to edit</h3>
+        ${this.availableDivisions.map((div) => {
+          return html`<button
+            class="division-selector"
+            @click=${() => this.selectDivision(div)}
+          >
+            <country-flag .country=${div.country}></country-flag>
+            <span>${div.descriptor}</span>
+          </button>`;
+        })}
+      </div>
     </div>`;
   }
 }
@@ -209,4 +254,11 @@ function alphabeticalCompare(a: Division, b: Division) {
     return 1;
   }
   return 0;
+}
+
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'deck-builder-route': DeckBuilderRoute;
+  }
 }

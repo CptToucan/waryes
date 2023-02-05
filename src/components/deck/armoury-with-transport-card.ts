@@ -37,6 +37,10 @@ export class ArmouryWithTransportCard extends ArmouryCard {
         justify-content: space-between;
       }
 
+      .details-row > span {
+        font-size: var(--lumo-font-size-s)
+      }
+
       .top-section {
         height: 48px;
       }

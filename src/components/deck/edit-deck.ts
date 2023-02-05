@@ -1,10 +1,11 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import {Deck} from '../../classes/deck';
 import './armoury-view';
 import './deck-view';
 import 'side-drawer';
-import { DeckController } from '../../controllers/deck-controller';
+import {DeckController} from '../../controllers/deck-controller';
+import {SideDrawer} from 'side-drawer';
 
 @customElement('edit-deck')
 export class EditDeck extends LitElement {
@@ -16,13 +17,9 @@ export class EditDeck extends LitElement {
         padding: var(--lumo-space-s);
       }
 
-
-
       h3 {
         margin: 0;
       }
-
-
 
       .deck-category-heading-title {
         color: var(--lumo-primary-color-50pct);
@@ -113,12 +110,29 @@ export class EditDeck extends LitElement {
   @property({
     hasChanged(_value: Deck, _oldValue: Deck) {
       return true;
-    }
+    },
   })
   deck?: Deck;
 
   @state()
   deckOpen = false;
+
+  @query('side-drawer')
+  drawer!: SideDrawer;
+
+  openDeck() {
+    this.deckOpen = true;
+    // this.drawer.setAttribute("open", "");
+    this.drawer.open = true;
+  }
+
+  closeDeck() {
+    // this.drawer.removeAttribute("open");
+    this.deckOpen = false;
+
+    //
+    this.drawer.open = false;
+  }
 
   constructor() {
     super();
@@ -128,8 +142,8 @@ export class EditDeck extends LitElement {
   deckController?: DeckController;
 
   firstUpdated() {
-    if(this.deck !== undefined && this.deckController) {
-      this.deckController.initialiseControllerAgainstDeck(this.deck)
+    if (this.deck !== undefined && this.deckController) {
+      this.deckController.initialiseControllerAgainstDeck(this.deck);
     }
   }
 
@@ -137,20 +151,18 @@ export class EditDeck extends LitElement {
     return html`
       <div class="container">
         <side-drawer
-          .open=${this.deckOpen}
-          @close=${() => (this.deckOpen = false)}
-          @open=${() => (this.deckOpen = true)}
+          @open=${() => this.openDeck()}
+          @close=${() => this.closeDeck()}
+          ?open=${this.deckOpen}
         >
-          <deck-view .deck=${this.deck}></deck-view>
+          <deck-view .deck=${this.deck} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
         </side-drawer>
         <div class="desktop">
-          <deck-view .deck=${this.deck}></deck-view>
+          <deck-view .deck=${this.deck} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
 
           <div class="cards">
             <div class="button-drawer">
-              <vaadin-button
-                @click=${() => (this.deckOpen = !this.deckOpen)}
-                theme="large"
+              <vaadin-button @click=${() => this.openDeck()} theme="large"
                 >Deck</vaadin-button
               >
               <vaadin-button
@@ -169,3 +181,14 @@ export class EditDeck extends LitElement {
     `;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'edit-deck': EditDeck;
+  }
+}
+
+/**
+           @close=${() => (this.deckOpen = false)}
+          @open=${() => (this.deckOpen = true)}
+ */
