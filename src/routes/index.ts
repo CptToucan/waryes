@@ -81,11 +81,33 @@ export class IndexRoute extends LitElement {
         font-size: var(--lumo-font-size-l);
         height: var(--lumo-size-xxl);
         text-align: center;
+        text-decoration: none;
+        user-select: none;
       }
 
-      a:hover {
-        background-color: var(--lumo-contrast-10pct);
+      a.choice-button.disabled {
+        opacity: 0.4;
+        cursor: unset;
       }
+
+      a.choice-button vaadin-icon {
+        color: var(--lumo-primary-color);
+      }
+
+      a.choice-button span {
+        color: var(--lumo-contrast-60pct);
+      }
+
+      a.choice-button.disabled:hover {
+        background-color: var(--lumo-contrast-5pct);
+        
+      }
+
+      a.choice-button:hover {
+        background-color: var(--lumo-contrast-10pct);
+        
+      }
+
 
       a:focus {
         border: 2px solid var(--lumo-primary-color-50pct);
@@ -101,25 +123,25 @@ export class IndexRoute extends LitElement {
 
   renderSelectOrImportChoice() {
     return html`<div class="container menu-buttons button-grid">
-      <a class="choice-button">
+      <a class="choice-button disabled">
         <vaadin-icon icon="vaadin:code"></vaadin-icon>
         <h3>Import</h3>
         <span>Got a deck code? Import it here and start editing.</span>
       </a>
 
-      <a class="choice-button">
+      <a class="choice-button disabled">
         <vaadin-icon icon="vaadin:tools"></vaadin-icon>
         <h3>Build</h3>
         <span>Build a deck from scratch.</span>
       </a>
 
-      <a class="choice-button">
+      <a class="choice-button" href="/units">
         <vaadin-icon icon="vaadin:table"></vaadin-icon>
         <h3>Browse</h3>
         <span>Take a look around the armoury.</span>
       </a>
 
-      <a class="choice-button">
+      <a class="choice-button" href="/comparison">
         <vaadin-icon icon="vaadin:pie-bar-chart"></vaadin-icon>
         <h3>Compare</h3>
         <span>Compare units and analyse.</span>
