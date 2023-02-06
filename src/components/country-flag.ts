@@ -1,17 +1,11 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-// @ts-ignore;
 import EastGermany from '../../images/flags/east-germany.svg';
-// @ts-ignore;
 import France from '../../images/flags/france.svg';
-// @ts-ignore;
 import SovietUnion from '../../images/flags/soviet-union.svg';
-// @ts-ignore;
 import UK from '../../images/flags/uk.svg';
-// @ts-ignore;
 import USA from '../../images/flags/usa.svg';
-// @ts-ignore;
 import WestGermany from '../../images/flags/west-germany.svg';
 import { Country } from '../types/deck-builder';
 
