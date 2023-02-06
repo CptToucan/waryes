@@ -51,7 +51,7 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:pie-bar-chart',
       href: '/comparison',
     },
-    /*{
+    {
       name: 'Deck Builder',
       icon: 'vaadin:tools',
       href: '/deck-builder'
@@ -61,7 +61,6 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:code',
       href: '/deck-import'
     },
-    */
     {
       name: 'Discord',
       icon: 'vaadin:comments',
@@ -84,7 +83,7 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:pie-bar-chart',
       href: '/comparison',
     },
-    /*{
+    {
       name: 'Deck Builder',
       icon: 'vaadin:tools',
       href: '/deck-builder'
@@ -94,7 +93,7 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:code',
       href: '/deck-import'
     },
-    */
+    
     {
       name: 'Discord',
       icon: 'vaadin:comments',

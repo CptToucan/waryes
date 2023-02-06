@@ -95,6 +95,21 @@ export class DeckView extends LitElement {
         margin-top: var(--lumo-space-xs);
       }
 
+      .slot-costs > span {
+        color: var(--lumo-contrast-50pct);
+      }
+
+      .slot-costs > .in-use {
+        color: var(--lumo-primary-color);
+      }
+
+      .slot-costs > .is-next {
+        color: var(--lumo-contrast-color);
+
+      } 
+
+
+
       vaadin-menu-bar::part(container) {
       }
     `;
@@ -143,20 +158,19 @@ export class DeckView extends LitElement {
 
   async shareDeck() {
     try {
-    if (this.deck) {
-      const deckCode = this.deck.toDeckCode();
-      viewDeckCode(deckCode);
-      await navigator.clipboard.writeText(window.location.href);
-      notificationService.instance?.addNotification({
-        content: 'Share link copied to clipboard',
-        duration: 3000,
-        theme: '',
-      });
-    }
-    else {
-      throw new Error('No deck to share');
-    }
-  } catch(err) {
+      if (this.deck) {
+        const deckCode = this.deck.toDeckCode();
+        viewDeckCode(deckCode);
+        await navigator.clipboard.writeText(window.location.href);
+        notificationService.instance?.addNotification({
+          content: 'Share link copied to clipboard',
+          duration: 3000,
+          theme: '',
+        });
+      } else {
+        throw new Error('No deck to share');
+      }
+    } catch (err) {
       notificationService.instance?.addNotification({
         content: 'Failed to copy share code',
         duration: 5000,
@@ -291,6 +305,30 @@ export class DeckView extends LitElement {
     return html`${renderOutput}`;
   }
 
+  renderSlotCosts(slotCosts: number[], nextSlotIndex: number) {
+    return html`<div class="slot-costs">
+      [${slotCosts.map((el, index) => {
+        const isLast = index !== slotCosts.length - 1;
+        let isNext = false;
+        let isInUse = false;
+
+        if(index === nextSlotIndex) {
+          isNext = true;
+        }
+        else if(index < nextSlotIndex) {
+          isInUse = true;
+        }
+
+       
+
+        return html`<span class="${isInUse ? 'in-use' : ''} ${isNext ? 'is-next' : ''}">${el}</span> ${
+          isLast ? ', ' : ''
+        }`;
+      })}]
+    </div>
+    `;
+  }
+
   renderDeckCategory(category: UnitCategory, deck: Deck) {
     const deckUnitsInCategory =
       deck.unitsInDeckGroupedUnitsByCategory[category];
@@ -319,9 +357,12 @@ export class DeckView extends LitElement {
             ${numberOfCardsInCategory} /
             ${deck.getTotalSlotsForCategory(category)} slots
           </div>
-          <div class="next-slot-cost">
-            Next slot: ${deck.getNextSlotCostForCategory(category)} points
+          <div class="total-points-in-category">
+            Points: ${deck.getSumOfUnitCostsForCategory(category)} points
           </div>
+        </div>
+        <div class="deck-category-heading-row">
+          ${this.renderSlotCosts(this.deck?.slotCosts[category] || [], this.deck?.getNextSlotCostIndexForCategory(category) || 0)}
         </div>
       </div>
       <div class="deck-category-cards">
