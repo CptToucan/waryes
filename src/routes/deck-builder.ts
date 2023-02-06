@@ -13,6 +13,7 @@ import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
 import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
+import '../components/division-flag';
 import '@vaadin/text-area';
 
 @customElement('deck-builder-route')
@@ -85,6 +86,7 @@ export class DeckBuilderRoute
         border: 2px solid transparent;
         text-overflow: ellipsis;
         overflow-x: hidden;
+        overflow-y: hidden;
         white-space: nowrap;
         
       }
@@ -120,6 +122,10 @@ export class DeckBuilderRoute
 
       country-flag {
         margin-right: var(--lumo-space-s);
+      }
+
+      division-flag {
+        margin: 0 var(--lumo-space-s);
       }
     `;
   }
@@ -238,7 +244,8 @@ export class DeckBuilderRoute
             @click=${() => this.selectDivision(div)}
           >
             <country-flag .country=${div.country}></country-flag>
-            <span>${div.descriptor}</span>
+            <division-flag .division=${div}></division-flag>
+            <span>${div.name ?? div.descriptor}</span>
           </button>`;
         })}
       </div>

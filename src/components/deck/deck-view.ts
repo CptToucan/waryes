@@ -192,7 +192,7 @@ export class DeckView extends LitElement {
     if (this.deck) {
       return html` <div class="deck">
         <div class="deck-header">
-          <h3 class="deck-title">${this.deck.division.descriptor}</h3>
+          <h3 class="deck-title">${this.deck.division.name ?? this.deck.division.descriptor}</h3>
           <div class="deck-header-row">
             <span class="activation-points">
               ${this.deck.totalSpentActivationPoints} /
