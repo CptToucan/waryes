@@ -40,6 +40,6 @@
       }
     ]
   },
-  "include": ["src/**/*.ts", "node_modules/@ionic/core/components/*.d.ts", "node_modules/gridstack/dist/es5/types.d.ts", "node_modules/@vaadin/grid/*.d.ts"],
+  "include": ["src/**/*.ts", "images/**/*.ts", "node_modules/@ionic/core/components/*.d.ts", "node_modules/gridstack/dist/es5/types.d.ts", "node_modules/@vaadin/grid/*.d.ts"],
   "exclude": [],
 }

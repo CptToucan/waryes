@@ -4,9 +4,9 @@ import {customElement} from 'lit/decorators.js';
 import WaryesImage from '../../images/waryes-transparent.png';
 import '@vaadin/multi-select-combo-box';
 import '@vaadin/combo-box';
-import { Unit } from '../types/unit';
-import { Router } from '@vaadin/router';
-import "../components/unit-search";
+import {Unit} from '../types/unit';
+import {Router} from '@vaadin/router';
+import '../components/unit-search';
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
@@ -17,6 +17,7 @@ export class IndexRoute extends LitElement {
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        margin-bottom: var(--lumo-space-xl);
       }
 
       .search {
@@ -33,21 +34,98 @@ export class IndexRoute extends LitElement {
         flex: 1 1 0;
       }
 
-
       .or {
-        font-size: var(--lumo-font-size-l);   
+        font-size: var(--lumo-font-size-l);
         padding-top: var(--lumo-space-m);
         padding-bottom: var(--lumo-space-m);
+      }
+
+      button {
+        all: unset;
+        cursor: pointer;
+      }
+
+      .menu-buttons {
+        display: flex;
+        flex-direction: row;
+        flex: 1 1 100%;
+        align-items: stretch;
+        padding: var(--lumo-space-s);
+        flex-wrap: wrap;
+      }
+
+      .container {
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
+        display: flex;
+      }
+
+      .button-grid {
+        display: grid;
+        padding: var(--lumo-space-s);
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: var(--lumo-space-xs);
+      }
+
+      a.choice-button {
+        border-radius: var(--lumo-border-radius-m);
+        padding: var(--lumo-space-m);
+        background-color: var(--lumo-contrast-5pct);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        color: var(--lumo-contrast-80pct);
+        border: 2px solid transparent;
+        flex: 1 1 0;
+        font-size: var(--lumo-font-size-l);
+        height: var(--lumo-size-xxl);
+        text-align: center;
+      }
+
+      a:hover {
+        background-color: var(--lumo-contrast-10pct);
+      }
+
+      a:focus {
+        border: 2px solid var(--lumo-primary-color-50pct);
       }
     `;
   }
 
-  unitSelected(event: CustomEvent)  {
-    if(event.detail.value as Unit) {
+  unitSelected(event: CustomEvent) {
+    if (event.detail.value as Unit) {
       Router.go(`/unit/${event.detail.value?.descriptorName}`);
     }
   }
 
+  renderSelectOrImportChoice() {
+    return html`<div class="container menu-buttons button-grid">
+      <a class="choice-button">
+        <vaadin-icon icon="vaadin:code"></vaadin-icon>
+        <h3>Import</h3>
+        <span>Got a deck code? Import it here and start editing.</span>
+      </a>
+
+      <a class="choice-button">
+        <vaadin-icon icon="vaadin:tools"></vaadin-icon>
+        <h3>Build</h3>
+        <span>Build a deck from scratch.</span>
+      </a>
+
+      <a class="choice-button">
+        <vaadin-icon icon="vaadin:table"></vaadin-icon>
+        <h3>Browse</h3>
+        <span>Take a look around the armoury.</span>
+      </a>
+
+      <a class="choice-button">
+        <vaadin-icon icon="vaadin:pie-bar-chart"></vaadin-icon>
+        <h3>Compare</h3>
+        <span>Compare units and analyse.</span>
+      </a>
+    </div>`;
+  }
 
   render(): TemplateResult {
     return html`
@@ -56,11 +134,10 @@ export class IndexRoute extends LitElement {
         <div class="search">
           <unit-search @unit-selected=${this.unitSelected}></unit-search>
         </div>
-        <div class="or">OR</div>
-        <div>
-          <vaadin-button @click=${() => {Router.go("/units/")}} theme="large">View All</vaadin-button>
         </div>
       </div>
+
+      ${this.renderSelectOrImportChoice()}
     `;
   }
 }

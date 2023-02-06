@@ -4,6 +4,9 @@ import {TabsSelectedChangedEvent} from '@vaadin/tabs';
 import '@vaadin/tabs';
 import {Unit, Weapon} from '../types/unit';
 
+/**
+ * Component for rendering the details of a single unit
+ */
 @customElement('unit-card')
 export class UnitCard extends LitElement {
   static get styles() {
@@ -50,14 +53,7 @@ export class UnitCard extends LitElement {
         margin: 0;
       }
 
-      vaadin-tabs {
 
-      }
-      vaadin-tab {
-
-
-        
-      }
 
       .weapons-tab table {
         width: 100%;
@@ -277,5 +273,13 @@ export class UnitCard extends LitElement {
       <unit-armor-view .unit=${this.unit}></unit-armor-view>
       ${this.renderWeaponsRow(this.compact)} ${this.renderUnitBottomStats()}
     </div>`;
+  }
+}
+
+
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'unit-card': UnitCard;
   }
 }
