@@ -42,6 +42,7 @@ export class DeckCard extends LitElement {
   veterancyChanged(veterancy: number) {
     if(this.deckUnit) {
       this.deckUnit.veterancy = veterancy;
+      this.deck?.deckChanged();
       this.requestUpdate();
     }
   }

@@ -328,6 +328,16 @@ export class Deck {
     return slotCostsForCategory[numberOfUnitsInCategory];
   }
 
+  public getNextSlotCostIndexForCategory(
+    category: UnitCategory
+  ): number | undefined {
+    const unitsInDeckCategory =
+      this.unitsInDeckGroupedUnitsByCategory[category];
+    const numberOfUnitsInCategory = unitsInDeckCategory.length;
+   
+    return numberOfUnitsInCategory;
+  }
+
   public getTotalSlotsForCategory(category: UnitCategory): number {
     const slotCostsForCategory = this.slotCosts[category];
     return slotCostsForCategory.length;
@@ -347,6 +357,22 @@ export class Deck {
     return unitCount;
   }
 
+
+  public getSumOfUnitCostsForCategory(category: UnitCategory): number {
+    const unitsInDeckCategory =
+      this.unitsInDeckGroupedUnitsByCategory[category];
+    let totalCost = 0;
+
+    for (const deckUnit of unitsInDeckCategory) {
+      const transportCost = deckUnit.transport?.commandPoints || 0;
+      const unitCost = this.getUnitForPack(deckUnit.pack)?.commandPoints || 0;
+      const costPerCard = unitCost + transportCost;
+      const veterancyQuantities = this.getVeterancyQuantitiesForPack(deckUnit.pack);
+      const quantityInCard = veterancyQuantities[deckUnit.veterancy];
+      totalCost += costPerCard * quantityInCard;
+    }
+    return totalCost;
+  }
 
 
   public get usedActivationPoints() {
