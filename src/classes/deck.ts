@@ -374,6 +374,16 @@ export class Deck {
     return totalCost;
   }
 
+  public getSumOfUnitsCosts() {
+    let totalSum = 0;
+    for (const category in this.unitsInDeckGroupedUnitsByCategory) {
+      const categoryEnum: UnitCategory = category as UnitCategory;
+      totalSum += this.getSumOfUnitCostsForCategory(categoryEnum);
+    }
+
+    return totalSum;
+  }
+
 
   public get usedActivationPoints() {
     let totalPoints = 0;
