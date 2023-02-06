@@ -9,6 +9,7 @@ import '@vaadin/menu-bar';
 import '@vaadin/context-menu';
 import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
 import {viewDeckCode} from '../../utils/view-deck-code';
+import '@vaadin/tooltip';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -104,13 +105,25 @@ export class DeckView extends LitElement {
       }
 
       .slot-costs > .is-next {
-        color: var(--lumo-contrast-color);
+        color: var(--lumo-contrast);
+      }
 
-      } 
+      .total-unit-cost {
+        border-top: 1px solid var(--lumo-contrast-20pct);
+        padding: var(--lumo-space-s);
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        color: var(--lumo-contrast);
+      }
 
+      .total-unit-cost > span.warning {
+        color: orange;
+      }
 
-
-      vaadin-menu-bar::part(container) {
+      .total-unit-cost > span {
+        margin-left: var(--lumo-space-s);
+        margin-right: var(--lumo-space-s);
       }
     `;
   }
@@ -237,6 +250,24 @@ export class DeckView extends LitElement {
 
   render(): TemplateResult {
     if (this.deck) {
+      const unitCosts = this.deck.getSumOfUnitsCosts();
+      const warningUpperThreshold = 14500;
+      const warningLowerThreshold = 12000;
+
+      let displayWarningOnCost = false;
+
+      let warningText = "Typical decks should be under 14500 points"
+      if (unitCosts > warningUpperThreshold) {
+        displayWarningOnCost = true;
+        warningText = "Typical decks should be under 14500 points"
+      }
+      else if (unitCosts < warningLowerThreshold) {
+        displayWarningOnCost = true;
+        warningText = "Typical decks should be more than 12000 points"
+      }
+
+
+
       return html` <div class="deck">
         <div class="deck-header">
           <h3 class="deck-title">
@@ -291,6 +322,22 @@ export class DeckView extends LitElement {
           </div>
         </div>
         <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
+        <div class="total-unit-cost">
+          Total Points:
+          <span class="${displayWarningOnCost && 'warning'}">${unitCosts}</span>
+          ${displayWarningOnCost
+            ? html`<vaadin-icon
+                  id="warning-icon"
+                  icon="vaadin:question-circle-o"
+                  style="font-size: 12px"
+                ></vaadin-icon
+                ><vaadin-tooltip
+                  for="warning-icon"
+                  text=${warningText}
+                  position="top-end"
+                ></vaadin-tooltip>`
+            : html``}
+        </div>
       </div>`;
     } else {
       return html`NO DECK`;
@@ -312,21 +359,19 @@ export class DeckView extends LitElement {
         let isNext = false;
         let isInUse = false;
 
-        if(index === nextSlotIndex) {
+        if (index === nextSlotIndex) {
           isNext = true;
-        }
-        else if(index < nextSlotIndex) {
+        } else if (index < nextSlotIndex) {
           isInUse = true;
         }
 
-       
-
-        return html`<span class="${isInUse ? 'in-use' : ''} ${isNext ? 'is-next' : ''}">${el}</span> ${
-          isLast ? ', ' : ''
-        }`;
+        return html`<span
+            class="${isInUse ? 'in-use' : ''} ${isNext ? 'is-next' : ''}"
+            >${el}</span
+          >
+          ${isLast ? ', ' : ''}`;
       })}]
-    </div>
-    `;
+    </div> `;
   }
 
   renderDeckCategory(category: UnitCategory, deck: Deck) {
@@ -362,7 +407,10 @@ export class DeckView extends LitElement {
           </div>
         </div>
         <div class="deck-category-heading-row">
-          ${this.renderSlotCosts(this.deck?.slotCosts[category] || [], this.deck?.getNextSlotCostIndexForCategory(category) || 0)}
+          ${this.renderSlotCosts(
+            this.deck?.slotCosts[category] || [],
+            this.deck?.getNextSlotCostIndexForCategory(category) || 0
+          )}
         </div>
       </div>
       <div class="deck-category-cards">
