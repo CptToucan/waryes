@@ -41,6 +41,7 @@ interface Pack {
 
 interface Division {
   id: number,
+  name: string,
   descriptor: string
   alliance: string
   availableForPlay: boolean
