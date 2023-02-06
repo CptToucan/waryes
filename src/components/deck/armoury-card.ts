@@ -1,4 +1,4 @@
-import {CSSResultGroup, html, LitElement, TemplateResult} from 'lit';
+import {css, CSSResultGroup, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {Unit} from '../../types/unit';
@@ -8,8 +8,8 @@ import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 import {Pack} from '../../types/deck-builder';
 import {Deck} from '../../classes/deck';
 import {armouryCardStyles} from './armoury-card-styles';
-import { DialogOpenedChangedEvent } from '@vaadin/dialog';
-import { dialogFooterRenderer, dialogHeaderRenderer, dialogRenderer } from '@vaadin/dialog/lit.js';
+import {DialogOpenedChangedEvent} from '@vaadin/dialog';
+import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import '@vaadin/dialog';
 import '../unit-card';
 export interface ArmouryCardOptions {
@@ -27,7 +27,7 @@ export interface ArmouryCardVeterancyOptions {
  */
 @customElement('armoury-card')
 export class ArmouryCard extends LitElement {
-  static styles: CSSResultGroup = [armouryCardStyles];
+  static styles: CSSResultGroup = [armouryCardStyles, css``];
 
   @state()
   selectedVeterancy?: number;
@@ -49,13 +49,12 @@ export class ArmouryCard extends LitElement {
   @property({
     hasChanged(_value: Deck, _oldValue: Deck) {
       return true;
-    }
+    },
   })
   deck?: Deck;
 
   @state()
   unitDialogOpened = false;
-  
 
   private open() {
     this.unitDialogOpened = true;
@@ -73,10 +72,10 @@ export class ArmouryCard extends LitElement {
   }
 
   get activeVeterancy() {
-    if(this.deck && this.pack) {
+    if (this.deck && this.pack) {
       const defaultVeterancy = this.deck.getDefaultVeterancyForPack(this.pack);
       let activeVeterancy = defaultVeterancy;
-  
+
       if (this.selectedVeterancy !== undefined) {
         activeVeterancy = this.selectedVeterancy;
       }
@@ -101,8 +100,6 @@ export class ArmouryCard extends LitElement {
 
   protected renderDetailsForUnit(unit: Unit, pack: Pack, deck: Deck) {
     const veterancyQuantities = deck.getVeterancyQuantitiesForPack(pack);
-    
-
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
       <div class="body">
@@ -111,7 +108,11 @@ export class ArmouryCard extends LitElement {
           ${this.renderCommandPoints(unit, pack, deck)}
           ${this.renderInfoIcon(unit, pack, deck)}
           ${this.renderUnitIcon(unit, pack, deck)}
-          ${this.renderQuantity(this.activeVeterancy, veterancyQuantities, unit)}
+          ${this.renderQuantity(
+            this.activeVeterancy,
+            veterancyQuantities,
+            unit
+          )}
         </div>
       </div>
       ${this.renderBottomSection(
@@ -145,13 +146,17 @@ export class ArmouryCard extends LitElement {
   }
 
   renderInfoIcon(_unit: Unit, _pack: Pack, _deck: Deck) {
-    return html` <vaadin-icon
-      class="info-icon"
-      icon="vaadin:info-circle-o"
-      @click=${() => this.open()}
-    ></vaadin-icon>
-    ${this.renderUnitModal(_unit)}
-    
+    return html`
+      <vaadin-button
+        theme="tertiary icon"
+        class="info-icon-button"
+        @click=${() => this.open()}
+        aria-label="Show unit info"
+      >
+        <vaadin-icon  icon="vaadin:info-circle-o"></vaadin-icon
+      ></vaadin-button>
+
+      ${this.renderUnitModal(_unit)}
     `;
   }
 
@@ -173,34 +178,29 @@ export class ArmouryCard extends LitElement {
 
   renderUnitModal(_unit: Unit) {
     return html`<vaadin-dialog
-    aria-label="Add note"
-    draggable
-    modeless
-    resizable
-    .opened="${this.unitDialogOpened}"
-    @opened-changed="${(event: DialogOpenedChangedEvent) => {
-      this.unitDialogOpened = event.detail.value;
-    }}"
-    ${dialogHeaderRenderer(
-      () => html`
-
-      `,
-      []
-    )}
-    ${dialogRenderer(
-      () => html`
-        <unit-card .unit=${_unit}></unit-card>
-      `,
-      []
-    )}
-    ${dialogFooterRenderer(
-      () =>
-        html`
-          <vaadin-button @click="${this.close}">Cancel</vaadin-button>
+      aria-label="Add note"
+      draggable
+      modeless
+      resizable
+      .opened="${this.unitDialogOpened}"
+      @opened-changed="${(event: DialogOpenedChangedEvent) => {
+        this.unitDialogOpened = event.detail.value;
+      }}"
+      ${dialogHeaderRenderer(
+        () => html`
+          <div class="display: flex; justify-content: flex-end;">
+            <vaadin-button @click="${this.close}" theme="tertiary icon"
+              ><vaadin-icon icon="vaadin:close"></vaadin-icon
+            ></vaadin-button>
+          </div>
         `,
-      []
-    )}
-  ></vaadin-dialog>`
+        []
+      )}
+      ${dialogRenderer(
+        () => html` <unit-card .unit=${_unit}></unit-card> `,
+        []
+      )}
+    ></vaadin-dialog>`;
   }
 
   renderQuantity(

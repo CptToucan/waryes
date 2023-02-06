@@ -162,13 +162,8 @@ export class EditDeck extends LitElement {
 
           <div class="cards">
             <div class="button-drawer">
-              <vaadin-button @click=${() => this.openDeck()} theme="large"
-                >Deck</vaadin-button
-              >
-              <vaadin-button
-                @click=${() => (this.deckOpen = !this.deckOpen)}
-                theme="large"
-                >Filters</vaadin-button
+              <vaadin-button @click=${() => this.openDeck()} theme="large primary"
+                >View Deck</vaadin-button
               >
             </div>
 

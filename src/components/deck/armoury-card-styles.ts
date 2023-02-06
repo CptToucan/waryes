@@ -78,13 +78,14 @@ export const armouryCardStyles = css` :host {
   margin: 0;
 }
 
-.info-icon {
+.info-icon-button {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: 0px;
+  right: 0px;
   color: var(--lumo-contrast-70pct);
-  height: 18px;
-  width: 18px;
+  margin: 0;
+//  height: 18px;
+//  width: 18px;
 }
 
 .name {
