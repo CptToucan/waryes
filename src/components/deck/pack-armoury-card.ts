@@ -49,11 +49,17 @@ export class PackArmouryCard extends LitElement {
 
 
   armouryCardSelected(veterancy: number) {
-    if (this.pack) {
-      if (this.deck?.getTransportsForPack(this.pack)) {
+    if (this.pack && this.deck) {
+      const transports = this.deck.getTransportsForPack(this.pack);
+
+      if (transports && transports.length > 1) {
         this.openTransportDialog(veterancy);
-      } else {
-        this.deck?.addUnit({veterancy, pack: this.pack});
+      }
+      else if(transports && transports.length === 1) {
+        this.deck.addUnit({veterancy, pack: this.pack, transport: transports[0]})
+      }
+      else {
+        this.deck.addUnit({veterancy, pack: this.pack});
       }
     }
   }
