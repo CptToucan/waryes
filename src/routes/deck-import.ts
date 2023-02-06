@@ -1,7 +1,7 @@
-import { Router } from '@vaadin/router';
 import { TextAreaValueChangedEvent } from '@vaadin/text-area';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement} from 'lit/decorators.js';
+import { viewDeckCode } from '../utils/view-deck-code';
 
 @customElement('deck-import-route')
 export class DeckImportRoute extends LitElement {
@@ -37,10 +37,7 @@ export class DeckImportRoute extends LitElement {
 
   importDeck() {
     if(this.deckCode) {
-      Router.go({
-        pathname: "/deck-builder",
-        search: `?code=${encodeURIComponent(this.deckCode)}`
-      })
+      viewDeckCode(this.deckCode);
     }
     throw new Error("No deck code");
   }

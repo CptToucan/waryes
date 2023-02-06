@@ -5,6 +5,7 @@ import '@vaadin/scroller';
 import {UnitsDatabaseService} from '../services/units-db';
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
+import { getAllianceNameFromDescriptor } from '../utils/get-alliance-name-from-descriptor';
 
 // @ts-ignore
 import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
@@ -95,6 +96,7 @@ export class DeckBuilderRoute
         text-overflow: ellipsis;
         overflow-x: hidden;
         white-space: nowrap;
+
       }
 
       button:hover {
@@ -168,10 +170,9 @@ export class DeckBuilderRoute
 
 
     const params = new URLSearchParams(location.search);
-    let deckCode = params.get("code");
+    const deckCode = params.get("code");
 
     if(deckCode) {
-      deckCode = decodeURIComponent(deckCode);
       const deckFromString = Deck.fromDeckCode(deckCode, {
         unitMap: units,
         divisions: this.availableDivisions
@@ -233,11 +234,12 @@ export class DeckBuilderRoute
   renderDeckEditor(deck: Deck): TemplateResult {
     return html`<edit-deck @deck-cleared=${this.clearDeckParameters} .deck=${deck}></edit-deck>`;
   }
+  
 
   renderDivisionSelection(): TemplateResult {
     return html`<div class="container">
       <div class="division-selection">
-        <h3>Select a deck to edit</h3>
+        <h2 style="margin: var(--lumo-space-m);">Select a deck to edit</h2>
         ${this.availableDivisions.map((div) => {
           return html`<button
             class="division-selector"
@@ -245,7 +247,7 @@ export class DeckBuilderRoute
           >
             <country-flag .country=${div.country}></country-flag>
             <division-flag .division=${div}></division-flag>
-            <span>${div.name ?? div.descriptor}</span>
+            <span>${getAllianceNameFromDescriptor(div.alliance)} - ${div.name ?? div.descriptor}</span>
           </button>`;
         })}
       </div>

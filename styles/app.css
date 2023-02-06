@@ -49,3 +49,26 @@ html[theme~="dark"] {
 }
 
 
+vaadin-dialog-overlay::part(header) {
+  padding: 0;
+}
+
+vaadin-dialog-overlay::part(title) {
+  padding: var(--lumo-space-m);
+}
+
+vaadin-dialog-overlay::part(header-content) {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  width: 100%;
+}
+
+vaadin-dialog-overlay::part(content) {
+  max-width: 600px;
+}
+
+
+div[slot=header-content] {
+  background-color: red !important;
+}

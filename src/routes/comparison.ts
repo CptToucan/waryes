@@ -214,7 +214,7 @@ export class ComparisonRoute extends LitElement {
     notificationService.instance?.addNotification({
       content: 'Settings applied',
       duration: 3000,
-      theme: 'primary',
+      theme: '',
     });
   }
 

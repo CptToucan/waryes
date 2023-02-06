@@ -44,7 +44,7 @@ export class NotificationManager extends LitElement {
       notificationRender.push(html` <vaadin-notification
         theme=${_notification.theme}
         duration=${_notification.duration}
-        position="bottom-stretch"
+        position="top-center"
         data-content=${_notification.content}
         .opened=${true}
         ${notificationRenderer(this.renderer, [])}

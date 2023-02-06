@@ -7,7 +7,8 @@ import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-desc
 import {notificationService} from '../../services/notification';
 import '@vaadin/menu-bar';
 import '@vaadin/context-menu';
-import { MenuBarItemSelectedEvent } from '@vaadin/menu-bar';
+import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
+import {viewDeckCode} from '../../utils/view-deck-code';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -95,7 +96,6 @@ export class DeckView extends LitElement {
       }
 
       vaadin-menu-bar::part(container) {
-        
       }
     `;
   }
@@ -115,7 +115,7 @@ export class DeckView extends LitElement {
         notificationService.instance?.addNotification({
           content: 'Deck code copied to clipboard',
           duration: 3000,
-          theme: 'primary',
+          theme: '',
         });
         return;
       } else {
@@ -133,18 +133,53 @@ export class DeckView extends LitElement {
 
   resetDeck() {
     this.deck?.clearDeck();
-    this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))
+    this.dispatchEvent(new CustomEvent('deck-cleared', {bubbles: true}));
+    notificationService.instance?.addNotification({
+      content: 'Deck cleared',
+      duration: 3000,
+      theme: '',
+    });
+  }
+
+  async shareDeck() {
+    try {
+    if (this.deck) {
+      const deckCode = this.deck.toDeckCode();
+      viewDeckCode(deckCode);
+      await navigator.clipboard.writeText(window.location.href);
+      notificationService.instance?.addNotification({
+        content: 'Share link copied to clipboard',
+        duration: 3000,
+        theme: '',
+      });
+    }
+    else {
+      throw new Error('No deck to share');
+    }
+  } catch(err) {
+      notificationService.instance?.addNotification({
+        content: 'Failed to copy share code',
+        duration: 5000,
+        theme: 'error',
+      });
+      console.error(err);
+    }
   }
 
   menuItemSelected(item: MenuBarItemSelectedEvent) {
-    const menuId = (item.detail.value.component as HTMLElement)?.getAttribute("menu-id");
+    const menuId = (item.detail.value.component as HTMLElement)?.getAttribute(
+      'menu-id'
+    );
 
-    switch(menuId) {
-      case "export":
+    switch (menuId) {
+      case 'export':
         this.exportDeck();
         break;
-      case "clear":
+      case 'clear':
         this.resetDeck();
+        break;
+      case 'share':
+        this.shareDeck();
         break;
     }
   }
@@ -168,21 +203,19 @@ export class DeckView extends LitElement {
 
     item.style.display = 'flex';
     item.style.alignItems = 'center';
-    
-
 
     icon.setAttribute('icon', `vaadin:${iconName}`);
     item.setAttribute('menu-id', id);
 
-    if(isChild) {
+    if (isChild) {
       item.appendChild(icon);
     }
-    span.appendChild(document.createTextNode(text))
+    span.appendChild(document.createTextNode(text));
     if (text) {
       item.appendChild(span);
     }
 
-    if(!isChild) {
+    if (!isChild) {
       item.appendChild(icon);
     }
     return item;
@@ -192,7 +225,9 @@ export class DeckView extends LitElement {
     if (this.deck) {
       return html` <div class="deck">
         <div class="deck-header">
-          <h3 class="deck-title">${this.deck.division.name ?? this.deck.division.descriptor}</h3>
+          <h3 class="deck-title">
+            ${this.deck.division.name ?? this.deck.division.descriptor}
+          </h3>
           <div class="deck-header-row">
             <span class="activation-points">
               ${this.deck.totalSpentActivationPoints} /
@@ -204,18 +239,37 @@ export class DeckView extends LitElement {
               @item-selected=${this.menuItemSelected}
               .items="${[
                 {
-                  component: this.createItem('angle-down', 'Actions', 'actions'),
+                  component: this.createItem(
+                    'angle-down',
+                    'Actions',
+                    'actions'
+                  ),
                   children: [
                     {
                       component: this.createItem(
                         'compile',
-                        'Export',
+                        'Export to code',
                         'export',
                         true
                       ),
                     },
-                    { component: 'hr' },
-                    {component: this.createItem('trash', 'Clear', 'clear', true)},
+                    {
+                      component: this.createItem(
+                        'share',
+                        'Share',
+                        'share',
+                        true
+                      ),
+                    },
+                    {component: 'hr'},
+                    {
+                      component: this.createItem(
+                        'trash',
+                        'Clear',
+                        'clear',
+                        true
+                      ),
+                    },
                   ],
                 },
               ]}"

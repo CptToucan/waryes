@@ -53,16 +53,12 @@ export class UnitCard extends LitElement {
         margin: 0;
       }
 
-
-
       .weapons-tab table {
         width: 100%;
         border-collapse: collapse;
       }
 
       .weapons-tab table td {
-        padding: var(--lumo-space-xs) 0;
-        margin: var(--lumo-space-s) 0;
         color: var(--lumo-contrast);
       }
 
@@ -76,6 +72,7 @@ export class UnitCard extends LitElement {
         text-overflow: ellipsis;
         overflow: hidden;
         max-width: 200px;
+        font-size: 14px;
       }
 
       .weapons-tab table tr.weapon-stat-border-bottom td {
@@ -94,7 +91,7 @@ export class UnitCard extends LitElement {
         text-align: left;
         display: flex;
         flex-direction: row;
-        padding: var(--lumo-space-xs) var(--lumo-space-xs);
+        padding: 0 var(--lumo-space-xs);
       }
 
       .unit-bottom-stats div p {
@@ -108,11 +105,13 @@ export class UnitCard extends LitElement {
 
       .unit-bottom-stats div p:nth-child(1) {
         color: var(--lumo-contrast-70pct);
+        font-size: 14px;
       }
 
       .unit-bottom-stats div p:nth-child(2) {
         text-align: right;
         color: var(--lumo-contrast-100pct);
+        font-size: 14px;
       }
     `;
   }
@@ -240,31 +239,25 @@ export class UnitCard extends LitElement {
     `;
   }
 
-  renderWeaponsRow(compact: boolean): TemplateResult {
-    if (compact) {
-      return html`
-        <vaadin-tabs
-          theme="equal-width-tabs center"
-          style="max-width: 100%;"
-          @selected-changed="${this.selectedWeaponTabChanged}"
-        >
-          ${this.renderWeaponTabs()}
-        </vaadin-tabs>
+  renderWeaponsRow(_compact: boolean): TemplateResult {
 
-        ${this.unit &&
-        this.renderWeaponStats(this.unit.weapons[this.selectedWeapon])}
-      `;
-    } else {
-      return html`
-        <div
-          style="display: flex; flex-direction: row; justify-content: space-between;"
-        >
-          ${this.unit?.weapons.map((weaponMetadata) =>
-            this.renderWeaponStats(weaponMetadata)
-          )}
-        </div>
-      `;
+    let weaponMetadata: Weapon | null = null;
+
+    if(this.unit?.weapons && this.unit?.weapons.length > 0 && this.unit?.weapons[this.selectedWeapon])  {
+      weaponMetadata = this.unit.weapons[this.selectedWeapon];
     }
+    return html`
+      <vaadin-tabs
+        theme="equal-width-tabs center"
+        style="max-width: 100%;"
+        @selected-changed="${this.selectedWeaponTabChanged}"
+      >
+        ${this.renderWeaponTabs()}
+      </vaadin-tabs>
+
+      ${weaponMetadata &&
+      this.renderWeaponStats(weaponMetadata)}
+    `;
   }
 
   render() {
@@ -275,8 +268,6 @@ export class UnitCard extends LitElement {
     </div>`;
   }
 }
-
-
 
 declare global {
   interface HTMLElementTagNameMap {

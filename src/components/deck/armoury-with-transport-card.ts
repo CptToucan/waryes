@@ -42,7 +42,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
       }
 
       .top-section {
-        height: 48px;
+        height: 64px;
       }
 
       .quantity {
@@ -83,14 +83,14 @@ export class ArmouryWithTransportCard extends ArmouryCard {
 
   renderUnitIcon(unit: Unit) {
     const unitIcon = html`<vaadin-icon
-      style="font-size: 32px;"
+      style="font-size: 48px;"
       icon=${getIconForUnit(unit)}
     ></vaadin-icon>`;
 
     if (this.transport) {
       return html`${unitIcon}
         <vaadin-icon
-          style="font-size: 32px;"
+          style="font-size: 48px;"
           icon=${getIconForUnit(this.transport)}
         ></vaadin-icon>`;
     }
