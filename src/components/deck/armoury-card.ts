@@ -8,7 +8,10 @@ import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 import {Pack} from '../../types/deck-builder';
 import {Deck} from '../../classes/deck';
 import {armouryCardStyles} from './armoury-card-styles';
-
+import { DialogOpenedChangedEvent } from '@vaadin/dialog';
+import { dialogFooterRenderer, dialogHeaderRenderer, dialogRenderer } from '@vaadin/dialog/lit.js';
+import '@vaadin/dialog';
+import '../unit-card';
 export interface ArmouryCardOptions {
   unit: Unit;
   veterancyOptions?: ArmouryCardVeterancyOptions;
@@ -49,6 +52,18 @@ export class ArmouryCard extends LitElement {
     }
   })
   deck?: Deck;
+
+  @state()
+  unitDialogOpened = false;
+  
+
+  private open() {
+    this.unitDialogOpened = true;
+  }
+
+  private close() {
+    this.unitDialogOpened = false;
+  }
 
   veterancySelected(veterancy: number) {
     this.selectedVeterancy = veterancy;
@@ -133,7 +148,11 @@ export class ArmouryCard extends LitElement {
     return html` <vaadin-icon
       class="info-icon"
       icon="vaadin:info-circle-o"
-    ></vaadin-icon>`;
+      @click=${() => this.open()}
+    ></vaadin-icon>
+    ${this.renderUnitModal(_unit)}
+    
+    `;
   }
 
   renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
@@ -150,6 +169,38 @@ export class ArmouryCard extends LitElement {
         icon="$vaadin:question"
       ></vaadin-icon>`;
     }
+  }
+
+  renderUnitModal(_unit: Unit) {
+    return html`<vaadin-dialog
+    aria-label="Add note"
+    draggable
+    modeless
+    resizable
+    .opened="${this.unitDialogOpened}"
+    @opened-changed="${(event: DialogOpenedChangedEvent) => {
+      this.unitDialogOpened = event.detail.value;
+    }}"
+    ${dialogHeaderRenderer(
+      () => html`
+
+      `,
+      []
+    )}
+    ${dialogRenderer(
+      () => html`
+        <unit-card .unit=${_unit}></unit-card>
+      `,
+      []
+    )}
+    ${dialogFooterRenderer(
+      () =>
+        html`
+          <vaadin-button @click="${this.close}">Cancel</vaadin-button>
+        `,
+      []
+    )}
+  ></vaadin-dialog>`
   }
 
   renderQuantity(
