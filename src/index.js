@@ -5,6 +5,8 @@ const $tpl1 = document.createElement('template');
 $tpl1.innerHTML = `<style>${color.toString().replace(':host', 'html')}</style>`;
 document.head.appendChild($tpl1.content);
 
+import "./iconset.js";
+
 import "./services/router";
 
 /** Routes */
@@ -15,6 +17,8 @@ import "./routes/login";
 import "./routes/units";
 import "./routes/unit-view";
 import "./routes/comparison"
+import "./routes/deck-builder"
+import "./routes/deck-import";
 
 /** Components */
 import "./components/unit-card";
