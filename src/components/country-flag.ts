@@ -40,7 +40,7 @@ export class CountryFlag extends LitElement {
         image = WestGermany;
         break;
     }
-    return html`<img width="40" src=${image} />`;
+    return html`<img width="40" src=${image} alt=${this.country} title=${this.country} />`;
   }
 }
 
