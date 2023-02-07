@@ -42,5 +42,6 @@ module.exports = {
   plugins: [
     new NodePolyfillPlugin(),
     new HtmlWebpackPlugin({template: './src/index.html', publicPath: '/'}),
+    new CopyPlugin({patterns: [{from: "site-meta", to: "."}]})
   ],
 };
