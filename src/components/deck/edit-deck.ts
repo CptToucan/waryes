@@ -155,7 +155,7 @@ export class EditDeck extends LitElement {
           @close=${() => this.closeDeck()}
           ?open=${this.deckOpen}
         >
-          <deck-view .deck=${this.deck} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
+          <deck-view .deck=${this.deck} .showClose=${true} @close-clicked=${() => this.closeDeck()} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
         </side-drawer>
         <div class="desktop">
           <deck-view .deck=${this.deck} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>

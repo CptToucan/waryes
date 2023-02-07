@@ -87,7 +87,7 @@ export class UnitSearch extends LitElement {
   async firstUpdated() {
     const units = await UnitsDatabaseService.fetchUnits();
 
-    if (units !== null) {
+    if (units != null) {
       const sortedUnits = units
         .filter((unit) => unit.name !== '')
         .sort((a, b) => {

@@ -10,6 +10,7 @@ export const armouryCardStyles = css` :host {
   flex-direction: column;
   align-items: center;
   justify-content: stretch;
+  flex: 1 1 100%;
 
   border-radius: var(--lumo-border-radius-m);
   padding-left: var(--lumo-space-xs);

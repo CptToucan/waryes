@@ -2,8 +2,7 @@ import { collection, getDocs, getDocsFromCache, Firestore, loadBundle, namedQuer
 import { Division } from "../types/deck-builder";
 import { FirebaseService, FirebaseServiceClass } from "./firebase";
 import { getStorage, ref, getBlob } from "firebase/storage";
-// @ts-ignore
-import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
+
 
 const CURRENT_FILE_NAME = "bundle-divisions.txt"
 const CURRENT_NAMED_QUERY = "divisions"
@@ -37,8 +36,6 @@ class DivisionDatabaseServiceClass {
      */
     public async fetchDivisions(strategy: DivisionsFetchStrategy = DivisionsFetchStrategy.cache) {
         switch (strategy) {
-            case DivisionsFetchStrategy.local:
-                return await DeckBuilderJson.divisions as Division[]
             case DivisionsFetchStrategy.cache:
                 if (this.debug) { console.log("Loading units from cache") }
                 return await this.fetchDivisionsCache()
@@ -46,6 +43,7 @@ class DivisionDatabaseServiceClass {
                 if (this.debug) { console.log("Loading units from cloud") }
                 return await this.fetchDivisionsForceDirect()
         }
+        return [];
     }
 
 
