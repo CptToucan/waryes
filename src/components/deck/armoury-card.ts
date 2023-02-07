@@ -153,7 +153,7 @@ export class ArmouryCard extends LitElement {
         @click=${() => this.open()}
         aria-label="Show unit info"
       >
-        <vaadin-icon  icon="vaadin:info-circle-o"></vaadin-icon
+        <vaadin-icon icon="vaadin:info-circle-o"></vaadin-icon
       ></vaadin-button>
 
       ${this.renderUnitModal(_unit)}
@@ -247,18 +247,31 @@ export class ArmouryCard extends LitElement {
     return html`<div class="veterancy">
       ${numberOfUnitsInPacksAfterXPMultiplier.map((_, index) => {
         // If there are no units available for a veterancy it is not selectable
-        const isDisabled = numberOfUnitsInPacksAfterXPMultiplier[index] === 0;
-
-        return html`<div
-          role="button"
-          @click=${() => this.veterancySelected(index)}
-          class="${activeVeterancy === index ? 'active' : ''} ${isDisabled
-            ? 'disabled'
-            : ''}"
-        >
-          ${getIconForVeterancy(index)}
-        </div>`;
+        return this.renderVeterancyButton(
+          numberOfUnitsInPacksAfterXPMultiplier,
+          index,
+          activeVeterancy
+        );
       })}
+    </div>`;
+  }
+
+  private renderVeterancyButton(
+    numberOfUnitsInPacksAfterXPMultiplier: number[],
+    veterancyIndex: number,
+    activeVeterancy: number
+  ) {
+    const isDisabled = numberOfUnitsInPacksAfterXPMultiplier[veterancyIndex] === 0;
+
+    return html`<div
+      role="button"
+      aria-label="veterancy ${veterancyIndex}"
+      @click=${() => this.veterancySelected(veterancyIndex)}
+      class="${activeVeterancy === veterancyIndex ? 'active' : ''} ${isDisabled
+        ? 'disabled'
+        : ''}"
+    >
+      ${getIconForVeterancy(veterancyIndex)}
     </div>`;
   }
 }

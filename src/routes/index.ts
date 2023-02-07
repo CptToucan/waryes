@@ -123,13 +123,13 @@ export class IndexRoute extends LitElement {
 
   renderSelectOrImportChoice() {
     return html`<div class="container menu-buttons button-grid">
-      <a class="choice-button disabled">
+      <a class="choice-button" href="/deck-import">
         <vaadin-icon icon="vaadin:code"></vaadin-icon>
         <h3>Import</h3>
         <span>Got a deck code? Import it here and start editing.</span>
       </a>
 
-      <a class="choice-button disabled">
+      <a class="choice-button" href="/deck-builder">
         <vaadin-icon icon="vaadin:tools"></vaadin-icon>
         <h3>Build</h3>
         <span>Build a deck from scratch.</span>

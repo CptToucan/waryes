@@ -8,8 +8,8 @@ import {notificationService} from '../../services/notification';
 import '@vaadin/menu-bar';
 import '@vaadin/context-menu';
 import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
-import {viewDeckCode} from '../../utils/view-deck-code';
 import '@vaadin/tooltip';
+import {getDeckShareUrl} from '../../utils/get-deck-share-url';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -135,6 +135,9 @@ export class DeckView extends LitElement {
   })
   deck?: Deck;
 
+  @property()
+  showClose = false;
+
   async exportDeck() {
     try {
       if (this.deck) {
@@ -173,8 +176,7 @@ export class DeckView extends LitElement {
     try {
       if (this.deck) {
         const deckCode = this.deck.toDeckCode();
-        viewDeckCode(deckCode);
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(getDeckShareUrl(deckCode));
         notificationService.instance?.addNotification({
           content: 'Share link copied to clipboard',
           duration: 3000,
@@ -202,11 +204,21 @@ export class DeckView extends LitElement {
       case 'export':
         this.exportDeck();
         break;
+      case 'change':
+        this.dispatchEvent(
+          new CustomEvent('change-division-clicked', {composed: true})
+        );
+        break;
       case 'clear':
         this.resetDeck();
         break;
       case 'share':
         this.shareDeck();
+        break;
+      case 'view':
+        this.dispatchEvent(
+          new CustomEvent('summary-clicked', {composed: true})
+        );
         break;
     }
   }
@@ -256,23 +268,32 @@ export class DeckView extends LitElement {
 
       let displayWarningOnCost = false;
 
-      let warningText = "Typical decks should be under 14500 points"
+      let warningText = 'Typical decks should be under 14500 points';
       if (unitCosts > warningUpperThreshold) {
         displayWarningOnCost = true;
-        warningText = "Typical decks should be under 14500 points"
-      }
-      else if (unitCosts < warningLowerThreshold) {
+        warningText = 'Typical decks should be under 14500 points';
+      } else if (unitCosts < warningLowerThreshold) {
         displayWarningOnCost = true;
-        warningText = "Typical decks should be more than 12000 points"
+        warningText = 'Typical decks should be more than 12000 points';
       }
-
-
 
       return html` <div class="deck">
         <div class="deck-header">
-          <h3 class="deck-title">
-            ${this.deck.division.name ?? this.deck.division.descriptor}
-          </h3>
+          <div class="deck-header-row">
+            <h3 class="deck-title">
+              ${this.deck.division.name ?? this.deck.division.descriptor}
+            </h3>
+            ${this.showClose
+              ? html`<vaadin-button
+                  @click=${() =>
+                    this.dispatchEvent(new CustomEvent('close-clicked'))}
+                  theme="icon tertiary"
+                  aria-label="close drawer"
+                  ><vaadin-icon icon="vaadin:close"></vaadin-icon
+                ></vaadin-button>`
+              : html``}
+          </div>
+
           <div class="deck-header-row">
             <span class="activation-points">
               ${this.deck.totalSpentActivationPoints} /
@@ -306,7 +327,23 @@ export class DeckView extends LitElement {
                         true
                       ),
                     },
+                    {
+                      component: this.createItem(
+                        'eye',
+                        'View deck',
+                        'view',
+                        true
+                      ),
+                    },
                     {component: 'hr'},
+                    {
+                      component: this.createItem(
+                        'exchange',
+                        'Change division',
+                        'change',
+                        true
+                      ),
+                    },
                     {
                       component: this.createItem(
                         'trash',
@@ -403,7 +440,7 @@ export class DeckView extends LitElement {
             ${deck.getTotalSlotsForCategory(category)} slots
           </div>
           <div class="total-points-in-category">
-            Points: ${deck.getSumOfUnitCostsForCategory(category)} points
+            ${deck.getSumOfUnitCostsForCategory(category)} points
           </div>
         </div>
         <div class="deck-category-heading-row">

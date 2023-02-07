@@ -6,16 +6,13 @@ import {UnitsDatabaseService} from '../services/units-db';
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
 import { getAllianceNameFromDescriptor } from '../utils/get-alliance-name-from-descriptor';
-
-// @ts-ignore
-import DeckBuilderJson from '../../data/deckbuilder-data-test.json';
 import {Division, DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
 import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
 import '../components/division-flag';
-import '@vaadin/text-area';
+import '../components/deck/summary-view';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -149,6 +146,12 @@ export class DeckBuilderRoute
   @state()
   deckToEdit?: Deck;
 
+  /**
+   * Whether to show in display mode, this is where you can not edit the deck anymore
+   */
+  @state()
+  displayMode = false;
+
 
   /**
    * Converts unit array in to a map to be used by the edit-deck component
@@ -180,6 +183,7 @@ export class DeckBuilderRoute
 
       this.selectedDivision = deckFromString.division;
       this.deckToEdit = deckFromString;
+      this.displayMode = true;
   
     }
   }
@@ -222,7 +226,14 @@ export class DeckBuilderRoute
     }
   }
 
+  resetDivision() {
+    this.deckToEdit = undefined;
+  }
+
   render(): TemplateResult {
+    if(this.displayMode && this.deckToEdit) {
+      return this.renderDisplayMode(this.deckToEdit);
+    }
     if (this.deckToEdit) {
       return this.renderDeckEditor(this.deckToEdit);
     }
@@ -230,9 +241,13 @@ export class DeckBuilderRoute
     return this.renderDivisionSelection();
   }
 
+  renderDisplayMode(deck: Deck) {
+    return html`<summary-view @edit-clicked=${() => this.displayMode = false} .deck=${deck}></summary-view>`
+  }
+
 
   renderDeckEditor(deck: Deck): TemplateResult {
-    return html`<edit-deck @deck-cleared=${this.clearDeckParameters} .deck=${deck}></edit-deck>`;
+    return html`<edit-deck @change-division-clicked=${() => this.resetDivision()} @summary-clicked=${() => this.displayMode = true} @deck-cleared=${this.clearDeckParameters} .deck=${deck}></edit-deck>`;
   }
   
 
