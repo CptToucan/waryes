@@ -13,6 +13,7 @@ import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
 import '../components/division-flag';
 import '../components/deck/summary-view';
+import { notificationService } from '../services/notification';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -176,14 +177,24 @@ export class DeckBuilderRoute
     const deckCode = params.get("code");
 
     if(deckCode) {
-      const deckFromString = Deck.fromDeckCode(deckCode, {
-        unitMap: units,
-        divisions: this.availableDivisions
-      });
+      try {
+        const deckFromString = Deck.fromDeckCode(deckCode, {
+          unitMap: units,
+          divisions: this.availableDivisions
+        });
+  
+        this.selectedDivision = deckFromString.division;
+        this.deckToEdit = deckFromString;
+        this.displayMode = true;
+      }
+      catch(err) {
+        notificationService.instance?.addNotification({
+          duration: 10000,
+          content: "Unable to load deck code, please report this deck code on the WarYes discord.",
+          theme: 'error',
+        });
+      }
 
-      this.selectedDivision = deckFromString.division;
-      this.deckToEdit = deckFromString;
-      this.displayMode = true;
   
     }
   }
