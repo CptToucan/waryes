@@ -53,7 +53,8 @@ export class DivisionFlag extends LitElement {
 
   render(): TemplateResult {
     const icon = this.division?.descriptor ? ICONS_DIVISION_MAP[this.division.descriptor] : '';
-    return html`<img width="40" src=${icon} alt=${ this.division?.name ?? this.division?.descriptor ?? 'invalid division' } />`;
+    const displayName = this.division?.name ?? this.division?.descriptor ?? 'invalid division'
+    return html`<img width="40" src=${icon} alt=${ displayName } title=${displayName} />`;
   }
 }
 
