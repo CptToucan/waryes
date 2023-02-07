@@ -5,7 +5,7 @@ import '@vaadin/scroller';
 import {UnitsDatabaseService} from '../services/units-db';
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
-import { getAllianceNameFromDescriptor } from '../utils/get-alliance-name-from-descriptor';
+import {getAllianceNameFromDescriptor} from '../utils/get-alliance-name-from-descriptor';
 import {Division, DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
@@ -13,7 +13,7 @@ import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
 import '../components/division-flag';
 import '../components/deck/summary-view';
-import { notificationService } from '../services/notification';
+import {notificationService} from '../services/notification';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -73,7 +73,6 @@ export class DeckBuilderRoute
         font-size: var(--lumo-font-size-xxl);
       }
 
-
       button.division-selector {
         border-radius: var(--lumo-border-radius-m);
         padding: var(--lumo-space-l);
@@ -87,14 +86,12 @@ export class DeckBuilderRoute
         overflow-x: hidden;
         overflow-y: hidden;
         white-space: nowrap;
-        
       }
 
       button.division-selector span {
         text-overflow: ellipsis;
         overflow-x: hidden;
         white-space: nowrap;
-
       }
 
       button:hover {
@@ -153,7 +150,6 @@ export class DeckBuilderRoute
   @state()
   displayMode = false;
 
-
   /**
    * Converts unit array in to a map to be used by the edit-deck component
    */
@@ -172,30 +168,32 @@ export class DeckBuilderRoute
       alphabeticalCompare
     );
 
-
     const params = new URLSearchParams(location.search);
-    const deckCode = params.get("code");
+    const deckCode = params.get('code');
 
-    if(deckCode) {
+    if (deckCode) {
       try {
         const deckFromString = Deck.fromDeckCode(deckCode, {
           unitMap: units,
-          divisions: this.availableDivisions
+          divisions: this.availableDivisions,
         });
-  
+
         this.selectedDivision = deckFromString.division;
         this.deckToEdit = deckFromString;
         this.displayMode = true;
+      } catch (err) {
+        console.error(err);
+        setTimeout(
+          () =>
+            notificationService.instance?.addNotification({
+              duration: 10000,
+              content:
+                'Unable to load deck code, please report this deck code on the WarYes discord.',
+              theme: 'error',
+            }),
+          1000
+        );
       }
-      catch(err) {
-        notificationService.instance?.addNotification({
-          duration: 10000,
-          content: "Unable to load deck code, please report this deck code on the WarYes discord.",
-          theme: 'error',
-        });
-      }
-
-  
     }
   }
 
@@ -226,7 +224,7 @@ export class DeckBuilderRoute
   }
 
   clearDeckParameters() {
-    Router.go("/deck-builder")
+    Router.go('/deck-builder');
   }
 
   selectDivision(division: Division) {
@@ -242,7 +240,7 @@ export class DeckBuilderRoute
   }
 
   render(): TemplateResult {
-    if(this.displayMode && this.deckToEdit) {
+    if (this.displayMode && this.deckToEdit) {
       return this.renderDisplayMode(this.deckToEdit);
     }
     if (this.deckToEdit) {
@@ -253,14 +251,20 @@ export class DeckBuilderRoute
   }
 
   renderDisplayMode(deck: Deck) {
-    return html`<summary-view @edit-clicked=${() => this.displayMode = false} .deck=${deck}></summary-view>`
+    return html`<summary-view
+      @edit-clicked=${() => (this.displayMode = false)}
+      .deck=${deck}
+    ></summary-view>`;
   }
-
 
   renderDeckEditor(deck: Deck): TemplateResult {
-    return html`<edit-deck @change-division-clicked=${() => this.resetDivision()} @summary-clicked=${() => this.displayMode = true} @deck-cleared=${this.clearDeckParameters} .deck=${deck}></edit-deck>`;
+    return html`<edit-deck
+      @change-division-clicked=${() => this.resetDivision()}
+      @summary-clicked=${() => (this.displayMode = true)}
+      @deck-cleared=${this.clearDeckParameters}
+      .deck=${deck}
+    ></edit-deck>`;
   }
-  
 
   renderDivisionSelection(): TemplateResult {
     return html`<div class="container">
@@ -273,7 +277,10 @@ export class DeckBuilderRoute
           >
             <country-flag .country=${div.country}></country-flag>
             <division-flag .division=${div}></division-flag>
-            <span>${getAllianceNameFromDescriptor(div.alliance)} - ${div.name ?? div.descriptor}</span>
+            <span
+              >${getAllianceNameFromDescriptor(div.alliance)} -
+              ${div.name ?? div.descriptor}</span
+            >
           </button>`;
         })}
       </div>
@@ -290,7 +297,6 @@ function alphabeticalCompare(a: Division, b: Division) {
   }
   return 0;
 }
-
 
 declare global {
   interface HTMLElementTagNameMap {
