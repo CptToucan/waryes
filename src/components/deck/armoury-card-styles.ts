@@ -137,4 +137,20 @@ export const armouryCardStyles = css` :host {
   justify-content: center;
   align-items: center;
   color: var(--lumo-contrast-70pct);
-}`
+}
+
+.unitSubIcon {
+  font-size: 24px; 
+  position: absolute; 
+  left: 60%; 
+  bottom:0;
+}
+
+.unitSubIcon.smaller {
+  font-size: 20px;
+}
+
+.unitSubIcon.transport {
+  left:45%;
+}
+`

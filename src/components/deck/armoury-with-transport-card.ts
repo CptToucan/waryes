@@ -3,7 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {Deck} from '../../classes/deck';
 import {Pack} from '../../types/deck-builder';
 import {Unit} from '../../types/unit';
-import {getIconForUnit} from '../../utils/get-icon-for-unit';
+import {getIconForUnit, getSubIconForUnit} from '../../utils/get-icon-for-unit';
 import {ArmouryCard} from './armoury-card';
 import './transport-selection';
 
@@ -86,10 +86,21 @@ export class ArmouryWithTransportCard extends ArmouryCard {
   }
 
   renderUnitIcon(unit: Unit) {
-    const unitIcon = html`<vaadin-icon
+    let subIcon = null;
+    if (unit.category === 'air' || unit.category === 'hel' || unit.category === 'rec' ) {
+      const subIconSvg = getSubIconForUnit(unit);
+      subIcon = html`<vaadin-icon
+        class="unitSubIcon smaller ${this.transport ? 'transport' : '' }"
+        icon="${subIconSvg}"
+      ></vaadin-icon>`;
+    }
+
+    const unitIcon = html`<div></div><vaadin-icon
       class="category-icon"
       icon=${getIconForUnit(unit)}
-    ></vaadin-icon>`;
+    ></vaadin-icon>
+      ${subIcon}
+    </div>`;
 
     if (this.transport) {
       return html`${unitIcon}

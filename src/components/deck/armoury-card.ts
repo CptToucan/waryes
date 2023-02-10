@@ -3,7 +3,7 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {Unit} from '../../types/unit';
 import '@vaadin/dialog';
-import {getIconForUnit} from '../../utils/get-icon-for-unit';
+import {getIconForUnit, getSubIconForUnit} from '../../utils/get-icon-for-unit';
 import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 import {Pack} from '../../types/deck-builder';
 import {Deck} from '../../classes/deck';
@@ -163,11 +163,23 @@ export class ArmouryCard extends LitElement {
   renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
     if (unit) {
       const icon = getIconForUnit(unit);
+      let subIcon = null;
+      if (unit.category === 'air' || unit.category === 'hel' || unit.category === 'rec' ) {
+        const subIconSvg = getSubIconForUnit(unit);
+        subIcon = html`<vaadin-icon
+          class="unitSubIcon"
+          icon="${subIconSvg}"
+        ></vaadin-icon>`;
+      }
 
-      return html` <vaadin-icon
+      return html`<div>
+        <vaadin-icon
         style="font-size: 48px;"
         icon="${icon}"
-      ></vaadin-icon>`;
+        >
+      </vaadin-icon>
+      ${subIcon}
+      </div> `;
     } else {
       return html`<vaadin-icon
         style="font-size: 48px;"
