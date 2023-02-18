@@ -16,8 +16,8 @@ import {notificationService} from '../services/notification';
 import WaryesImage from '../../images/waryes-transparent.png';
 import {router} from '../services/router';
 import {ifDefined} from 'lit/directives/if-defined.js';
-import { Features, featureService } from '../services/features';
-
+import {Features, featureService} from '../services/features';
+import {Unit} from '../types/unit';
 interface MenuItem {
   name: string;
   icon: string;
@@ -54,17 +54,17 @@ const defaultMenu: MenuDefinition = {
     {
       name: 'Deck Builder',
       icon: 'vaadin:tools',
-      href: '/deck-builder'
+      href: '/deck-builder',
     },
     {
       name: 'Import Deck',
       icon: 'vaadin:code',
-      href: '/deck-import'
+      href: '/deck-import',
     },
     {
       name: 'Discord',
       icon: 'vaadin:comments',
-      href: 'https://discord.gg/gqBgvgGj8H'
+      href: 'https://discord.gg/gqBgvgGj8H',
     },
   ],
   guest: [
@@ -86,19 +86,19 @@ const defaultMenu: MenuDefinition = {
     {
       name: 'Deck Builder',
       icon: 'vaadin:tools',
-      href: '/deck-builder'
+      href: '/deck-builder',
     },
     {
       name: 'Import Deck',
       icon: 'vaadin:code',
-      href: '/deck-import'
+      href: '/deck-import',
     },
-    
+
     {
       name: 'Discord',
       icon: 'vaadin:comments',
-      href: 'https://discord.gg/gqBgvgGj8H'
-    }
+      href: 'https://discord.gg/gqBgvgGj8H',
+    },
   ],
 };
 
@@ -132,6 +132,22 @@ export class AuthenticatedMenu extends LitElement {
           flex: 1 1 0;
         }
       }
+
+      .left-navbar {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex: 1 1 0;
+        overflow: hidden;
+      }
+
+      unit-search {
+        margin-left: var(--lumo-space-m);
+        flex: 1 1 0px;
+        max-width: 256px;
+        min-width: 0px;
+        width: 0;
+      }
     `;
   }
 
@@ -145,6 +161,12 @@ export class AuthenticatedMenu extends LitElement {
 
   @state()
   selectedMenuItemIndex?: number;
+
+  unitSelected(event: CustomEvent) {
+    if (event.detail.value as Unit) {
+      Router.go(`/unit/${event.detail.value?.descriptorName}`);
+    }
+  }
 
   renderMenuItem: MenuItemRenderer = (menuItem) => {
     return html`
@@ -224,11 +246,21 @@ export class AuthenticatedMenu extends LitElement {
       this.renderMenuItem(item)
     );
 
-    return html` <vaadin-app-layout style="height: 100%; --vaadin-app-layout-drawer-overlay: true" theme="small" .drawerOpened=${false}>
+    return html` <vaadin-app-layout
+      style="height: 100%; --vaadin-app-layout-drawer-overlay: true"
+      theme="small"
+      .drawerOpened=${false}
+    >
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
-        <img height="32" src=${WaryesImage} />
-        ${ featureService.enabled(Features.firebase_auth) ? this.renderAccountButton(): ''}
+        <div class="left-navbar">
+          <img height="32" src=${WaryesImage} />
+          <unit-search @unit-selected=${this.unitSelected}></unit-search>
+        </div>
+
+        ${featureService.enabled(Features.firebase_auth)
+          ? this.renderAccountButton()
+          : ''}
       </div>
       <div class="drawer" slot="drawer">
         <vaadin-tabs

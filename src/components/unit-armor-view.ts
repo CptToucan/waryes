@@ -7,7 +7,7 @@ export class UnitArmorView extends LitElement {
   static get styles() {
     return css`
       .armor-section {
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-s);
       }
 
       p {
@@ -20,7 +20,7 @@ export class UnitArmorView extends LitElement {
         flex-grow: 0;
         justify-content: space-around;
         margin: 0;
-        font-size: var(--lumo-font-size-xxxl);
+        font-size: var(--lumo-font-size-xxl);
         color: var(--lumo-contrast);
         font-weight: bold;
       }
@@ -75,5 +75,11 @@ export class UnitArmorView extends LitElement {
       <p class="armor-value">${value ?? '?'}</p>
       <p class="armor-name">${name}</p>
     </div>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'unit-armor-view': UnitArmorView;
   }
 }
