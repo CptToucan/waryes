@@ -12,14 +12,19 @@ export class UnitSearch extends LitElement {
     return css`
       :host {
         max-width: 512px;
+        display: flex;
       }
 
       vaadin-combo-box,
       vaadin-multi-select-combo-box {
-        font-size: var(--lumo-font-size-xl);
+        font-size: var(--lumo-font-size-l);
         flex: 1 1 0;
         width: 100%;
-        height: var(--lumo-size-xl);
+        margin: 0;
+      }
+
+      vaadin-input-container {
+        height: 1px;
       }
     `;
   }
@@ -107,7 +112,7 @@ export class UnitSearch extends LitElement {
 
   renderMulti() {
     return html` <vaadin-multi-select-combo-box
-      placeholder="Search for Warno unit"
+      placeholder="Search for unit"
       .items=${this.units}
       .selectedItems=${this.selectedUnits}
       @selected-items-changed=${this.multiSelectComboBoxUnitsSelected}
@@ -124,7 +129,7 @@ export class UnitSearch extends LitElement {
       ${this.multi
         ? this.renderMulti()
         : html` <vaadin-combo-box
-            placeholder="Search for Warno unit"
+            placeholder="Search for unit"
             .items=${this.units}
             item-label-path="name"
             @selected-item-changed=${this.comboBoxUnitSelected}

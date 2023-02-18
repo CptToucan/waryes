@@ -2,11 +2,35 @@ import { AbstractFieldMetadata } from "./AbstractFieldMetadata";
 import { NumberFieldMetadata } from "./NumberFieldMetadata";
 import { StringFieldMetadata } from "./StringFieldMetadata";
 
+
+interface AccuracyScaling {
+  distance: number
+  accurancy: number
+}
+
+enum InfoPanelType {
+  DEFAULT = "default",
+  SUPPLY_VEHICLE = "supply-vehicle",
+  TRANSPORT_VEHICLE = "transport-vehicle",
+  INFANTRY = "infantry",
+  PLANE = "plane",
+  HELICOPTER = "helicopter",
+  TRANSPORT_HELICOPTER = "transport-helicopter",
+  SUPPLY_HELICOPTER = "supply-helicopter"
+}
+
 /**
  * This interface should have all of its values defined in FieldMetadata, this is the glue holding field metadata and interface types together
  */
 interface Weapon {
     showInInterface:    boolean
+    heDamageRadius: number | null
+    suppressDamageRadius: number | null
+    fireLeftToRight: boolean
+    numberOfWeapons: number
+    hasTurret: boolean
+    turretRotationSpeed: number
+    traits: string[]
     ammoDescriptorName: string
     weaponName: string
     he?:                number
@@ -17,12 +41,19 @@ interface Weapon {
     aimingTime?:        number
     reloadTime?:        number
     salvoLength?:       number
+    totalHeDamage:      number
+    timeBetweenSalvos:  number
+    ammunitionPerSalvo: number
     rateOfFire?:        number
     salvoIndex:         number
     supplyCost?:        number
     staticAccuracy:     number
     movingAccuracy:     number
+    staticAccuracyScaling: AccuracyScaling[]
+    movingAccuracyScaling: AccuracyScaling[]
     penetration?:       number
+    instaKillAtMaxRangeArmour: number
+
 
     // TODO: Audit / remove
     // old vlaues missing or removed
@@ -38,36 +69,50 @@ interface Weapon {
     // type?:              string,
 }
 
+interface UnitType {
+  nationality: string
+  motherCountry: string
+  formation: string
+}
+
+interface SpeedForTerrain {
+  speed: number
+  name: string
+}
+
 /**
  * This interface should have all of its values defined in FieldMetadata, this is the glue holding field metadata and interface types together
  */
 interface Unit {
-    name: string,
-    category: string,
-    id: string,
-    commandPoints: number,
-    descriptorName:         string,
-    factoryDescriptor:      string,
+    descriptorName:         string
+    name:                   string
+    category:               string
+    id:                     number
+    unitType:               UnitType
+    commandPoints:          number
+    factoryDescriptor:      string
+    frontArmor:             number
+    sideArmor:              number
+    rearArmor:              number
+    topArmor:               number
+    maxDamage:              number
+    speed:                  number
+    speedForTerrains:       SpeedForTerrain[]
+    roadSpeed:              number
+    rotationTime:           number
+    optics?:                number
+    airOptics?:             number
+    stealth?:               number
+    infoPanelType?:         InfoPanelType
+    advancedDeployment?:    number | null
+    fuel?:                  number | null
+    fuelMove?:              number | null
+    supply?:                number | null
+    ecm:                    number | null
+    agility?:               number | null
+    travelTime?:            number | null
     specialities:           string[],
-    frontArmor:             number,
-    sideArmor:              number,
-    rearArmor:              number,
-    topArmor:               number,
-    maxDamage:              number,
-    speed:                  number,
-    roadSpeed:              number,
-    optics?:                number,
-    airOptics?:             number,
-    stealth?:               number,
-    advancedDeployment?:    number,
-    fuel?:                  number,
-    fuelMove?:              number,
-    supply?:                number,
-    ecm:                    number,
-    agility?:               number, 
-    travelTime?:            number,
     weapons:                Weapon[],
-
     _searchNameHelper:      string,
 
     // TODO: Audit / remove
@@ -142,4 +187,4 @@ type UnitMap = {
 }
 
 
-export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap};
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, InfoPanelType};
