@@ -4,6 +4,7 @@ import './unit-armor-view';
 import './unit-weapon-view';
 import './unit-info-panel-view';
 import './trait-badge';
+import './unit-image';
 import '@vaadin/button';
 import {Unit} from '../types/unit';
 import {getIconForSpecialty} from '../utils/get-icon-for-specialty';

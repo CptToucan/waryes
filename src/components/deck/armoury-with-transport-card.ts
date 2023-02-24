@@ -3,7 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {Deck} from '../../classes/deck';
 import {Pack} from '../../types/deck-builder';
 import {Unit} from '../../types/unit';
-import {getIconForUnit, getSubIconForUnit} from '../../utils/get-icon-for-unit';
+import {getIconForUnit} from '../../utils/get-icon-for-unit';
 import {ArmouryCard} from './armoury-card';
 import './transport-selection';
 
@@ -41,18 +41,6 @@ export class ArmouryWithTransportCard extends ArmouryCard {
         font-size: var(--lumo-font-size-s);
       }
 
-      .top-section {
-        height: 64px;
-      }
-
-      .quantity {
-        right: 2.5rem;
-        left: initial;
-        padding-left: var(--lumo-space-xs);
-        padding-right: var(--lumo-space-xs);
-        border-right: 1px solid var(--lumo-contrast-20pct);
-      }
-
       .transport-settings {
         display: flex;
         justify-content: center;
@@ -85,6 +73,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
     this.dispatchEvent(new CustomEvent('unit-removed', {detail: unit}));
   }
 
+  /*
   renderUnitIcon(unit: Unit) {
     let subIcon = null;
     if (unit.category === 'air' || unit.category === 'hel' || unit.category === 'rec' ) {
@@ -112,6 +101,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
 
     return unitIcon;
   }
+  */
 
   renderRemainingQuantity() {
     return html``;

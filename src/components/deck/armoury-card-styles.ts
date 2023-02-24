@@ -70,6 +70,7 @@ export const armouryCardStyles = css` :host {
   bottom: 0;
   right: 0;
   color: var(--lumo-primary-color);
+  font-size: var(--lumo-font-size-s);
 }
 
 .add-button {
@@ -106,6 +107,7 @@ export const armouryCardStyles = css` :host {
   bottom: 0;
   left: 0;
   color: var(--lumo-contrast-70pct);
+  font-size: var(--lumo-font-size-s);
 }
 
 .top-section {
@@ -139,18 +141,9 @@ export const armouryCardStyles = css` :host {
   color: var(--lumo-contrast-70pct);
 }
 
-.unitSubIcon {
-  font-size: 24px; 
-  position: absolute; 
-  left: 60%; 
-  bottom:0;
-}
 
-.unitSubIcon.smaller {
-  font-size: 20px;
-}
 
-.unitSubIcon.transport {
-  left:45%;
+unit-image {
+  margin-bottom: var(--lumo-space-s);
 }
 `

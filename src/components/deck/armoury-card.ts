@@ -3,7 +3,6 @@ import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/icon';
 import {Unit} from '../../types/unit';
 import '@vaadin/dialog';
-import {getIconForUnit, getSubIconForUnit} from '../../utils/get-icon-for-unit';
 import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
 import {Pack} from '../../types/deck-builder';
 import {Deck} from '../../classes/deck';
@@ -152,6 +151,7 @@ export class ArmouryCard extends LitElement {
         class="info-icon-button"
         @click=${() => this.open()}
         aria-label="Show unit info"
+        style="padding: 0;"
       >
         <vaadin-icon icon="vaadin:info-circle-o"></vaadin-icon
       ></vaadin-button>
@@ -160,6 +160,7 @@ export class ArmouryCard extends LitElement {
     `;
   }
 
+  /*
   renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
     if (unit) {
       const icon = getIconForUnit(unit);
@@ -186,6 +187,11 @@ export class ArmouryCard extends LitElement {
         icon="$vaadin:question"
       ></vaadin-icon>`;
     }
+  }
+  */
+
+  renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
+    return html`<unit-image .unit=${unit}></unit-image>`
   }
 
   renderUnitModal(_unit: Unit) {
