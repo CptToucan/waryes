@@ -1,26 +1,5 @@
 import { Unit } from "../types/unit";
-
-type IconMap = {
-  [key: string]: string;
-};
-
-const iconMap: IconMap = {
-  hq: 'command',
-  hq_veh: 'command',
-  hq_inf: 'command',
-  hq_tank: 'command',
-  reco: 'recon',
-  AT: 'at',
-  supply: 'supply',
-  transport: 'transport',
-  infantry: 'infantry',
-  engineer: 'assault-infantry',
-  mortar: 'mortar',
-  howitzer: 'artillery',
-  armor: 'tank',
-  AA: 'aa',
-  sead: 'sead',
-};
+import { getIconForSpecialty, iconMap } from "./get-icon-for-specialty";
 
 export function getIconForUnit(unit: Unit) {
   let icon: string;
@@ -30,8 +9,8 @@ export function getIconForUnit(unit: Unit) {
     icon = 'helicopter';
   } else if (unit.category === 'rec') {
     icon = 'recon';
-  } else if (unit.specialities && iconMap[unit.specialities[0]] !== undefined) {
-    icon = iconMap[unit.specialities[0]];
+  } else if (unit.specialities && getIconForSpecialty(unit.specialities[0]) !== undefined) {
+    icon = getIconForSpecialty(unit.specialities[0]);
   } else {
     icon = 'support';
   }

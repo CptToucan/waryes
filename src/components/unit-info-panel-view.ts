@@ -1,12 +1,12 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {InfoPanelType, Unit} from '../types/unit';
-import { displayAmphibious } from '../utils/unit-stats/display-amphibious';
+import {displayAmphibious} from '../utils/unit-stats/display-amphibious';
 import '@vaadin/tabs';
-import { displaySpeed } from '../utils/unit-stats/display-speed';
-import { displayDistance } from '../utils/unit-stats/display-distance';
-import { displayFuel } from '../utils/unit-stats/display-fuel';
-import { displayTime } from '../utils/unit-stats/display-time';
+import {displaySpeed} from '../utils/unit-stats/display-speed';
+import {displayDistance} from '../utils/unit-stats/display-distance';
+import {displayFuel} from '../utils/unit-stats/display-fuel';
+import {displayTime} from '../utils/unit-stats/display-time';
 
 interface PanelItem {
   display: string;
@@ -20,7 +20,9 @@ export class UnitInfoPanelView extends LitElement {
       :host {
         color: var(--lumo-contrast-90pct);
         font-size: var(--lumo-font-size-xxs);
-        
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
       }
 
       .info-row {
@@ -40,10 +42,8 @@ export class UnitInfoPanelView extends LitElement {
         color: var(--lumo-contrast-60pct);
       }
 
-
       .stat:not(:last-child) {
         border-right: 1px dotted var(--lumo-contrast-30pct);
-
       }
     `;
   }
@@ -53,13 +53,15 @@ export class UnitInfoPanelView extends LitElement {
 
   getLayoutForPanelType(type: InfoPanelType, unit: Unit): PanelItem[][] {
     let panel: PanelItem[][] = [];
-    console.log(type);
     switch (type) {
       case InfoPanelType.DEFAULT:
         panel = this.defaultPanel(unit);
         break;
       case InfoPanelType.INFANTRY:
         panel = this.infantryPanel(unit);
+        break;
+      case InfoPanelType.HELICOPTER:
+        panel = this.helicopterPanel(unit);
         break;
       case InfoPanelType.TRANSPORT_HELICOPTER:
         panel = this.transportHelicopterPanel(unit);
@@ -89,14 +91,21 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'Amphibious', value: displayAmphibious(unit)   },
+        {display: 'Amphibious', value: displayAmphibious(unit)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Road Speed', value: displaySpeed(unit.roadSpeed)},
       ],
       [
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
         {display: 'Fuel', value: displayFuel(unit.fuel)},
-        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
+      ],
+      [
+        {display: 'Smoke', value: unit.hasDefensiveSmoke},
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
     ];
   }
@@ -109,8 +118,12 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
         {display: 'Speed', value: displaySpeed(unit.speed)},
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
     ];
   }
@@ -129,7 +142,11 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Fuel', value: displayFuel(unit.fuel)},
-        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
     ];
   }
@@ -152,9 +169,15 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Fuel', value: displayFuel(unit.fuel)},
-        {display: 'Adv. Deploy', value: unit.advancedDeployment},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
         {display: 'Supply', value: unit.supply},
       ],
+      [
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
+      ]
     ];
   }
 
@@ -166,13 +189,17 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'Amphibious', value:  displayAmphibious(unit)},
+        {display: 'Amphibious', value: displayAmphibious(unit)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Road Speed', value: displaySpeed(unit.roadSpeed)},
       ],
       [
-        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
         {display: 'Supply', value: unit.supply},
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
     ];
   }
@@ -185,14 +212,34 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'ECM', value: unit.ecm},
       ],
       [
-        {display: 'Agility', value: unit.agility},
-        {display: 'Travel Time', value: unit.travelTime},
-        {display: 'Speed', value: unit.speed},
+        {display: 'Turn Radius', value: displayDistance(unit.agility)},
+        {display: 'Travel Time', value: displayTime(unit.travelTime)},
+        {display: 'Speed', value: displaySpeed(unit.speed)},
       ],
       [
-        {display: 'Move Time', value: unit.fuelMove},
-        {display: 'Fuel', value: unit.fuel},
+        {display: 'Move Time', value: displayTime(unit.fuelMove)},
+        {display: 'Fuel', value: displayFuel(unit.fuel)},
       ],
+    ];
+  }
+
+  helicopterPanel(unit: Unit): PanelItem[][] {
+    return [
+      [
+        {display: 'Max Dmg', value: unit.maxDamage},
+        {display: 'Optics', value: unit.optics},
+        {display: 'Stealth', value: unit.stealth},
+      ],
+      [
+        {display: 'ECM', value: unit.ecm},
+        {display: 'Speed', value: displaySpeed(unit.speed)},
+        {display: 'Move Time', value: displayTime(unit.fuelMove)},
+      ],
+      [
+        {display: 'Fuel', value: displayFuel(unit.fuel)},
+        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
+      ]
     ];
   }
 
@@ -211,15 +258,20 @@ export class UnitInfoPanelView extends LitElement {
   }
 
   render(): TemplateResult {
-    if (this.unit?.infoPanelType) {
-      const panelLayout = this.getLayoutForPanelType(
-        this.unit.infoPanelType,
-        this.unit
-      );
-      return this.renderPanelDisplay(panelLayout);
-    }
+    try {
+      if (this.unit?.infoPanelType) {
+        const panelLayout = this.getLayoutForPanelType(
+          this.unit.infoPanelType,
+          this.unit
+        );
+        return this.renderPanelDisplay(panelLayout);
+      }
 
-    return html`ERROR`;
+      return html`?`;
+    } catch (err) {
+      console.error(err);
+      return html`ERROR`;
+    }
   }
 }
 

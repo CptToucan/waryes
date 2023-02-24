@@ -1,11 +1,23 @@
 import { AbstractFieldMetadata } from "./AbstractFieldMetadata";
+import { Country } from "./deck-builder";
 import { NumberFieldMetadata } from "./NumberFieldMetadata";
 import { StringFieldMetadata } from "./StringFieldMetadata";
 
 
 interface AccuracyScaling {
   distance: number
-  accurancy: number
+  accuracy: number
+}
+
+interface MissileProperties {
+  maxMissileAcceleration: number
+  maxMissileSpeed: number
+}
+
+interface SmokeProperties {
+  altitude: number
+  lifeSpan: number
+  radius: number
 }
 
 enum InfoPanelType {
@@ -24,8 +36,6 @@ enum InfoPanelType {
  */
 interface Weapon {
     showInInterface:    boolean
-    heDamageRadius: number | null
-    suppressDamageRadius: number | null
     fireLeftToRight: boolean
     numberOfWeapons: number
     hasTurret: boolean
@@ -34,7 +44,9 @@ interface Weapon {
     ammoDescriptorName: string
     weaponName: string
     he?:                number
+    heDamageRadius: number | null
     suppress?:          number
+    suppressDamagesRadius: number | null
     groundRange?:       number
     helicopterRange?:   number
     planeRange?:        number
@@ -42,6 +54,7 @@ interface Weapon {
     reloadTime?:        number
     salvoLength?:       number
     totalHeDamage:      number
+    // this is actually time between shots
     timeBetweenSalvos:  number
     ammunitionPerSalvo: number
     rateOfFire?:        number
@@ -49,10 +62,13 @@ interface Weapon {
     supplyCost?:        number
     staticAccuracy:     number
     movingAccuracy:     number
-    staticAccuracyScaling: AccuracyScaling[]
-    movingAccuracyScaling: AccuracyScaling[]
+    staticAccuracyScaling?: AccuracyScaling[]
+    movingAccuracyScaling?: AccuracyScaling[]
     penetration?:       number
     instaKillAtMaxRangeArmour: number
+    trueRateOfFire: number
+    missileProperties?: MissileProperties
+    smokeProperties?: SmokeProperties
 
 
     // TODO: Audit / remove
@@ -71,7 +87,7 @@ interface Weapon {
 
 interface UnitType {
   nationality: string
-  motherCountry: string
+  motherCountry: Country
   formation: string
 }
 
@@ -111,9 +127,10 @@ interface Unit {
     ecm:                    number | null
     agility?:               number | null
     travelTime?:            number | null
-    specialities:           string[],
-    weapons:                Weapon[],
-    _searchNameHelper:      string,
+    hasDefensiveSmoke:      boolean
+    specialities:           string[]
+    weapons:                Weapon[]
+    _searchNameHelper:      string
 
     // TODO: Audit / remove
     // old values missing or removed
@@ -187,4 +204,4 @@ type UnitMap = {
 }
 
 
-export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, InfoPanelType};
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, InfoPanelType, MissileProperties, SmokeProperties};

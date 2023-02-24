@@ -239,7 +239,7 @@ export class ComparisonRoute extends LitElement {
       for (const field of this.masterState?.fields || []) {
         let fieldValue;
         if (field.fieldType === UnitFieldType.UNIT) {
-          fieldValue = unitWeapon?.unit[field.id as keyof Unit];
+          fieldValue = unit[field.id as keyof Unit];
         } else if (field.fieldType === UnitFieldType.WEAPON) {
           fieldValue = unitWeapon?.weapon[field.id as keyof Weapon];
         }
@@ -306,7 +306,7 @@ export class ComparisonRoute extends LitElement {
         },
       ],
     };
-
+    console.log(JSON.stringify(seriesData))
     return chartOption;
   }
 

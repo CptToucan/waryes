@@ -1,5 +1,5 @@
 export function displayDistance(distance?:string | number | null) {
-  if(distance == undefined) {
+  if(distance == undefined || distance == null) {
     distance = 0;
   }
 
