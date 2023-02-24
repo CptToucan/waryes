@@ -44,7 +44,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
   render(): TemplateResult {
     return html`
     <div class='unit-view'>
-      <unit-card .unit=${this.unit}></unit-card>
+      <unit-card .unit=${this.unit} ?expert=${true}></unit-card>
     </div>
     `;
   }

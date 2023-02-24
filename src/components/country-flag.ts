@@ -12,7 +12,13 @@ import { Country } from '../types/deck-builder';
 @customElement('country-flag')
 export class CountryFlag extends LitElement {
   static get styles() {
-    return css``;
+    return css`
+      :host {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    `;
   }
 
   @property()

@@ -57,7 +57,7 @@ export class EChart extends LitElement {
         this.echartsInstance.resize();
       }
 
-    }, 1000);
+    }, 0);
   }
 
   connectedCallback() {
@@ -433,3 +433,9 @@ const theme = {
     },
   },
 };
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'e-chart': EChart;
+  }
+}
