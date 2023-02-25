@@ -22,8 +22,6 @@
   font-weight: lighter;
 }
 
-
-
 html {
   font-family: var(--lumo-font-family);
   --lumo-font-family: Orbitron;
@@ -38,16 +36,15 @@ main {
   height: 100%;
 }
 
-html[theme~="dark"] {
+html[theme~='dark'] {
   --lumo-base-color: hsl(240, 7%, 11%);
   --lumo-primary-text-color: hsl(305, 100%, 56%);
   --lumo-primary-color: hsl(305, 100%, 56%);
   --lumo-primary-color-50pct: hsla(305, 90%, 70%, 0.69);
---lumo-primary-color-10pct: hsla(305, 90%, 55%, 0.13);
-  --lumo-body-text-color: #FDFD55;
+  --lumo-primary-color-10pct: hsla(305, 90%, 55%, 0.13);
+  --lumo-body-text-color: #fdfd55;
   --lumo-clickable-cursor: pointer;
 }
-
 
 vaadin-dialog-overlay::part(header) {
   padding: 0;
@@ -68,7 +65,25 @@ vaadin-dialog-overlay::part(content) {
   max-width: 600px;
 }
 
-
-div[slot=header-content] {
+div[slot='header-content'] {
   background-color: red !important;
+}
+
+.unit-search-result {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.unit-search-result > .unit-information {
+  display: flex;
+  align-items: center;
+  margin-top: var(--lumo-space-s);
+}
+
+.unit-search-result > .unit-image-wrapper {
+  margin-right: var(--lumo-space-s);
+}
+
+.unit-search-result > .unit-image-wrapper > unit-image {
+  width: 100px;
 }

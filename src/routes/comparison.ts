@@ -443,7 +443,7 @@ export class ComparisonRoute extends LitElement {
 
       <div class="units-grid">
         ${this.masterState?.units.map(
-          (unit) => html`<unit-card .unit=${unit}></unit-card>`
+          (unit) => html`<unit-card .unit=${unit} .showImage=${true}></unit-card>`
         )}
       </div>
     </vaadin-scroller>`;
