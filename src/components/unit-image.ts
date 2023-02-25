@@ -11,10 +11,12 @@ export class UnitImage extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 150px;
       }
 
       img {
         border-radius: var(--lumo-border-radius-m);
+        width: 100%;
       }
 
       .unit-sub-icon {
@@ -74,7 +76,7 @@ export class UnitImage extends LitElement {
       ${this.showFallback
         ? iconHtml
         : html` <img
-            width="150"
+
             src="/images/units/${this.unit?.descriptorName}.png"
             alt=${this.unit?.name}
             title=${this.unit?.name}
