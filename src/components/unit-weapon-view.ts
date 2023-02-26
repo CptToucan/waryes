@@ -34,7 +34,7 @@ export class UnitWeaponView extends LitElement {
       }
 
       vaadin-tabs [part='tabs'] {
-        -webkit-overflow-scrolling: auto !important;
+        -webkit-overflow-scrolling: unset !important;
       }
     `;
   }
