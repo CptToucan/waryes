@@ -78,7 +78,7 @@ export class UnitWeaponView extends LitElement {
       return html`
         <vaadin-tabs
           theme="equal-width-tabs center"
-          style="max-width: 100%; "
+          style="max-width: 100%; -webkit-overflow-scrolling: auto !important;"
           @selected-changed="${this.selectedWeaponTabChanged}"
         >
           ${this.renderWeaponTabs()}
