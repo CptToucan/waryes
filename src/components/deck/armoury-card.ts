@@ -160,36 +160,6 @@ export class ArmouryCard extends LitElement {
     `;
   }
 
-  /*
-  renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
-    if (unit) {
-      const icon = getIconForUnit(unit);
-      let subIcon = null;
-      if (unit.category === 'air' || unit.category === 'hel' || unit.category === 'rec' ) {
-        const subIconSvg = getSubIconForUnit(unit);
-        subIcon = html`<vaadin-icon
-          class="unitSubIcon"
-          icon="${subIconSvg}"
-        ></vaadin-icon>`;
-      }
-
-      return html`<div>
-        <vaadin-icon
-        style="font-size: 48px;"
-        icon="${icon}"
-        >
-      </vaadin-icon>
-      ${subIcon}
-      </div> `;
-    } else {
-      return html`<vaadin-icon
-        style="font-size: 48px;"
-        icon="$vaadin:question"
-      ></vaadin-icon>`;
-    }
-  }
-  */
-
   renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
     return html`<unit-image .unit=${unit}></unit-image>`
   }
