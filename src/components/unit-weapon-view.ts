@@ -33,7 +33,7 @@ export class UnitWeaponView extends LitElement {
         text-decoration: underline;
       }
 
-      .tabs-override [part='tabs'] {
+      vaadin-tabs [part='tabs'] {
         -webkit-overflow-scrolling: auto !important;
       }
     `;
@@ -81,7 +81,6 @@ export class UnitWeaponView extends LitElement {
       weaponMetadata = this.unit.weapons[this.selectedWeapon];
       return html`
         <vaadin-tabs
-          class="tabs-override"
           theme="equal-width-tabs center"
           style="max-width: 100%;"
           @selected-changed="${this.selectedWeaponTabChanged}"
