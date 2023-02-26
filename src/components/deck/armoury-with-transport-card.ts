@@ -37,6 +37,10 @@ export class ArmouryWithTransportCard extends ArmouryCard {
         justify-content: space-between;
       }
 
+      .details-row vaadin-icon {
+        margin-right: var(--lumo-space-xs);
+      }
+
       .details-row > span {
         font-size: var(--lumo-font-size-s);
       }
@@ -72,36 +76,6 @@ export class ArmouryWithTransportCard extends ArmouryCard {
   clickedRemoveButton(unit: Unit) {
     this.dispatchEvent(new CustomEvent('unit-removed', {detail: unit}));
   }
-
-  /*
-  renderUnitIcon(unit: Unit) {
-    let subIcon = null;
-    if (unit.category === 'air' || unit.category === 'hel' || unit.category === 'rec' ) {
-      const subIconSvg = getSubIconForUnit(unit);
-      subIcon = html`<vaadin-icon
-        class="unitSubIcon smaller ${this.transport ? 'transport' : '' }"
-        icon="${subIconSvg}"
-      ></vaadin-icon>`;
-    }
-
-    const unitIcon = html`<div></div><vaadin-icon
-      class="category-icon"
-      icon=${getIconForUnit(unit)}
-    ></vaadin-icon>
-      ${subIcon}
-    </div>`;
-
-    if (this.transport) {
-      return html`${unitIcon}
-        <vaadin-icon
-        class="category-icon"
-          icon=${getIconForUnit(this.transport)}
-        ></vaadin-icon>`;
-    }
-
-    return unitIcon;
-  }
-  */
 
   renderRemainingQuantity() {
     return html``;

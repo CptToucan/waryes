@@ -15,7 +15,7 @@ export function getIconForUnit(unit: Unit) {
     icon = 'support';
   }
 
-  return `waryes-svg:${icon}`;
+  return `waryes:${icon}`;
 }
 
 export function getSubIconForUnit(unit: Unit) {
@@ -39,5 +39,5 @@ export function getSubIconForUnit(unit: Unit) {
     icon = 'support';
   }
 
-  return `waryes-svg:${icon}`;
+  return `waryes:${icon}`;
 }

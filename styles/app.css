@@ -71,7 +71,13 @@ div[slot='header-content'] {
 
 .unit-search-result {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  font-size: var(--lumo-font-size-xs);
+
+}
+
+vaadin-combo-box-item {
+  border-bottom: 1px dotted var(--lumo-contrast-30pct);
 }
 
 .unit-search-result > .unit-information {
@@ -84,6 +90,20 @@ div[slot='header-content'] {
   margin-right: var(--lumo-space-s);
 }
 
-.unit-search-result > .unit-image-wrapper > unit-image {
-  width: 100px;
+.unit-search-result unit-image {
+  width: 80px;
+}
+
+.unit-search-result .unit-name {
+  font-size: var(--lumo-font-size-xs)
+}
+
+.unit-graphics {
+  display: flex;
+}
+
+.unit-search-result country-flag {
+  margin-right: var(--lumo-space-s);
+  width: 60px;
+  border-radius: 10px;
 }

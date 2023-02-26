@@ -1,7 +1,7 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
-import {getIconForUnit, getSubIconForUnit} from '../utils/get-icon-for-unit';
+import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
 
 @customElement('unit-image')
 export class UnitImage extends LitElement {
@@ -19,11 +19,8 @@ export class UnitImage extends LitElement {
         width: 100%;
       }
 
-      .unit-sub-icon {
+      vaadin-icon {
         font-size: 24px;
-        position: absolute;
-        left: 60%;
-        bottom: 0;
       }
 
       .unit-sub-icon.smaller {
@@ -32,6 +29,11 @@ export class UnitImage extends LitElement {
 
       .unit-sub-icon.transport {
         left: 45%;
+      }
+
+      .icon-wrapper {
+        display: flex;
+        align-items: center;
       }
     `;
   }
@@ -46,23 +48,19 @@ export class UnitImage extends LitElement {
     let iconHtml: TemplateResult;
     if (this.unit) {
       const unit = this.unit;
-      const icon = getIconForUnit(unit);
 
-      let subIcon = null;
-      if (
-        unit.category === 'air' ||
-        unit.category === 'hel' ||
-        unit.category === 'rec'
-      ) {
-        const subIconSvg = getSubIconForUnit(unit);
+      const icons = getIconsWithFallback(unit);
+      let subIcon;
+
+      if(icons.subIcon) {
         subIcon = html`<vaadin-icon
-          class="unit-sub-cion"
-          icon="${subIconSvg}"
-        ></vaadin-icon>`;
+        class="unit-sub-cion"
+        icon="${icons.subIcon}"
+      ></vaadin-icon>`;
       }
 
-      iconHtml = html`<div>
-        <vaadin-icon style="font-size: 48px;" icon="${icon}"> </vaadin-icon>
+      iconHtml = html`<div class="icon-wrapper">
+        <vaadin-icon icon="${icons.icon}"> </vaadin-icon>
         ${subIcon}
       </div> `;
     } else {
@@ -76,13 +74,21 @@ export class UnitImage extends LitElement {
       ${this.showFallback
         ? iconHtml
         : html` <img
-
-            src="/images/units/${this.unit?.descriptorName}.png"
+            src=${this.generateSrc()}
             alt=${this.unit?.name}
             title=${this.unit?.name}
-            @error=${() => (this.showFallback = true)}
+            @error=${(error: Error) => {
+              console.error(error);
+              const img = new Image();
+              img.onerror = () => {this.showFallback = true}
+              img.src = this.generateSrc();
+            }}
           />`}
     `;
+  }
+
+  generateSrc() {
+    return `/images/units/${this.unit?.descriptorName}.png`
   }
 }
 

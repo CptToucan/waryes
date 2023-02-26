@@ -32,6 +32,7 @@ export class IndexRoute extends LitElement {
 
       unit-search {
         flex: 1 1 0;
+        max-width: 512px;
       }
 
       .or {

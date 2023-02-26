@@ -131,6 +131,7 @@ interface Unit {
     specialities:           string[]
     weapons:                Weapon[]
     _searchNameHelper:      string
+    _display:               boolean
 
     // TODO: Audit / remove
     // old values missing or removed

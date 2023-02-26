@@ -12,9 +12,6 @@ export class DisplayArmouryWithTransportCard extends ArmouryWithTransportCard {
         font-size: 32px;
       }
 
-      .top-section {
-        height: 32px;
-      }
 
       .details-row > span {
         font-size: var(--lumo-font-size-xxs);

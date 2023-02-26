@@ -34,9 +34,11 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
       .expanded-unit-card {
         background-color: var(--lumo-contrast-5pct);
         display: flex;
-        width: 100%;
+        max-width: 1920px;
+        flex: 1 1 100%;
         margin: var(--lumo-space-s);
         padding: var(--lumo-space-s);
+        border-radius: var(--lumo-border-radius-m);
       }
 
       .unit-info {
@@ -57,13 +59,19 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
       }
 
       .weapon {
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
+        padding-left: var(--lumo-space-m);
+        padding-right: var(--lumo-space-m);
         flex: 1 1 100%;
+        max-width: 400px;
+
+       
+      }
+
+      .weapon:not(:last-child) {
+        border-right: 1px solid var(--lumo-contrast-30pct);
       }
 
       individual-weapon-view {
-        max-width: 400px;
         display: block;
       }
 
@@ -82,7 +90,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   @state()
-  expert = true;
+  expert = false;
 
   @property()
   unitId = 'init';
@@ -109,6 +117,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
               <unit-image .unit=${this.unit}></unit-image>
             </div>
             <unit-armor-view .unit=${this.unit}></unit-armor-view>
+            <unit-info-panel-view .unit=${this.unit}></unit-info-panel-view>
           </div>
           <div class="weapon-info">
             ${this.unit.weapons.map(
@@ -126,7 +135,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
 
         <div class="show-on-small-screens">
           <div class="unit-view">
-            <unit-card .showImage=${true} .unit=${this.unit} ?expert=${true}></unit-card>
+            <unit-card .showImage=${true} .unit=${this.unit} ?expert=${false}></unit-card>
           </div>
         </div> `;
     }
