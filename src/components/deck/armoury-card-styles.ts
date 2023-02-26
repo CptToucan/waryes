@@ -145,6 +145,6 @@ export const armouryCardStyles = css` :host {
 
 unit-image {
   margin-bottom: var(--lumo-space-s);
-  min-height: 150px;
+  min-height: 80px;
 }
 `
