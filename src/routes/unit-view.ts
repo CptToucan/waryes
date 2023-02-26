@@ -139,7 +139,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
           </div>
         </div> `;
     }
-    return html`NO UNIT`;
+    return html`Loading...`;
   }
 }
 
