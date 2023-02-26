@@ -19,7 +19,6 @@ export class UnitSearch extends LitElement {
   static get styles() {
     return css`
       :host {
-        max-width: 512px;
         display: flex;
       }
 
@@ -34,8 +33,6 @@ export class UnitSearch extends LitElement {
       vaadin-input-container {
         height: 1px;
       }
-
-
     `;
   }
 
@@ -105,7 +102,7 @@ export class UnitSearch extends LitElement {
 
     if (units != null) {
       const sortedUnits = units
-        .filter((unit) => unit.name !== '')
+        .filter((unit) => unit._display === true)
         .sort((a, b) => {
           if (a.name < b.name) {
             return -1;
@@ -136,18 +133,22 @@ export class UnitSearch extends LitElement {
     ></vaadin-multi-select-combo-box>`;
   }
 
+  /**
+   * Styles for this rendered search result are kept in the app.css, as they are rendered in the light DOM
+   * @param unit
+   * @returns
+   */
   private renderer: ComboBoxLitRenderer<Unit> = (unit) => html`
     <div class="unit-search-result">
-      <div class="unit-image-wrapper">
-        <unit-image .unit=${unit}></unit-image>
+      <div class="unit-graphics">
+        <country-flag .country=${unit.unitType.motherCountry}></country-flag>
+        <div class="unit-image-wrapper">
+          <unit-image .unit=${unit}></unit-image>
+        </div>
       </div>
-      <div class="unit-information">
-        <country-flag
-          style="margin-right: var(--lumo-space-s)"
-          .country=${unit.unitType.motherCountry}
-        ></country-flag>
 
-        <div style="font-size: var(--lumo-font-size-s)">${unit.name}</div>
+      <div class="unit-information">
+        <div class="unit-name">${unit.name}</div>
       </div>
     </div>
   `;

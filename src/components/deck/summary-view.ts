@@ -4,7 +4,6 @@ import {Deck} from '../../classes/deck';
 import {UnitCategory} from '../../types/deck-builder';
 import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
 import './display-armoury-with-transport-card';
-
 @customElement('summary-view')
 export class SummaryView extends LitElement {
   static get styles() {
@@ -126,9 +125,10 @@ export class SummaryView extends LitElement {
   @property()
   deck?: Deck;
 
+
   render(): TemplateResult {
     if (this.deck) {
-      return html`<div class="container">
+      return html`<div id="root" class="container">
         <div class="header">
           <div class="title-row">
             <division-flag .division=${this.deck.division}></division-flag>

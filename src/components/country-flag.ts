@@ -17,6 +17,11 @@ export class CountryFlag extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 40px;
+      }
+
+      img {
+        width: 100%
       }
     `;
   }
@@ -46,7 +51,7 @@ export class CountryFlag extends LitElement {
         image = WestGermany;
         break;
     }
-    return html`<img width="40" src=${image} alt=${this.country} title=${this.country} />`;
+    return html`<img src=${image} alt=${this.country} title=${this.country} />`;
   }
 }
 

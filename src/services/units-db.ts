@@ -9,6 +9,8 @@ import {
 import {FirebaseService, FirebaseServiceClass} from './firebase';
 import {getStorage, ref, getBlob} from 'firebase/storage';
 import {Unit} from '../types/unit';
+import { isSpecialtyCommand } from '../utils/is-specialty-command';
+import { isSpecialtyRecon } from '../utils/is-specialty-recon';
 
 const CURRENT_FILE_NAME = 'bundle-units.txt';
 const CURRENT_NAMED_QUERY = 'units';
@@ -98,13 +100,33 @@ class UnitsDatabaseServiceClass {
     const unitsQuery = await getDocsFromCache(query);
 
     this.units = unitsQuery.docs.map(function (doc) {
-      let unitData = doc.data() as Unit;
-      return {
+      const unitData = doc.data() as Unit;
+
+      const isCommand = isSpecialtyCommand(unitData.specialities[0]);
+
+      const isRecon = isSpecialtyRecon(unitData.specialities[0]);
+
+      const unit = {
         ...unitData,
+        _display: true,
         _searchNameHelper: unitData.name
           .toLowerCase()
           .replace(UNIT_SEARCH_IGNORED_CHARACTERS, ''),
       };
+
+      if(unit.name === "") {
+        unit._display = false; 
+      }
+      
+      if(isCommand) {
+        unit.name = `(CMD) ${unit.name}`
+      }
+      else if (isRecon) {
+        unit.name = `(REC) ${unit.name}`
+      }
+      
+
+      return unit;
     });
 
     this._readCounter += this.units.length;

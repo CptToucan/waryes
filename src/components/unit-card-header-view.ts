@@ -8,6 +8,7 @@ import './unit-image';
 import '@vaadin/button';
 import {Unit} from '../types/unit';
 import {getIconForSpecialty} from '../utils/get-icon-for-specialty';
+import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
 
 /**
  * Component for rendering the details of a single unit
@@ -35,21 +36,35 @@ export class UnitCardHeaderView extends LitElement {
         margin: 0;
       }
 
-      
       div.unit-title p.unit-command-points {
         text-align: right;
         color: var(--lumo-primary-text-color);
         margin: 0;
+        margin-left: var(--lumo-space-xs);
       }
 
       .traits {
-        padding-top: var(--lumo-space-xs);
-        padding-bottom: var(--lumo-space-xs);
         display: flex;
       }
 
-      .trait-container {
+      .icon-container {
         padding: var(--lumo-space-xs);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: var(--lumo-space-xs);
+      }
+
+      .icons {
+        display: flex;
+        padding-top: var(--lumo-space-xs);
+        padding-bottom: var(--lumo-space-xs);
+      }
+
+      .unit-category {
+        font-size: var(--lumo-font-size-xl);
+        display: flex;
+        border-right: 1px dotted var(--lumo-contrast-30pct);
       }
     `;
   }
@@ -62,8 +77,13 @@ export class UnitCardHeaderView extends LitElement {
 
   render(): TemplateResult {
     const traits = this.unit?.specialities.slice(1) || [];
+    // const categorySpeciality = this.unit?.specialities[0] || '';
 
-    return html`
+
+    if(this.unit) {
+      const icons = getIconsWithFallback(this.unit);
+  
+      return html`
       <div class="top-bar">
         <country-flag
           .country=${this.unit?.unitType.motherCountry}
@@ -80,16 +100,28 @@ export class UnitCardHeaderView extends LitElement {
         <p class="unit-name">${this.unit?.name}</p>
         <p class="unit-command-points">${this.unit?.commandPoints}</p>
       </div>
-      <div class="traits">
-        ${traits.map(
-          (speciality) => html`<div class="trait-container">
-            <vaadin-icon
-              icon="waryes-svg:${getIconForSpecialty(speciality)}"
-            ></vaadin-icon>
-          </div>`
-        )}
+      <div class="icons">
+        <div class="unit-category icon-container">
+          <vaadin-icon
+            icon=${icons.icon}
+          ></vaadin-icon>
+          ${icons.subIcon ? html`<vaadin-icon icon=${icons.subIcon}></vaadin-icon>`: html``}
+        </div>
+        <div class="traits">
+          ${traits.map(
+            (speciality) => html`<div class="icon-container">
+              <vaadin-icon
+                icon="waryes:${getIconForSpecialty(speciality)}"
+              ></vaadin-icon>
+            </div>`
+          )}
+        </div>
       </div>
     `;
+    }
+
+    return html``;
+
   }
 }
 

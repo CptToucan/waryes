@@ -163,7 +163,7 @@ export class IndividualWeaponView extends LitElement {
         },
         {
           name: 'Total HE',
-          value: weapon.totalHeDamage.toFixed(2),
+          value: weapon.totalHeDamage?.toFixed(2),
           expert: true,
         },
         {
@@ -327,10 +327,14 @@ export class IndividualWeaponView extends LitElement {
   }
 
   renderWeaponGroupLayout(weaponGroupLayout: WeaponGroupLayout) {
-    return html`${this.renderWeaponGroupTitle(
-      weaponGroupLayout.name
-    )}${weaponGroupLayout.stats.map((stat) => this.renderWeaponStat(stat))}
-    ${this.renderWeaponSeparator()} `;
+
+    if(this.shouldRenderField(weaponGroupLayout.expert)) {
+      return html`${this.renderWeaponGroupTitle(
+        weaponGroupLayout.name
+      )}${weaponGroupLayout.stats.map((stat) => this.renderWeaponStat(stat))}
+      ${this.renderWeaponSeparator()} `;
+    }
+    return html``;
   }
 
   renderWeaponGroupTitle(name: string, expert?: boolean) {
