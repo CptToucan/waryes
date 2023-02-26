@@ -31,7 +31,7 @@ export class UnitCardHeaderView extends LitElement {
 
       div.unit-title > p {
         flex-grow: 1;
-        font-size: var(--lumo-font-size-l);
+        font-size: var(--lumo-font-size-m);
         color: var(--lumo-contrast-90pct);
         margin: 0;
       }
