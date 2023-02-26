@@ -108,7 +108,7 @@ export class UnitsTable extends LitElement {
 
     if (units) {
       const sortedUnits = units
-        ?.filter((unit) => unit.name !== '')
+        ?.filter((unit) => unit._display === true)
         .sort((a, b) => {
           if (a.name < b.name) {
             return -1;
