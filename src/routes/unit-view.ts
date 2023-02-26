@@ -16,15 +16,11 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: var(--lumo-space-s);
       }
 
       .unit-view {
-        padding: var(--lumo-space-s);
         max-width: 400px;
-      }
-
-      .unit-view > unit-card {
-        width: 100%;
       }
 
       unit-image {
@@ -36,7 +32,6 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
         display: flex;
         max-width: 1920px;
         flex: 1 1 100%;
-        margin: var(--lumo-space-s);
         padding: var(--lumo-space-s);
         border-radius: var(--lumo-border-radius-m);
       }
@@ -63,8 +58,6 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
         padding-right: var(--lumo-space-m);
         flex: 1 1 100%;
         max-width: 400px;
-
-       
       }
 
       .weapon:not(:last-child) {
