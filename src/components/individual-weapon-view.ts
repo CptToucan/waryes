@@ -375,16 +375,29 @@ export class IndividualWeaponView extends LitElement {
   }
 
   renderAccuracyScaling(
-    accuracyScaling: AccuracyScaling[],
+    scaling: AccuracyScaling,
     expertStat: boolean
   ) {
+
     if (this.shouldRenderField(expertStat)) {
-      const seriesData = accuracyScaling.map((scale) => [
-        scale.distance,
-        scale.accuracy,
-      ]);
+      const series = [];
+      const legend = [];
+
+      if(scaling.ground) {
+        series.push({name: 'Ground',type: "line", data: scaling.ground.map((scale) => [scale.distance, scale.accuracy])});
+        legend.push("Ground");
+      }
+      if(scaling.helicopter) {
+        series.push({name: 'Heli', type: "line", data: scaling.helicopter.map((scale) => [scale.distance, scale.accuracy])});
+        legend.push("Heli");
+      }
+      if(scaling.plane) {
+        series.push({name: 'Plane', type: "line", data: scaling.plane.map((scale) => [scale.distance, scale.accuracy])});
+        legend.push("Plane");
+      }
 
       const option = {
+        legend: {show: true, data: legend, right: 0},
         xAxis: {
           type: 'value',
           axisLine: {
@@ -405,21 +418,21 @@ export class IndividualWeaponView extends LitElement {
           axisLabel: {
             formatter: '{value}%',
           },
+          max: 100,
           min: 0,
         },
         grid: {
+          bottom: '5%',
           left: '5%',
           right: '10%',
           top: '5%',
-          bottom: '5%',
+          /*
+          
+          */
+          
           containLabel: true,
         },
-        series: [
-          {
-            type: 'line',
-            data: seriesData,
-          },
-        ],
+        series
       };
       return html`<div class="accuracy-scaling">
         <div>
