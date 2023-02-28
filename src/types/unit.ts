@@ -4,9 +4,15 @@ import { NumberFieldMetadata } from "./NumberFieldMetadata";
 import { StringFieldMetadata } from "./StringFieldMetadata";
 
 
-interface AccuracyScaling {
+interface AccuracyScalingItem {
   distance: number
   accuracy: number
+}
+
+interface AccuracyScaling {
+  ground?: AccuracyScalingItem[]
+  helicopter?: AccuracyScalingItem[]
+  plane?: AccuracyScalingItem[]
 }
 
 interface MissileProperties {
@@ -62,8 +68,8 @@ interface Weapon {
     supplyCost?:        number
     staticAccuracy:     number
     movingAccuracy:     number
-    staticAccuracyScaling?: AccuracyScaling[]
-    movingAccuracyScaling?: AccuracyScaling[]
+    staticAccuracyScaling?: AccuracyScaling
+    movingAccuracyScaling?: AccuracyScaling
     penetration?:       number
     instaKillAtMaxRangeArmour: number
     trueRateOfFire: number
@@ -205,4 +211,4 @@ type UnitMap = {
 }
 
 
-export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, InfoPanelType, MissileProperties, SmokeProperties};
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, AccuracyScalingItem, InfoPanelType, MissileProperties, SmokeProperties};
