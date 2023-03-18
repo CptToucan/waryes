@@ -7,10 +7,11 @@ import {displaySpeed} from '../utils/unit-stats/display-speed';
 import {displayDistance} from '../utils/unit-stats/display-distance';
 import {displayFuel} from '../utils/unit-stats/display-fuel';
 import {displayTime} from '../utils/unit-stats/display-time';
+import { displayEcm } from '../utils/unit-stats/display-ecm';
 
 interface PanelItem {
   display: string;
-  value: unknown;
+  value?: string | boolean | number | null | TemplateResult;
 }
 
 @customElement('unit-info-panel-view')
@@ -53,6 +54,7 @@ export class UnitInfoPanelView extends LitElement {
 
   getLayoutForPanelType(type: InfoPanelType, unit: Unit): PanelItem[][] {
     let panel: PanelItem[][] = [];
+    console.log(unit);
     switch (type) {
       case InfoPanelType.DEFAULT:
         panel = this.defaultPanel(unit);
@@ -91,19 +93,23 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'Amphibious', value: displayAmphibious(unit)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
+        {
+          display: 'Forest Spd.',
+          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed),
+        },
         {display: 'Road Speed', value: displaySpeed(unit.roadSpeed)},
       ],
       [
+        {display: 'Amphibious', value: displayAmphibious(unit)},
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
         {display: 'Fuel', value: displayFuel(unit.fuel)},
+      ],
+      [
         {
           display: 'Adv. Deploy',
           value: displayDistance(unit.advancedDeployment),
         },
-      ],
-      [
         {display: 'Smoke', value: unit.hasDefensiveSmoke},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
@@ -125,6 +131,20 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
+      [
+        {
+          display: 'Forest Spd.',
+          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed),
+        },
+        {
+          display: 'Building Spd.',
+          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'building')?.speed),
+        },
+        {
+          display: 'Ruins Spd.',
+          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'ruins')?.speed),
+        },
+      ]
     ];
   }
 
@@ -136,7 +156,7 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'ECM', value: unit.ecm},
+        {display: 'ECM', value: displayEcm(unit.ecm)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
       ],
@@ -163,7 +183,7 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'ECM', value: unit.ecm},
+        {display: 'ECM', value: displayEcm(unit.ecm)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
       ],
@@ -209,7 +229,7 @@ export class UnitInfoPanelView extends LitElement {
       [
         {display: 'Max Dmg', value: unit.maxDamage},
         {display: 'Air Optics', value: unit.airOptics},
-        {display: 'ECM', value: unit.ecm},
+        {display: 'ECM', value: displayEcm(unit.ecm)},
       ],
       [
         {display: 'Turn Radius', value: displayDistance(unit.agility)},
@@ -219,6 +239,10 @@ export class UnitInfoPanelView extends LitElement {
       [
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
         {display: 'Fuel', value: displayFuel(unit.fuel)},
+        {
+          display: 'Bomb Strategy',
+          value: unit.bombStrategy || 'None',
+        }
       ],
     ];
   }
@@ -231,7 +255,7 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Stealth', value: unit.stealth},
       ],
       [
-        {display: 'ECM', value: unit.ecm},
+        {display: 'ECM', value: displayEcm(unit.ecm)},
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
       ],
