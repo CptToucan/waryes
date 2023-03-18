@@ -54,8 +54,11 @@ interface Weapon {
     suppress?:          number
     suppressDamagesRadius: number | null
     groundRange?:       number
+    groundMinRange?:    number
     helicopterRange?:   number
+    helicopterMinRange?: number
     planeRange?:        number
+    planeMinRange?:     number
     aimingTime?:        number
     reloadTime?:        number
     salvoLength?:       number
@@ -119,7 +122,7 @@ interface Unit {
     topArmor:               number
     maxDamage:              number
     speed:                  number
-    speedForTerrains:       SpeedForTerrain[]
+    speedsForTerrains:       SpeedForTerrain[]
     roadSpeed:              number
     rotationTime:           number
     optics?:                number
@@ -134,7 +137,8 @@ interface Unit {
     agility?:               number | null
     travelTime?:            number | null
     hasDefensiveSmoke:      boolean
-    specialities:           string[]
+    specialities:           string[],
+    bombStrategy:           string,
     weapons:                Weapon[]
     _searchNameHelper:      string
     _display:               boolean

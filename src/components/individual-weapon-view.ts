@@ -180,6 +180,11 @@ export class IndividualWeaponView extends LitElement {
           value: displayDistance(weapon.suppressDamagesRadius),
           expert: true,
         },
+        {
+          name: 'Armor 1-shot at Max Range',
+          value: weapon.instaKillAtMaxRangeArmour > 0 ? weapon.instaKillAtMaxRangeArmour : 'N/A',
+          expert: true,
+        }
       ],
     });
 
@@ -191,12 +196,28 @@ export class IndividualWeaponView extends LitElement {
           value: displayDistance(weapon.groundRange),
         },
         {
+          name: 'Ground Min Range',
+          value: displayDistance(weapon.groundMinRange),
+          expert: true,
+        },
+        {
           name: 'Helicopter',
           value: displayDistance(weapon.helicopterRange),
         },
         {
+          name: 'Helicopter Min Range',
+          value: displayDistance(weapon.helicopterMinRange),
+          expert: true,
+
+        },
+        {
           name: 'Aircraft',
           value: displayDistance(weapon.planeRange),
+        },
+        {
+          name: 'Aircraft Min Range',
+          value: displayDistance(weapon.planeMinRange),
+          expert: true,
         },
       ],
     });
