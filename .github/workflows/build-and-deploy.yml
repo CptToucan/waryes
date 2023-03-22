@@ -1,44 +1,37 @@
 name: WarYes Production Deployment
-
+run-name: Production Deployment 🚀
 on:
   push:
-    branches:
-      - main
-  workflow_dispatch:
+    branches: main
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'npm'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 16.x
+    - run: npm ci
+    - run: npm run build
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }} 
 
-      - name: Build project
-        run: npm run build
+    - name: Adding Known Hosts
+      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Transfer files via SSH to temporary directory
-        uses: appleboy/scp-action@v0.1.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: dist/
-          target: ${{ env.WWW_DIR_DEPLOY }}
+    - name: Deploy with rsync to temp
+      run: rsync -avz ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
 
-      - name: Replace live folder with temporary directory
-        uses: appleboy/ssh-action@v0.1.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mv ${{ env.WWW_DIR }} ${{ env.WWW_DIR_OLD }} 
-            mv ${{ env.WWW_DIR_DEPLOY }} ${{ env.WWW_DIR }}
+    - name: Swap www dir with deploy
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mvdir ${{ env.WWW_DIR}} ${{ env.WWW_DIR_OLD }} && mvdir ${{ env.WWW_DIR_DEPLOY }} ${{ env.WWW_DIR }}"
+
+    - name: Remove or archive old prod dir
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf ${{ env.WWW_DIR_OLD }}"
