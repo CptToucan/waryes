@@ -32,7 +32,7 @@ jobs:
             IdentityFile ~/.ssh/WarYes
 
     - name: Deploy with rsync to temp
-      run: scp ./dist ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
+      run: scp ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
 
     - name: Swap www dir with deploy
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mv ${{ env.WWW_DIR}} ${{ env.WWW_DIR_OLD }} && mv ${{ env.WWW_DIR_DEPLOY }} ${{ env.WWW_DIR }}"
