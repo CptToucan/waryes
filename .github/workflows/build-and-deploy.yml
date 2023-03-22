@@ -24,6 +24,8 @@ jobs:
       with:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
+    - name: List SSH Keys
+      run: ls ~/.ssh
 
     - name: Deploy with rsync to temp
       run: scp -vv ./README.md ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
