@@ -29,7 +29,7 @@ jobs:
       run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
     - name: Deploy with rsync to temp
-      run: rsync -avz ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
+      run: scp ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
 
     - name: Swap www dir with deploy
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mvdir ${{ env.WWW_DIR}} ${{ env.WWW_DIR_OLD }} && mvdir ${{ env.WWW_DIR_DEPLOY }} ${{ env.WWW_DIR }}"
