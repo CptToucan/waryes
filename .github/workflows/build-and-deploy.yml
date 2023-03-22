@@ -25,6 +25,11 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         name: WarYes
         known_hosts: ${{ secrets.KNOWN_HOSTS }}
+        config: |
+          Host ${{secrets.SSH_HOST}}
+            HostName ${{secrets.SSH_HOST}}
+            User ${{secrets.SSH_USER}}
+            IdentityFile ~/.ssh/WarYes
     - name: List SSH Keys
       run: ls ~/.ssh
 
