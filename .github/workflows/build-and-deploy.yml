@@ -33,7 +33,7 @@ jobs:
             IdentityFile ~/.ssh/WarYes
             
     - name: Make temp directory
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir /home/waryes/temporary-deploy"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /home/waryes/temporary-deploy"
 
     - name: Deploy with SCP to temp
       run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/waryes/site.tar.gz
