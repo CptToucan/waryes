@@ -16,21 +16,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+    - uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+    - uses: webfactory/ssh-acent@v0.7.0
+      with: 
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - run: npm ci
     - run: npm run build
-
-    - name: Install SSH Key
-      uses: shimataro/ssh-key-action@v2
-      with:
-        key: ${{ secrets.SSH_PRIVATE_KEY }} 
-
-    - name: Adding Known Hosts
-      run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
     - name: Deploy with rsync to temp
       run: rsync -avz ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
