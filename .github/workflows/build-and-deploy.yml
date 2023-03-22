@@ -30,12 +30,14 @@ jobs:
             HostName ${{secrets.SSH_HOST}}
             User ${{secrets.SSH_USER}}
             IdentityFile ~/.ssh/WarYes
+    - name: Make temp directory
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir /home/waryes/temporary-deploy"
 
     - name: Deploy with SCP to temp
-      run: scp -r ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ env.WWW_DIR_DEPLOY }}
+      run: scp -r ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/waryes/temporary-deploy
 
     - name: Swap www dir with deploy
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mv ${{ env.WWW_DIR}} ${{ env.WWW_DIR_OLD }} && mv ${{ env.WWW_DIR_DEPLOY }} ${{ env.WWW_DIR }}"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mv /home/waryes/site /home/waryes/site-old/ && mv /home/waryes/temporary-deploy/dist /home/waryes/site/"
 
     - name: Remove or archive old prod dir
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf ${{ env.WWW_DIR_OLD }}"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf /home/waryes/site-old/"
