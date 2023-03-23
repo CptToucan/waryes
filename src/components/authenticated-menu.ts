@@ -62,6 +62,11 @@ const defaultMenu: MenuDefinition = {
       href: '/deck-import',
     },
     {
+      name: 'Deck Library',
+      icon: 'vaadin:folder',
+      href: '/deck-library',
+    },
+    {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H',
@@ -92,6 +97,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Import Deck',
       icon: 'vaadin:code',
       href: '/deck-import',
+    },
+    {
+      name: 'Deck Library',
+      icon: 'vaadin:folder',
+      href: '/deck-library',
     },
 
     {
@@ -275,3 +285,10 @@ export class AuthenticatedMenu extends LitElement {
     </vaadin-app-layout>`;
   }
 }
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'authenticated-menu': AuthenticatedMenu;
+  }
+}
+

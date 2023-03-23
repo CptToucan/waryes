@@ -26,7 +26,7 @@ const Features = {
 
 /// System feature states
 const DefaultFeatureStates = {
-    [Features.firebase_auth]: false,
+    [Features.firebase_auth]: true,
 }
 
 const featureService = new FeatureService(DefaultFeatureStates);
