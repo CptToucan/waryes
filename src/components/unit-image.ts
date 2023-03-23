@@ -77,8 +77,7 @@ export class UnitImage extends LitElement {
             src=${this.generateSrc()}
             alt=${this.unit?.name}
             title=${this.unit?.name}
-            @error=${(error: Error) => {
-              console.error(error);
+            @error=${() => {
               const img = new Image();
               img.onerror = () => {this.showFallback = true}
               img.src = this.generateSrc();

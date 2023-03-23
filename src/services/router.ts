@@ -9,7 +9,8 @@ const routes = [
   {path: '/unit/:unitId', component: 'unit-view-route'},
   {path: '/comparison', component: 'comparison-route'},
   {path: '/deck-builder', component: 'deck-builder-route'},
-  {path: '/deck-import', component: 'deck-import-route'}
+  {path: '/deck-import', component: 'deck-import-route'},
+  {path: '/deck-library', component: 'deck-library-route'},
 ] 
 
 // Features.firebase_auth routes
