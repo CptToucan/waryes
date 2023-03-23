@@ -3,6 +3,8 @@ run-name: Production Deployment 🚀
 on:
   push:
     branches: main
+env:
+  SITE_FOLDER: ${{ env.SITE_FOLDER}}
 
 jobs:
   build:
