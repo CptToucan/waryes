@@ -1,0 +1,43 @@
+name: WarYes Production Deployment
+run-name: Production Deployment 🚀
+on:
+  push:
+    branches: main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build
+    - run: tar -czvf site.tar.gz dist/
+
+    - name: Install SSH Key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        name: WarYes
+        known_hosts: ${{ secrets.KNOWN_HOSTS }}
+        config: |
+          Host ${{secrets.SSH_HOST}}
+            HostName ${{secrets.SSH_HOST}}
+            User ${{secrets.SSH_USER}}
+            IdentityFile ~/.ssh/WarYes
+            
+    - name: Make temp directory
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{secrets.SITE_FOLDER}}/temporary-deploy"
+
+    - name: Deploy with SCP to temp
+      run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{secrets.SITE_FOLDER}}/site.tar.gz
+
+    - name: Swap www dir with deploy
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "tar -xzvf ${{secrets.SITE_FOLDER}}/site.tar.gz -C ${{secrets.SITE_FOLDER}}/temporary-deploy &&  mv ${{secrets.SITE_FOLDER}}/site ${{secrets.SITE_FOLDER}}/site-old/ && mv ${{secrets.SITE_FOLDER}}/temporary-deploy/dist ${{secrets.SITE_FOLDER}}/site/"
+
+    - name: Remove or archive old prod dir
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf ${{secrets.SITE_FOLDER}}/site-old/"
