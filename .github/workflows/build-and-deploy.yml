@@ -34,7 +34,7 @@ jobs:
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p ${{secrets.SITE_FOLDER}}/temporary-deploy"
 
     - name: Deploy with SCP to temp
-      run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{secrets.SITE_FOLDER}}site.tar.gz
+      run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{secrets.SITE_FOLDER}}/site.tar.gz
 
     - name: Swap www dir with deploy
       run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "tar -xzvf ${{secrets.SITE_FOLDER}}/site.tar.gz -C ${{secrets.SITE_FOLDER}}/temporary-deploy &&  mv ${{secrets.SITE_FOLDER}}/site ${{secrets.SITE_FOLDER}}/site-old/ && mv ${{secrets.SITE_FOLDER}}/temporary-deploy/dist ${{secrets.SITE_FOLDER}}/site/"
