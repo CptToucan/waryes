@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env: 
+      SITE_FOLDER: ${{env.SITE_FOLDER}}
     
     steps:
     - uses: actions/checkout@v3
@@ -15,7 +17,6 @@ jobs:
       with:
         node-version: 16.x
         cache: 'npm'
-
     - run: npm ci
     - run: npm run build
     - run: tar -czvf site.tar.gz dist/
@@ -33,13 +34,13 @@ jobs:
             IdentityFile ~/.ssh/WarYes
             
     - name: Make temp directory
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /home/waryes/temporary-deploy"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p $SITE_FOLDER/temporary-deploy"
 
     - name: Deploy with SCP to temp
-      run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/waryes/site.tar.gz
+      run: scp site.tar.gz ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/vhosts/thirsty-kare.77-68-98-177.plesk.page/site.tar.gz
 
     - name: Swap www dir with deploy
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "tar -xzvf /home/waryes/site.tar.gz -C /home/waryes/temporary-deploy &&  mv /home/waryes/site /home/waryes/site-old/ && mv /home/waryes/temporary-deploy/dist /home/waryes/site/"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "tar -xzvf $SITE_FOLDER/site.tar.gz -C $SITE_FOLDER/temporary-deploy &&  mv $SITE_FOLDER/site $SITE_FOLDER/site-old/ && mv $SITE_FOLDER/temporary-deploy/dist $SITE_FOLDER/site/"
 
     - name: Remove or archive old prod dir
-      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf /home/waryes/site-old/"
+      run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm -rf $SITE_FOLDER/site-old/"
