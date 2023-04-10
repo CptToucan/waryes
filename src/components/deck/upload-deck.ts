@@ -7,28 +7,13 @@ import type {FormLayoutResponsiveStep} from '@vaadin/form-layout';
 import '@vaadin/form-layout';
 import '@vaadin/password-field';
 import '@vaadin/text-field';
-import '@vaadin/select';
-import {SelectItem, SelectValueChangedEvent} from '@vaadin/select';
+import '@vaadin/multi-select-combo-box';
 import {Deck} from '../../classes/deck';
-
-// Rush
-// Turtle
-// Harassment
-// Micro
-// Macro
-// All-in
-// Defensive
-// CQC
-// Light
-// Heavy
-// Artillery
-// Air
-// Meme
-// Spam
-// Ranked
-// Team
-// Para
-
+import {getAuth} from 'firebase/auth';
+import type {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
+import { tags } from '../../types/tags';
+import { saveDeckToFirebase } from '../../utils/save-deck-to-firebase';
+import { Router } from '@vaadin/router';
 
 @customElement('upload-deck')
 export class UploadDeck extends LitElement {
@@ -45,40 +30,46 @@ export class UploadDeck extends LitElement {
     this.showing = false;
   }
 
-  private comboBoxItems: SelectItem[] = [
-    {value: 'Rush', label: 'Rush'},
-    {value: 'Turtle', label: 'Turtle'},
-    {value: 'Harassment', label: 'Harassment'},
-    {value: 'Micro', label: 'Micro'},
-    {value: 'Macro', label: 'Macro'},
-    {value: 'All-in', label: 'All-in'},
-    {value: 'Defensive', label: 'Defensive'},
-    {value: 'CQC', label: 'CQC'},
-    {value: 'Light', label: 'Light'},
-    {value: 'Heavy', label: 'Heavy'},
-    {value: 'Artillery', label: 'Artillery'},
-    {value: 'Air', label: 'Air'},
-    {value: 'Meme', label: 'Meme'},
-    {value: 'Spam', label: 'Spam'},
-    {value: 'Ranked', label: 'Ranked'},
-    {value: 'Team', label: 'Team'},
 
-  ];
 
   @state()
-  private selectedType = '';
+  private selectedTags: string[] = [];
 
   private responsiveSteps: FormLayoutResponsiveStep[] = [
     // Use one column by default
     {minWidth: 0, columns: 1},
   ];
 
+  private async _uploadDeck(deckName: string) {
+    const deck = this.deck;
+    const selectedTags = this.selectedTags;
+
+    
+
+    if(deck) {
+      const deckRef = await saveDeckToFirebase(
+        deck,
+        deckName,
+        selectedTags
+      );
+
+      Router.go(`/deck/${deckRef?.id}`);
+    }
+
+    this.closeDialog();
+  }
+
   render(): TemplateResult {
     const deckCode = this.deck?.toDeckCode();
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    const deckName = `${user?.displayName}'s ${this.deck?.division.name}`;
+
 
     return html`
       <vaadin-dialog
-        header-title="Select Transport"
+        header-title="Upload Deck"
         @opened-changed=${(event: CustomEvent) => {
           if (event.detail.value === false) {
             this.closeDialog();
@@ -91,28 +82,39 @@ export class UploadDeck extends LitElement {
                 <vaadin-text-field
                   colspan="2"
                   label="Code"
+                  .required=${true}
                   ?readOnly=${true}
                   value=${ifDefined(deckCode)}
                 ></vaadin-text-field>
-                <vaadin-select
-                  label="Type"
-                  .items=${this.comboBoxItems}
-                  .value=${this.selectedType}
-                  @value-changed=${(event: SelectValueChangedEvent) =>
-                    (this.selectedType = event.detail.value)}
-                ></vaadin-select>
-                <div>
-                  ${`Toucan's ${this.selectedType} ${this.deck?.division.name} Deck`}
-                </div>
+
+                <vaadin-multi-select-combo-box
+                  label="Tags"
+                  .required=${true}
+                  .items=${tags}
+                  .selectedItems=${this.selectedTags}
+                  .errorMessage=${'Please select at least one tag'}
+                  @selected-items-changed=${(
+                    event: MultiSelectComboBoxSelectedItemsChangedEvent<string>
+                  ) => {
+                    this.selectedTags = event.detail.value;
+                  }}
+                >
+                </vaadin-multi-select-combo-box>
+                <div>${deckName}</div>
               </vaadin-form-layout>
             `,
+          [this.deck]
         )}
-        ${dialogFooterRenderer(() => html`<vaadin-button @click="${() => {}}"
+        ${dialogFooterRenderer(
+          () => html` <vaadin-button @click="${this.closeDialog}"
               >Cancel</vaadin-button
-            >
-            <vaadin-button @click="${this.closeDialog}"
-              >Cancel</vaadin-button
-            >`, [])}
+            ><vaadin-button
+              theme="primary"
+              @click="${() => this._uploadDeck(deckName)}"
+              >Upload</vaadin-button
+            >`,
+          [deckName]
+        )}
         .opened="${this.showing}"
       ></vaadin-dialog>
     `;

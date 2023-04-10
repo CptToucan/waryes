@@ -25,9 +25,9 @@ class FirebaseServiceClass {
     this.auth = auth;
   }
 
-  app?: FirebaseApp;
-  db?: Firestore;
-  auth?: Auth;
+  app: FirebaseApp;
+  db: Firestore;
+  auth: Auth;
 }
 
 const FirebaseService = new FirebaseServiceClass();

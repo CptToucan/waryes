@@ -54,7 +54,6 @@ export class UnitInfoPanelView extends LitElement {
 
   getLayoutForPanelType(type: InfoPanelType, unit: Unit): PanelItem[][] {
     let panel: PanelItem[][] = [];
-    console.log(unit);
     switch (type) {
       case InfoPanelType.DEFAULT:
         panel = this.defaultPanel(unit);
