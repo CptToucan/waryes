@@ -20,6 +20,7 @@ import "./routes/comparison"
 import "./routes/deck-builder"
 import "./routes/deck-import";
 import "./routes/deck-library";
+import "./routes/deck-view";
 
 /** Components */
 import "./components/unit-card";

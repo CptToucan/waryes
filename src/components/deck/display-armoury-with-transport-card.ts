@@ -1,4 +1,4 @@
-import {customElement} from 'lit/decorators.js';
+import {customElement, property} from 'lit/decorators.js';
 import {html, css} from 'lit';
 import {ArmouryWithTransportCard} from './armoury-with-transport-card';
 import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
@@ -22,6 +22,10 @@ export class DisplayArmouryWithTransportCard extends ArmouryWithTransportCard {
       }
     `,
   ];
+
+  @property()
+  compact = false;
+  
   renderButton() {
     return html``;
   }

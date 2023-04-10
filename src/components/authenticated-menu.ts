@@ -158,6 +158,17 @@ export class AuthenticatedMenu extends LitElement {
         min-width: 0px;
         width: 0;
       }
+
+      a.logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @media (max-width: 640px) {
+        .desktop-only {
+          display: none;
+        }
     `;
   }
 
@@ -234,6 +245,10 @@ export class AuthenticatedMenu extends LitElement {
         .items=${this.getLoggedInContextMenuItems()}
       >
         <vaadin-button theme="tertiary" aria-label="Account">
+          <span class="desktop-only">
+            ${this.user.displayName ? this.user.displayName : 'NO DISPLAY NAME'}
+          </span>
+
           <vaadin-icon icon="vaadin:user"></vaadin-icon>
         </vaadin-button>
       </vaadin-context-menu>`;
@@ -264,7 +279,10 @@ export class AuthenticatedMenu extends LitElement {
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <div class="left-navbar">
-          <img height="32" src=${WaryesImage} />
+          <a class="logo" href="/">
+            <img height="32" src=${WaryesImage} />
+          </a>
+
           <unit-search @unit-selected=${this.unitSelected}></unit-search>
         </div>
 
@@ -291,4 +309,3 @@ declare global {
     'authenticated-menu': AuthenticatedMenu;
   }
 }
-

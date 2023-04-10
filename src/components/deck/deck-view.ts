@@ -11,6 +11,9 @@ import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
 import '@vaadin/tooltip';
 import {getDeckShareUrl} from '../../utils/get-deck-share-url';
 import './upload-deck';
+import {exportDeckToCode} from '../../utils/export-deck-to-code';
+import { Router } from '@vaadin/router';
+import { updateDeckToFirebase } from '../../utils/update-deck-to-firebase';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -97,6 +100,11 @@ export class DeckView extends LitElement {
         margin-top: var(--lumo-space-xs);
       }
 
+      .slot-costs {
+        display: flex;
+        flex-direction: row;
+      }
+
       .slot-costs > span {
         color: var(--lumo-contrast-50pct);
       }
@@ -142,29 +150,8 @@ export class DeckView extends LitElement {
   @state()
   uploading = false;
 
-  async exportDeck() {
-    try {
-      if (this.deck) {
-        const deckCode = this.deck.toDeckCode();
-        await navigator.clipboard.writeText(deckCode);
-        notificationService.instance?.addNotification({
-          content: 'Deck code copied to clipboard',
-          duration: 3000,
-          theme: '',
-        });
-        return;
-      } else {
-        throw new Error('No deck to export');
-      }
-    } catch (err) {
-      notificationService.instance?.addNotification({
-        content: 'Failed to generate deck code',
-        duration: 5000,
-        theme: 'error',
-      });
-      console.error(err);
-    }
-  }
+  @property()
+  userDeckId?: string;
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -200,20 +187,29 @@ export class DeckView extends LitElement {
   }
 
   async uploadDeck() {
-    try {
-      if (this.deck) {
-        this.uploading = true;
-      } else {
-        throw new Error('No deck to upload');
-      }
-    } catch (err) {
-      notificationService.instance?.addNotification({
-        content: 'Failed to upload deck',
-        duration: 5000,
-        theme: 'error',
-      });
-      console.error(err);
+    console.log(this.userDeckId);
+    const deckCode = this.deck?.toDeckCode();
+    if(this.userDeckId && deckCode) {
+      await updateDeckToFirebase(this.userDeckId, deckCode);
+      Router.go(`/deck/${this.userDeckId}`);
     }
+    else {
+      try {
+        if (this.deck) {
+          this.uploading = true;
+        } else {
+          throw new Error('No deck to upload');
+        }
+      } catch (err) {
+        notificationService.instance?.addNotification({
+          content: 'Failed to upload deck',
+          duration: 5000,
+          theme: 'error',
+        });
+        console.error(err);
+      }
+    }
+
   }
 
   menuItemSelected(item: MenuBarItemSelectedEvent) {
@@ -223,7 +219,7 @@ export class DeckView extends LitElement {
 
     switch (menuId) {
       case 'export':
-        this.exportDeck();
+        exportDeckToCode(this.deck);
         break;
       case 'change':
         this.dispatchEvent(
@@ -233,7 +229,7 @@ export class DeckView extends LitElement {
       case 'clear':
         this.resetDeck();
         break;
-      case 'upload':
+      case 'save':
         this.uploadDeck();
         break;
       case 'share':
@@ -360,40 +356,44 @@ export class DeckView extends LitElement {
   }
 
   generateTooltipItems() {
+    const childTooltipItems = [];
+
+    childTooltipItems.push({
+      component: this.createItem('compile', 'Export to code', 'export', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('harddrive', 'Save', 'save', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('share', 'Share', 'share', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('eye', 'View deck', 'view', true),
+    });
+    childTooltipItems.push({component: 'hr'});
+
+    /**
+     * If the deck is not a user deck, then we can change the division
+     */
+    if (!this.userDeckId) {
+      childTooltipItems.push({
+        component: this.createItem(
+          'exchange',
+          'Change division',
+          'change',
+          true
+        ),
+      });
+    }
+
+    childTooltipItems.push({
+      component: this.createItem('trash', 'Clear', 'clear', true),
+    });
+
     return [
       {
         component: this.createItem('angle-down', 'Actions', 'actions'),
-        children: [
-          {
-            component: this.createItem(
-              'compile',
-              'Export to code',
-              'export',
-              true
-            ),
-          },
-          {
-            component: this.createItem('upload', 'Upload', 'upload', true),
-          },
-          {
-            component: this.createItem('share', 'Share', 'share', true),
-          },
-          {
-            component: this.createItem('eye', 'View deck', 'view', true),
-          },
-          {component: 'hr'},
-          {
-            component: this.createItem(
-              'exchange',
-              'Change division',
-              'change',
-              true
-            ),
-          },
-          {
-            component: this.createItem('trash', 'Clear', 'clear', true),
-          },
-        ],
+        children: childTooltipItems,
       },
     ];
   }
