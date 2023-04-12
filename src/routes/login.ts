@@ -122,6 +122,7 @@ export class LoginRoute extends LitElement {
         <vaadin-login-form
           no-autofocus
           @login=${this.login}
+          @forgot-password=${() => Router.go('/forgot-password')}
           ?error=${this.loginError}
         ></vaadin-login-form>
 

@@ -1,9 +1,9 @@
-import { Router } from '@vaadin/router';
-import { Features, featureService } from './features';
+import {Route, Router} from '@vaadin/router';
+import {Features, featureService} from './features';
 
-const router = new Router(document.getElementById("main"));
+const router = new Router(document.getElementById('main'));
 
-const routes = [
+const routes: Route[] = [
   {path: '/', component: 'index-route'},
   {path: '/units', component: 'units-route'},
   {path: '/unit/:unitId', component: 'unit-view-route'},
@@ -12,7 +12,11 @@ const routes = [
   {path: '/deck-builder', component: 'deck-builder-route'},
   {path: '/deck-import', component: 'deck-import-route'},
   {path: '/deck-library', component: 'deck-library-route'},
-] 
+  {path: '/forgot-password', component: 'forgot-password-route'},
+  {path: '/privacy-policy', component: 'privacy-policy-route'},
+  {path: '/verify-email', component: 'verify-email-route'},
+  {path: '/user-settings', component: 'user-settings-route'},
+];
 
 // Features.firebase_auth routes
 if (featureService.enabled(Features.firebase_auth)) {
@@ -23,10 +27,7 @@ if (featureService.enabled(Features.firebase_auth)) {
 }
 
 router.setRoutes([
-  {path: '/',
-    component: 'application-route',
-    children: routes
-  }
+  {path: '/', component: 'application-route', children: routes},
 ]);
 
-export { router }
+export {router};

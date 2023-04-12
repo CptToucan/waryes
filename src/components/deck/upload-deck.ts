@@ -44,16 +44,18 @@ export class UploadDeck extends LitElement {
     const deck = this.deck;
     const selectedTags = this.selectedTags;
 
-    
-
     if(deck) {
-      const deckRef = await saveDeckToFirebase(
-        deck,
-        deckName,
-        selectedTags
-      );
-
-      Router.go(`/deck/${deckRef?.id}`);
+      try {
+        const deckRef = await saveDeckToFirebase(
+          deck,
+          deckName,
+          selectedTags
+        );
+        Router.go(`/deck/${deckRef?.id}`);
+      }
+      catch(err) {
+        console.error(err);
+      }
     }
 
     this.closeDialog();

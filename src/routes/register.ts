@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {createUserWithEmailAndPassword, updateProfile} from 'firebase/auth';
+import {createUserWithEmailAndPassword, sendEmailVerification, updateProfile} from 'firebase/auth';
 import '@vaadin/email-field';
 import '@vaadin/password-field';
 import '@vaadin/button';
@@ -12,7 +12,7 @@ import '@vaadin/form-layout';
 
 import {FirebaseService} from '../services/firebase';
 import {notificationService} from '../services/notification';
-import {Router} from '@vaadin/router';
+import { Router } from '@vaadin/router';
 
 @customElement('register-route')
 export class RegisterRoute extends LitElement {
@@ -26,6 +26,7 @@ export class RegisterRoute extends LitElement {
 
       h2 {
         color: var(--lumo-contrast);
+        margin: 0;
       }
 
       .card {
@@ -93,16 +94,16 @@ export class RegisterRoute extends LitElement {
       }
 
       await updateProfile(userCredential.user, {displayName});
+      await sendEmailVerification(userCredential.user);
 
-
+      Router.go("/");
 
       notificationService.instance?.addNotification({
         duration: 3000,
-        content: 'Successfuly registered',
+        content: 'Email verification sent. Please verify email before logging in.',
         theme: 'success',
       });
 
-      Router.go('/');
     } catch (error: any) {
       console.error(error);
       this.registrationError = error.message ?? 'Failed to create an account';
@@ -114,6 +115,11 @@ export class RegisterRoute extends LitElement {
       <div class="card">
         <h2>Register</h2>
         <vaadin-form-layout .responsiveSteps="${this.responsiveSteps}">
+          <div>
+            To allow voting and storing decks with WarYes, we require you to sign up for an account. 
+
+            You can read our privacy policy here: <a href="/privacy-policy" target="_blank">Privacy Policy</a>
+          </div>
           <vaadin-email-field
             label="Email address"
             name="email"
@@ -139,9 +145,9 @@ export class RegisterRoute extends LitElement {
             clear-button-visible
             ?required=${true}
           ></vaadin-password-field>
-          <div>
+            <div style="display: flex; justify-content: flex-end;">
             <vaadin-button
-              theme="primary"
+              theme="primary large"
               @click=${() => {
                 this.register({
                   email: this.email,
@@ -151,7 +157,8 @@ export class RegisterRoute extends LitElement {
               }}
               >Register</vaadin-button
             >
-          </div>
+            </div>
+          
         </vaadin-form-layout>
       </div>
     `;
