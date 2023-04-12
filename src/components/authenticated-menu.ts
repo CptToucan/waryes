@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {User, getAuth, signOut} from 'firebase/auth';
+import {User, getAuth, signOut, sendEmailVerification} from 'firebase/auth';
 import '@vaadin/icon';
 import '@vaadin/icons';
 import '@vaadin/tabs';
@@ -18,6 +18,7 @@ import {router} from '../services/router';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {Features, featureService} from '../services/features';
 import {Unit} from '../types/unit';
+import "./verify-email";
 interface MenuItem {
   name: string;
   icon: string;
@@ -169,6 +170,7 @@ export class AuthenticatedMenu extends LitElement {
         .desktop-only {
           display: none;
         }
+      }
     `;
   }
 
@@ -220,10 +222,25 @@ export class AuthenticatedMenu extends LitElement {
   }
 
   getLoggedInContextMenuItems(): ContextMenuItem[] {
-    return [{text: 'Logout'}];
+    const isEmailVerified = this.user?.emailVerified;
+    const items = [];
+
+    if (!isEmailVerified) {
+      items.push({text: 'Verify Email'});
+    }
+
+    items.push({text: 'Settings'});
+    
+    items.push({text: 'Logout'});
+    return items;
   }
 
   async contextMenuItemSelected(event: ContextMenuItemSelectedEvent) {
+    if(event.detail.value.text === "Settings") {
+      Router.go('/user-settings');
+    }
+
+
     if (event.detail.value.text === 'Logout') {
       const auth = getAuth();
       await signOut(auth);
@@ -234,6 +251,26 @@ export class AuthenticatedMenu extends LitElement {
         content: 'Successfully logged out',
         theme: 'success',
       });
+    }
+
+    if(event.detail.value.text === "Verify Email") {
+      const auth = getAuth();
+      if(auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+        notificationService.instance?.addNotification({
+          duration: 3000,
+          content: 'Verification email sent',
+          theme: 'success',
+        });
+      }
+      else {
+        notificationService.instance?.addNotification({
+          duration: 3000,
+          content: 'Failed to send verification email',
+          theme: 'error',
+        });
+      }
+
     }
   }
 
@@ -263,13 +300,14 @@ export class AuthenticatedMenu extends LitElement {
         <vaadin-icon icon="vaadin:sign-in"></vaadin-icon>
       </vaadin-button>`;
     }
-    return html``;
   }
 
   render(): TemplateResult {
     const menu: TemplateResult[] = this.items().map((item) =>
       this.renderMenuItem(item)
     );
+
+    const shouldMakeUserVerify = this.user && this.user?.emailVerified === false;
 
     return html` <vaadin-app-layout
       style="height: 100%; --vaadin-app-layout-drawer-overlay: true"
@@ -299,7 +337,7 @@ export class AuthenticatedMenu extends LitElement {
         </vaadin-tabs>
       </div>
 
-      <slot></slot>
+      ${shouldMakeUserVerify ? html`<verify-email></verify-email>` : html`<slot></slot>`}
     </vaadin-app-layout>`;
   }
 }

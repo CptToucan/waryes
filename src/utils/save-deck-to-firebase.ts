@@ -56,7 +56,7 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
         duration: 5000,
       });
 
-      return null;
+      throw new Error('Error uploading deck');
     }
   } else {
     throw new Error('No deck to upload');
