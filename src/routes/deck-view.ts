@@ -143,17 +143,24 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       this.userDeck = {...deckSnap.data(), id: deckSnap.id};
       this.userDeckRef = ref;
 
-      if (this.userDeck?.copied_from) {
-        const copyDoc = await getDoc(deckSnap.data().copied_from);
-        this.copyDeck = copyDoc.exists()
-          ? {
-              ...(copyDoc as QueryDocumentSnapshot<DocumentData>).data(),
-              id: copyDoc.id,
-            }
-          : undefined;
-      } else {
-        this.copyDeck = undefined;
+      try {
+        if (this.userDeck?.copied_from) {
+          console.log(this.userDeck?.copied_from);
+          const copyDoc = await getDoc(deckSnap.data().copied_from);
+          this.copyDeck = copyDoc.exists()
+            ? {
+                ...(copyDoc as QueryDocumentSnapshot<DocumentData>).data(),
+                id: copyDoc.id,
+              }
+            : undefined;
+        } else {
+          this.copyDeck = undefined;
+        }
       }
+      catch(err) {
+        console.error(err);
+      }
+
     }
 
     this.voteCount = this.userDeck?.vote_count || 0;
@@ -241,6 +248,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   async togglePublic(userDeck: DocumentData | undefined) {
     if (userDeck) {
       if (this.loggedInUser?.uid === userDeck.created_by) {
+        console.log(userDeck);
         await updateDeckToFirebase(userDeck.id, undefined, !userDeck.public);
 
         this.userDeck = {
