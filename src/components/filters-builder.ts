@@ -7,7 +7,7 @@ import {FilterMetadata} from '../types/FilterMetadata';
 import '../components/filter/boolean-value';
 import '../components/filter/string-value';
 import '../components/filter/number-value';
-import './filter-chip';
+import './simple-chip';
 
 @customElement('filters-builder')
 export class FiltersBuilder extends LitElement {

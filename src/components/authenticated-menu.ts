@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {User, getAuth, signOut} from 'firebase/auth';
+import {User, getAuth, signOut, sendEmailVerification} from 'firebase/auth';
 import '@vaadin/icon';
 import '@vaadin/icons';
 import '@vaadin/tabs';
@@ -18,6 +18,7 @@ import {router} from '../services/router';
 import {ifDefined} from 'lit/directives/if-defined.js';
 import {Features, featureService} from '../services/features';
 import {Unit} from '../types/unit';
+import "./verify-email";
 interface MenuItem {
   name: string;
   icon: string;
@@ -62,10 +63,25 @@ const defaultMenu: MenuDefinition = {
       href: '/deck-import',
     },
     {
+      name: 'Deck Library',
+      icon: 'vaadin:folder',
+      href: '/deck-library',
+    },
+    {
+      name: 'My Decks',
+      icon: 'vaadin:folder',
+      href: '/my-decks',
+    },
+    {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H',
     },
+    {
+      name: 'Privacy Policy',
+      icon: 'vaadin:file-text',
+      href: '/privacy-policy',
+    }
   ],
   guest: [
     {
@@ -93,12 +109,23 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:code',
       href: '/deck-import',
     },
+    {
+      name: 'Deck Library',
+      icon: 'vaadin:folder',
+      href: '/deck-library',
+    },
 
     {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H',
     },
+
+    {
+      name: 'Privacy Policy',
+      icon: 'vaadin:file-text',
+      href: '/privacy-policy',
+    }
   ],
 };
 
@@ -139,14 +166,31 @@ export class AuthenticatedMenu extends LitElement {
         align-items: center;
         flex: 1 1 0;
         overflow: hidden;
+        gap: var(--lumo-space-m);
       }
 
       unit-search {
-        margin-left: var(--lumo-space-m);
+
         flex: 1 1 0px;
         max-width: 256px;
         min-width: 0px;
         width: 0;
+      }
+
+      a.logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @media (max-width: 640px) {
+        .desktop-only {
+          display: none;
+        }
+
+        a.logo {
+          display: none;
+        }
       }
     `;
   }
@@ -199,10 +243,25 @@ export class AuthenticatedMenu extends LitElement {
   }
 
   getLoggedInContextMenuItems(): ContextMenuItem[] {
-    return [{text: 'Logout'}];
+    const isEmailVerified = this.user?.emailVerified;
+    const items = [];
+
+    if (!isEmailVerified) {
+      items.push({text: 'Verify Email'});
+    }
+
+    items.push({text: 'Settings'});
+    
+    items.push({text: 'Logout'});
+    return items;
   }
 
   async contextMenuItemSelected(event: ContextMenuItemSelectedEvent) {
+    if(event.detail.value.text === "Settings") {
+      Router.go('/user-settings');
+    }
+
+
     if (event.detail.value.text === 'Logout') {
       const auth = getAuth();
       await signOut(auth);
@@ -214,6 +273,26 @@ export class AuthenticatedMenu extends LitElement {
         theme: 'success',
       });
     }
+
+    if(event.detail.value.text === "Verify Email") {
+      const auth = getAuth();
+      if(auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+        notificationService.instance?.addNotification({
+          duration: 3000,
+          content: 'Verification email sent',
+          theme: 'success',
+        });
+      }
+      else {
+        notificationService.instance?.addNotification({
+          duration: 3000,
+          content: 'Failed to send verification email',
+          theme: 'error',
+        });
+      }
+
+    }
   }
 
   renderAccountButton(): TemplateResult {
@@ -224,6 +303,10 @@ export class AuthenticatedMenu extends LitElement {
         .items=${this.getLoggedInContextMenuItems()}
       >
         <vaadin-button theme="tertiary" aria-label="Account">
+          <span class="desktop-only">
+            ${this.user.displayName ? this.user.displayName : 'NO DISPLAY NAME'}
+          </span>
+
           <vaadin-icon icon="vaadin:user"></vaadin-icon>
         </vaadin-button>
       </vaadin-context-menu>`;
@@ -238,13 +321,14 @@ export class AuthenticatedMenu extends LitElement {
         <vaadin-icon icon="vaadin:sign-in"></vaadin-icon>
       </vaadin-button>`;
     }
-    return html``;
   }
 
   render(): TemplateResult {
     const menu: TemplateResult[] = this.items().map((item) =>
       this.renderMenuItem(item)
     );
+
+    const shouldMakeUserVerify = this.user && this.user?.emailVerified === false;
 
     return html` <vaadin-app-layout
       style="height: 100%; --vaadin-app-layout-drawer-overlay: true"
@@ -254,7 +338,10 @@ export class AuthenticatedMenu extends LitElement {
       <vaadin-drawer-toggle slot="navbar"></vaadin-drawer-toggle>
       <div class="navbar-layout" slot="navbar">
         <div class="left-navbar">
-          <img height="32" src=${WaryesImage} />
+          <a class="logo" href="/">
+            <img height="32" src=${WaryesImage} />
+          </a>
+
           <unit-search @unit-selected=${this.unitSelected}></unit-search>
         </div>
 
@@ -271,7 +358,13 @@ export class AuthenticatedMenu extends LitElement {
         </vaadin-tabs>
       </div>
 
-      <slot></slot>
+      ${shouldMakeUserVerify ? html`<verify-email></verify-email>` : html`<slot></slot>`}
     </vaadin-app-layout>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'authenticated-menu': AuthenticatedMenu;
   }
 }

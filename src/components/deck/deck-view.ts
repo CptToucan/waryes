@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import './deck-card';
 import {Deck} from '../../classes/deck';
 import {UnitCategory} from '../../types/deck-builder';
@@ -10,6 +10,10 @@ import '@vaadin/context-menu';
 import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
 import '@vaadin/tooltip';
 import {getDeckShareUrl} from '../../utils/get-deck-share-url';
+import './upload-deck';
+import {exportDeckToCode} from '../../utils/export-deck-to-code';
+import { Router } from '@vaadin/router';
+import { updateDeckToFirebase } from '../../utils/update-deck-to-firebase';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -41,8 +45,9 @@ export class DeckView extends LitElement {
       }
 
       .deck-category-cards {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        place-items: center;
       }
 
       .deck-header-row {
@@ -96,6 +101,11 @@ export class DeckView extends LitElement {
         margin-top: var(--lumo-space-xs);
       }
 
+      .slot-costs {
+        display: flex;
+        flex-direction: row;
+      }
+
       .slot-costs > span {
         color: var(--lumo-contrast-50pct);
       }
@@ -138,29 +148,11 @@ export class DeckView extends LitElement {
   @property()
   showClose = false;
 
-  async exportDeck() {
-    try {
-      if (this.deck) {
-        const deckCode = this.deck.toDeckCode();
-        await navigator.clipboard.writeText(deckCode);
-        notificationService.instance?.addNotification({
-          content: 'Deck code copied to clipboard',
-          duration: 3000,
-          theme: '',
-        });
-        return;
-      } else {
-        throw new Error('No deck to export');
-      }
-    } catch (err) {
-      notificationService.instance?.addNotification({
-        content: 'Failed to generate deck code',
-        duration: 5000,
-        theme: 'error',
-      });
-      console.error(err);
-    }
-  }
+  @state()
+  uploading = false;
+
+  @property()
+  userDeckId?: string;
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -195,6 +187,32 @@ export class DeckView extends LitElement {
     }
   }
 
+  async uploadDeck() {
+    console.log(this.userDeckId);
+    const deckCode = this.deck?.toDeckCode();
+    if(this.userDeckId && deckCode) {
+      await updateDeckToFirebase(this.userDeckId, deckCode);
+      Router.go(`/deck/${this.userDeckId}`);
+    }
+    else {
+      try {
+        if (this.deck) {
+          this.uploading = true;
+        } else {
+          throw new Error('No deck to upload');
+        }
+      } catch (err) {
+        notificationService.instance?.addNotification({
+          content: 'Failed to upload deck',
+          duration: 5000,
+          theme: 'error',
+        });
+        console.error(err);
+      }
+    }
+
+  }
+
   menuItemSelected(item: MenuBarItemSelectedEvent) {
     const menuId = (item.detail.value.component as HTMLElement)?.getAttribute(
       'menu-id'
@@ -202,7 +220,7 @@ export class DeckView extends LitElement {
 
     switch (menuId) {
       case 'export':
-        this.exportDeck();
+        exportDeckToCode(this.deck);
         break;
       case 'change':
         this.dispatchEvent(
@@ -211,6 +229,9 @@ export class DeckView extends LitElement {
         break;
       case 'clear':
         this.resetDeck();
+        break;
+      case 'save':
+        this.uploadDeck();
         break;
       case 'share':
         this.shareDeck();
@@ -277,108 +298,105 @@ export class DeckView extends LitElement {
         warningText = 'Typical decks should be more than 12000 points';
       }
 
-      return html` <div class="deck">
-        <div class="deck-header">
-          <div class="deck-header-row">
-            <h3 class="deck-title">
-              ${this.deck.division.name ?? this.deck.division.descriptor}
-            </h3>
-            ${this.showClose
-              ? html`<vaadin-button
-                  @click=${() =>
-                    this.dispatchEvent(new CustomEvent('close-clicked'))}
-                  theme="icon tertiary"
-                  aria-label="close drawer"
-                  ><vaadin-icon icon="vaadin:close"></vaadin-icon
-                ></vaadin-button>`
+      return html`${this.uploading
+          ? html`<upload-deck .deck=${this.deck}></upload-deck>`
+          : html``}
+        <div class="deck">
+          <div class="deck-header">
+            <div class="deck-header-row">
+              <h3 class="deck-title">
+                ${this.deck.division.name ?? this.deck.division.descriptor}
+              </h3>
+              ${this.showClose
+                ? html`<vaadin-button
+                    @click=${() =>
+                      this.dispatchEvent(new CustomEvent('close-clicked'))}
+                    theme="icon tertiary"
+                    aria-label="close drawer"
+                    ><vaadin-icon icon="vaadin:close"></vaadin-icon
+                  ></vaadin-button>`
+                : html``}
+            </div>
+
+            <div class="deck-header-row">
+              <span class="activation-points">
+                ${this.deck.totalSpentActivationPoints} /
+                ${this.deck.division.maxActivationPoints} Activation Points
+              </span>
+
+              <vaadin-menu-bar
+                theme="primary icon"
+                @item-selected=${this.menuItemSelected}
+                .items="${this.generateTooltipItems()}"
+              ></vaadin-menu-bar>
+            </div>
+          </div>
+          <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
+          <div class="total-unit-cost">
+            Total Points:
+            <span class="${displayWarningOnCost && 'warning'}"
+              >${unitCosts}</span
+            >
+            ${displayWarningOnCost
+              ? html`<vaadin-icon
+                    id="warning-icon"
+                    icon="vaadin:question-circle-o"
+                    style="font-size: 12px"
+                  ></vaadin-icon
+                  ><vaadin-tooltip
+                    for="warning-icon"
+                    text=${warningText}
+                    position="top-end"
+                  ></vaadin-tooltip>`
               : html``}
           </div>
-
-          <div class="deck-header-row">
-            <span class="activation-points">
-              ${this.deck.totalSpentActivationPoints} /
-              ${this.deck.division.maxActivationPoints} Activation Points
-            </span>
-
-            <vaadin-menu-bar
-              theme="primary icon"
-              @item-selected=${this.menuItemSelected}
-              .items="${[
-                {
-                  component: this.createItem(
-                    'angle-down',
-                    'Actions',
-                    'actions'
-                  ),
-                  children: [
-                    {
-                      component: this.createItem(
-                        'compile',
-                        'Export to code',
-                        'export',
-                        true
-                      ),
-                    },
-                    {
-                      component: this.createItem(
-                        'share',
-                        'Share',
-                        'share',
-                        true
-                      ),
-                    },
-                    {
-                      component: this.createItem(
-                        'eye',
-                        'View deck',
-                        'view',
-                        true
-                      ),
-                    },
-                    {component: 'hr'},
-                    {
-                      component: this.createItem(
-                        'exchange',
-                        'Change division',
-                        'change',
-                        true
-                      ),
-                    },
-                    {
-                      component: this.createItem(
-                        'trash',
-                        'Clear',
-                        'clear',
-                        true
-                      ),
-                    },
-                  ],
-                },
-              ]}"
-            ></vaadin-menu-bar>
-          </div>
-        </div>
-        <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
-        <div class="total-unit-cost">
-          Total Points:
-          <span class="${displayWarningOnCost && 'warning'}">${unitCosts}</span>
-          ${displayWarningOnCost
-            ? html`<vaadin-icon
-                  id="warning-icon"
-                  icon="vaadin:question-circle-o"
-                  style="font-size: 12px"
-                ></vaadin-icon
-                ><vaadin-tooltip
-                  for="warning-icon"
-                  text=${warningText}
-                  position="top-end"
-                ></vaadin-tooltip>`
-            : html``}
-        </div>
-      </div>`;
+        </div>`;
     } else {
       return html`NO DECK`;
     }
+  }
+
+  generateTooltipItems() {
+    const childTooltipItems = [];
+
+    childTooltipItems.push({
+      component: this.createItem('compile', 'Export to code', 'export', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('harddrive', 'Save', 'save', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('share', 'Share', 'share', true),
+    });
+    childTooltipItems.push({
+      component: this.createItem('eye', 'View deck', 'view', true),
+    });
+    childTooltipItems.push({component: 'hr'});
+
+    /**
+     * If the deck is not a user deck, then we can change the division
+     */
+    if (!this.userDeckId) {
+      childTooltipItems.push({
+        component: this.createItem(
+          'exchange',
+          'Change division',
+          'change',
+          true
+        ),
+      });
+    }
+
+    childTooltipItems.push({
+      component: this.createItem('trash', 'Clear', 'clear', true),
+    });
+
+    return [
+      {
+        component: this.createItem('angle-down', 'Actions', 'actions'),
+        children: childTooltipItems,
+      },
+    ];
   }
 
   renderDeck(deck: Deck) {

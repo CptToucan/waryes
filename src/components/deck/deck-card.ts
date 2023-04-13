@@ -9,7 +9,13 @@ import {Unit} from '../../types/unit';
 @customElement('deck-card')
 export class DeckCard extends LitElement {
   static get styles() {
-    return css``;
+    return css`
+      :host {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    `;
   }
 
   @property({

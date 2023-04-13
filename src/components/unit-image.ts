@@ -11,11 +11,12 @@ export class UnitImage extends LitElement {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
         width: 150px;
       }
 
       img {
-        border-radius: var(--lumo-border-radius-m);
+        // border-radius: var(--lumo-border-radius-m);
         width: 100%;
       }
 
@@ -34,6 +35,10 @@ export class UnitImage extends LitElement {
       .icon-wrapper {
         display: flex;
         align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+        flex: 1 1 0;
       }
     `;
   }
@@ -77,8 +82,7 @@ export class UnitImage extends LitElement {
             src=${this.generateSrc()}
             alt=${this.unit?.name}
             title=${this.unit?.name}
-            @error=${(error: Error) => {
-              console.error(error);
+            @error=${() => {
               const img = new Image();
               img.onerror = () => {this.showFallback = true}
               img.src = this.generateSrc();

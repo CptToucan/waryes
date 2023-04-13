@@ -89,6 +89,7 @@ export class UnitCardHeaderView extends LitElement {
           .country=${this.unit?.unitType.motherCountry}
         ></country-flag
         ><vaadin-button
+          theme="primary"
           @click=${() =>
             this.dispatchEvent(
               new CustomEvent('mode-toggled', {detail: !this.expert})

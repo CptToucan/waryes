@@ -499,7 +499,7 @@ export class ComparisonRoute extends LitElement {
             : 'master-sidebar-expanded'}"
         >
           <div class="master-header">
-            <h3>Comparison</h3>
+            <h2>Comparison</h2>
             <vaadin-button
               theme="icon secondary"
               aria-label="Expand/collapse sidebar"
@@ -514,7 +514,7 @@ export class ComparisonRoute extends LitElement {
           ? html``
           : html`<div class="detail-panel">
               <div class="detail-header">
-                <h3>Settings</h3>
+                <h2>Settings</h2>
                 <vaadin-button
                   theme="icon tertiary"
                   aria-label="Expand/collapse sidebar"
