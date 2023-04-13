@@ -22,6 +22,7 @@ import {getAuth, User} from 'firebase/auth';
 import {exportDeckToCode} from '../utils/export-deck-to-code';
 import {saveDeckToFirebase} from '../utils/save-deck-to-firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
+import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
 
 @customElement('deck-view-route')
 export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
@@ -82,6 +83,18 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       this.userDeck?.created_by === this.loggedInUser?.uid
     ) {
       items.push({component: this.createItem('edit', 'Edit'), text: 'Edit'});
+
+      if (this.userDeck?.public) {
+        items.push({
+          component: this.createItem('eye-slash', 'Private'),
+          text: 'Private',
+        });
+      } else {
+        items.push({
+          component: this.createItem('eye', 'Public'),
+          text: 'Public',
+        });
+      }
     }
 
     return items;
@@ -225,6 +238,19 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
   }
 
+  async togglePublic(userDeck: DocumentData | undefined) {
+    if (userDeck) {
+      if (this.loggedInUser?.uid === userDeck.created_by) {
+        await updateDeckToFirebase(userDeck.id, undefined, !userDeck.public);
+
+        this.userDeck = {
+          ...this.userDeck,
+          public: !userDeck.public,
+        };
+      }
+    }
+  }
+
   toolbarItemSelected(value: string) {
     switch (value) {
       case 'Vote':
@@ -235,6 +261,10 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         break;
       case 'Export':
         exportDeckToCode(this.deck);
+        break;
+      case 'Public':
+      case 'Private':
+        this.togglePublic(this.userDeck);
         break;
       case 'Edit':
         if (this.deck) {

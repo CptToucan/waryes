@@ -13,7 +13,7 @@ export class ForgotPasswordRoute extends LitElement {
       :host {
         display: flex;
         justify-content: center;
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-s);
       }
 
       .page {
@@ -24,6 +24,7 @@ export class ForgotPasswordRoute extends LitElement {
         margin: 0 auto; /* Center the container horizontally */
         background-color: var(--lumo-contrast-5pct);
         padding: var(--lumo-space-m);
+        border-radius: var(--lumo-border-radius);
       }
     `;
   }

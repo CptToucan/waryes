@@ -8,7 +8,7 @@ export class PrivacyPolicyRoute extends LitElement {
       :host {
         display: flex;
         justify-content: center;
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-s);
       }
 
       .page {
@@ -19,6 +19,7 @@ export class PrivacyPolicyRoute extends LitElement {
         margin: 0 auto; /* Center the container horizontally */
         background-color: var(--lumo-contrast-5pct);
         padding: var(--lumo-space-m);
+        border-radius: var(--lumo-border-radius);
       }
 
       h2 {
@@ -54,9 +55,7 @@ export class PrivacyPolicyRoute extends LitElement {
         </p>
         <h2>Non-personal identification information</h2>
 
-        <p>
-          We don't collect any non-personal identification information.
-        </p>
+        <p>We don't collect any non-personal identification information.</p>
         <h2>Web browser cookies</h2>
 
         <p>WarYes does not use cookies.</p>
@@ -66,28 +65,18 @@ export class PrivacyPolicyRoute extends LitElement {
         purposes:
         <ul>
           <li>
-            To improve customer service: Information you provide helps us
-            respond to your customer service requests and support needs more
-            efficiently.
+            To store and display user-generated content: We use the deck codes
+            that Users create and store on our Site to display them to other
+            Users and to facilitate sharing of these codes.
           </li>
           <li>
-            To personalize user experience: We may use information in the
-            aggregate to understand how our Users as a group use the services
-            and resources provided on our Site.
-          </li>
-          <li>
-            To store and display user-generated content: We may use the deck
-            codes that Users create and store on our Site to display them to
-            other Users and to facilitate sharing of these codes.
-          </li>
-          <li>
-            To generate statistics about deck usage: We may analyze deck code
-            usage to generate statistics about deck popularity, card usage, and
-            other trends in the Warno game community.
+            To generate statistics about deck usage: We analyze deck code usage
+            to generate statistics about deck popularity, card usage, and other
+            trends in the Warno game community.
           </li>
           <li>
             To send periodic emails: We may use the email address to respond to
-            their inquiries, questions, and/or other requests.
+            inquiries, questions, and/or other requests.
           </li>
         </ul>
 
@@ -132,13 +121,11 @@ export class PrivacyPolicyRoute extends LitElement {
         <h2>Changes to this privacy policy</h2>
 
         <p>
-          WarYes has the discretion to update this privacy policy at anytime.
-          When we do, we will post a notification on the main page of our Site
-          and revise the updated date at the bottom of this page. We encourage
-          Users to frequently check this page for any changes to stay informed
-          about how we are helping to protect the personal information we
-          collect. You acknowledge and agree that it is your responsibility to
-          review this privacy policy periodically and become aware of
+          WarYes has the discretion to update this privacy policy at anytime. We
+          encourage Users to frequently check this page for any changes to stay
+          informed about how we are helping to protect the personal information
+          we collect. You acknowledge and agree that it is your responsibility
+          to review this privacy policy periodically and become aware of
           modifications.
         </p>
 

@@ -36,7 +36,6 @@ export class DeckListItem extends LitElement {
         font-size: var(--lumo-font-size-s);
         padding: 0
           calc(var(--lumo-button-size) / 3 + var(--lumo-border-radius-m) / 2);
-        margin: var(--lumo-space-xs) 0;
         text-align: center;
         text-decoration: none;
         user-select: none;
@@ -76,6 +75,10 @@ export class DeckListItem extends LitElement {
         display: flex;
         flex-direction: row;
         gap: var(--lumo-space-s);
+      }
+
+      vaadin-button {
+        margin: 0;
       }
 
       .main-details {
@@ -184,6 +187,9 @@ export class DeckListItem extends LitElement {
   @state()
   private _expanded = false;
 
+  @property()
+  hideVotes = false;
+
   @state()
   get voteCount(): number {
     return this.deck?.data()?.vote_count || 0;
@@ -214,14 +220,19 @@ export class DeckListItem extends LitElement {
             ${this.deck.data().created.toDate().toLocaleString()}
           </div>
           <div class="left">
-            <span class="votes">${this.voteCount}</span>
+            ${!this.hideVotes
+              ? html`<div class="votes">${this.voteCount}</div>`
+              : ''}
 
             <div class="main-details">
               <div class="deck-title">
                 ${deck.is_pro_deck
                   ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
-                <span class="name"> ${deck.name}</span>
+                <slot name="name">
+                  <span class="name"> ${deck.name}</span></slot
+                >
+
               </div>
               <div class="details">
                 <div class="summary-icons">
@@ -246,8 +257,13 @@ export class DeckListItem extends LitElement {
             <div class="button-container">
               <a class="inspect" href="/deck/${this.deck?.id}">
                 <vaadin-icon icon="waryes:recon"></vaadin-icon>
-                <span class="desktop-only" style="margin-left: var(--lumo-space-xs);">Intel</span>
+                <span
+                  class="desktop-only"
+                  style="margin-left: var(--lumo-space-xs);"
+                  >Intel</span
+                >
               </a>
+              <slot name="buttons"></slot>
               <vaadin-button
                 theme="small icon"
                 @click=${() => {

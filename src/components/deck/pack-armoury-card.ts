@@ -13,7 +13,11 @@ import { Deck } from '../../classes/deck';
 @customElement('pack-armoury-card')
 export class PackArmouryCard extends LitElement {
   static get styles() {
-    return css``;
+    return css`
+      :host {
+        max-width: 150px;
+      }
+    `;
   }
 
   @property()

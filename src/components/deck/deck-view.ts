@@ -45,8 +45,9 @@ export class DeckView extends LitElement {
       }
 
       .deck-category-cards {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        place-items: center;
       }
 
       .deck-header-row {

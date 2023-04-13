@@ -24,6 +24,7 @@ import "./routes/deck-view";
 import "./routes/forgot-password";
 import "./routes/privacy-policy";
 import "./routes/user-settings";
+import "./routes/my-decks";
 
 /** Components */
 import "./components/unit-card";

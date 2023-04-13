@@ -14,6 +14,8 @@ import type {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-s
 import { tags } from '../../types/tags';
 import { saveDeckToFirebase } from '../../utils/save-deck-to-firebase';
 import { Router } from '@vaadin/router';
+import "@vaadin/checkbox"
+import { CheckboxCheckedChangedEvent } from '@vaadin/checkbox';
 
 @customElement('upload-deck')
 export class UploadDeck extends LitElement {
@@ -35,6 +37,9 @@ export class UploadDeck extends LitElement {
   @state()
   private selectedTags: string[] = [];
 
+  @state()
+  private public = false;
+
   private responsiveSteps: FormLayoutResponsiveStep[] = [
     // Use one column by default
     {minWidth: 0, columns: 1},
@@ -49,7 +54,9 @@ export class UploadDeck extends LitElement {
         const deckRef = await saveDeckToFirebase(
           deck,
           deckName,
-          selectedTags
+          selectedTags,
+          undefined,
+          this.public
         );
         Router.go(`/deck/${deckRef?.id}`);
       }
@@ -81,6 +88,13 @@ export class UploadDeck extends LitElement {
           () =>
             html`
               <vaadin-form-layout .responsiveSteps="${this.responsiveSteps}">
+                <vaadin-checkbox label="Public"
+                  @checked-changed=${(event: CheckboxCheckedChangedEvent) => {
+                    this.public = event.detail.value;
+                  }}
+                 >
+                  
+                </vaadin-checkbox>
                 <vaadin-text-field
                   colspan="2"
                   label="Code"

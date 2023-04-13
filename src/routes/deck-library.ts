@@ -85,9 +85,15 @@ export class DeckLibraryRoute extends LitElement {
       #mobile-pagination {
         position: fixed;
         bottom: 0;
+        left: 0;
+        right: 0;
         height: 56px;
         width: 100%;
         background-color: var(--lumo-base-color);
+      }
+
+      #mobile-pagination > * {
+
       }
 
       @media only screen and (min-width: 801px) {
@@ -365,6 +371,8 @@ export class DeckLibraryRoute extends LitElement {
   ) {
     const queryConditions: QueryConstraint[] = [];
 
+    queryConditions.push(where('public', '==', true));
+
     if (division) {
       queryConditions.push(where('division', '==', division?.descriptor));
     }
@@ -466,6 +474,7 @@ export class DeckLibraryRoute extends LitElement {
           () =>
             html`
               <deck-filters
+                style="width: unset;"
                 @filters-changed=${(event: CustomEvent) => {
                   this.queryFirebase(event.detail, 1);
                   this.closeFiltersDialog();

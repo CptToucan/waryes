@@ -16,6 +16,7 @@ export class VerifyEmail extends LitElement {
       }
 
       .page {
+        border-radius: var(--lumo-border-radius);
         display: flex;
         flex-direction: column;
         justify-content: center;
