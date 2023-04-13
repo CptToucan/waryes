@@ -17,7 +17,7 @@ export async function updateDeckToFirebase(deckId: string, newDeckCode?: string,
     updateProperties['code'] = newDeckCode;
   }
 
-  if(isPublic) {
+  if(isPublic === true || isPublic === false) {
     updateProperties['public'] = isPublic;
   }
 
