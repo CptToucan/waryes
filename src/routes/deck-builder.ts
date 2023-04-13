@@ -34,13 +34,12 @@ export class DeckBuilderRoute
       :host {
         height: 100%;
         display: flex;
+        flex-direction: row;
+        overflow-x: hidden;
       }
 
       .container {
-        padding-left: var(--lumo-space-s);
-        padding-right: var(--lumo-space-s);
         display: flex;
-        overflow-x: hidden;
         width: 100%;
       }
 
@@ -56,6 +55,14 @@ export class DeckBuilderRoute
         display: flex;
         flex-direction: column;
         width: 100%;
+      }
+
+      .display-mode-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding-left: var(--lumo-space-s);
+        padding-right: var(--lumo-space-s);
       }
 
       button.choice-button {
@@ -124,11 +131,17 @@ export class DeckBuilderRoute
       division-flag {
         margin: 0 var(--lumo-space-s);
       }
+      summary-view {
+        flex: 1 1 100%;
+      }
     `;
   }
 
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
+
+  @state()
+  userDeckId?: string;
 
   /**
    * Currently selected division
@@ -170,6 +183,8 @@ export class DeckBuilderRoute
 
     const params = new URLSearchParams(location.search);
     const deckCode = params.get('code');
+    const shouldStartEditing = params.get('edit') === 'true';
+    const userDeckId = params.get('ud') || undefined;
 
     if (deckCode) {
       try {
@@ -180,7 +195,8 @@ export class DeckBuilderRoute
 
         this.selectedDivision = deckFromString.division;
         this.deckToEdit = deckFromString;
-        this.displayMode = true;
+        this.displayMode = shouldStartEditing ? false : true;
+        this.userDeckId = userDeckId;
       } catch (err) {
         console.error(err);
         setTimeout(
@@ -244,24 +260,36 @@ export class DeckBuilderRoute
       return this.renderDisplayMode(this.deckToEdit);
     }
     if (this.deckToEdit) {
-      return this.renderDeckEditor(this.deckToEdit);
+      return this.renderDeckEditor(this.deckToEdit, this.userDeckId);
     }
 
     return this.renderDivisionSelection();
   }
 
   renderDisplayMode(deck: Deck) {
-    return html`<summary-view
-      @edit-clicked=${() => (this.displayMode = false)}
-      .deck=${deck}
-    ></summary-view>`;
+    return html` <div class="display-mode-container">
+      <deck-header
+        .deck=${deck}
+        .name=${deck.division.name ?? deck.division.descriptor}
+      >
+        <vaadin-button
+          slot="toolbar"
+          theme="primary"
+          style="min-width: 0px;"
+          @click=${() => (this.displayMode = false)}
+          >Edit</vaadin-button
+        >
+      </deck-header>
+      <summary-view .deck=${deck}> </summary-view>
+    </div>`;
   }
 
-  renderDeckEditor(deck: Deck): TemplateResult {
+  renderDeckEditor(deck: Deck, userDeckId?: string): TemplateResult {
     return html`<edit-deck
       @change-division-clicked=${() => this.resetDivision()}
       @summary-clicked=${() => (this.displayMode = true)}
       @deck-cleared=${this.clearDeckParameters}
+      .userDeckId=${userDeckId}
       .deck=${deck}
     ></edit-deck>`;
   }

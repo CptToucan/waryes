@@ -45,7 +45,18 @@ const ICONS_DIVISION_MAP: {[key: string]: any} = {
 @customElement('division-flag')
 export class DivisionFlag extends LitElement {
   static get styles() {
-    return css``;
+    return css`
+      :host {
+        width: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      img {
+        width: 100%
+      }
+    `;
   }
 
   @property()
@@ -54,7 +65,7 @@ export class DivisionFlag extends LitElement {
   render(): TemplateResult {
     const icon = this.division?.descriptor ? ICONS_DIVISION_MAP[this.division.descriptor] : '';
     const displayName = this.division?.name ?? this.division?.descriptor ?? 'invalid division'
-    return html`<img width="40" src=${icon} alt=${ displayName } title=${displayName} />`;
+    return html`<img src=${icon} alt=${ displayName } title=${displayName} />`;
   }
 }
 

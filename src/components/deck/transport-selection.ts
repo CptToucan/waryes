@@ -45,7 +45,7 @@ export class TransportSelection extends LitElement {
         @opened-changed=${(event: CustomEvent) => {if(event.detail.value === false) {this.closeTransportDialog()}}}
         ${dialogRenderer(
           () =>
-            html`${this.availableTransports?.map(
+            html`<div style="display: flex; flex-direction: column; align-items: center;">${this.availableTransports?.map(
               (transport) =>
                 html`<transport-card
                 .unit=${transport}
@@ -59,7 +59,7 @@ export class TransportSelection extends LitElement {
                       })
                     )}
                 ></transport-card>`
-            )}`,
+            )}</div>`,
           []
         )}
         ${dialogFooterRenderer(

@@ -1,16 +1,15 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement} from 'lit/decorators.js';
 
-@customElement('filter-chip')
-export class FilterChip extends LitElement {
+@customElement('simple-chip')
+export class SimpleChip extends LitElement {
   static get styles() {
     return css`
       :host {
-        --background: var(--lumo-contrast-5pct);
-        --color: var(--lumo-primary-text-color);;
-        border-radius: 16px;
-        margin: 4px;
-        padding: 7px 12px;
+        --background: var(--lumo-primary-color-10pct);
+        --color: var(--lumo-primary-text-color);
+        border-radius: var(--lumo-border-radius-m);
+        padding: 7px 6px;
         display: inline-flex;
         position: relative;
         align-items: center;
@@ -23,11 +22,18 @@ export class FilterChip extends LitElement {
         overflow: hidden;
         vertical-align: middle;
         box-sizing: border-box;
+        white-space: nowrap;
       }
     `;
   }
 
   render(): TemplateResult {
     return html`<slot></slot>`;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'simple-chip': SimpleChip;
   }
 }

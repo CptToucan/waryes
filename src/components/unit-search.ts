@@ -60,7 +60,7 @@ export class UnitSearch extends LitElement {
     const filter = e.detail.value.replace(UNIT_SEARCH_IGNORED_CHARACTERS, '');
     if (filter) {
       this.filteredUnits =
-        this.units?.filter((u) => u._searchNameHelper.includes(filter)) ?? [];
+        this.units?.filter((u) => u._searchNameHelper.toLowerCase().includes(filter.toLowerCase())) ?? [];
     }
   }
 

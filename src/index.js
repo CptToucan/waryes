@@ -19,6 +19,12 @@ import "./routes/unit-view";
 import "./routes/comparison"
 import "./routes/deck-builder"
 import "./routes/deck-import";
+import "./routes/deck-library";
+import "./routes/deck-view";
+import "./routes/forgot-password";
+import "./routes/privacy-policy";
+import "./routes/user-settings";
+import "./routes/my-decks";
 
 /** Components */
 import "./components/unit-card";

@@ -114,6 +114,9 @@ export class EditDeck extends LitElement {
   })
   deck?: Deck;
 
+  @property()
+  userDeckId?: string;
+
   @state()
   deckOpen = false;
 
@@ -122,15 +125,11 @@ export class EditDeck extends LitElement {
 
   openDeck() {
     this.deckOpen = true;
-    // this.drawer.setAttribute("open", "");
     this.drawer.open = true;
   }
 
   closeDeck() {
-    // this.drawer.removeAttribute("open");
     this.deckOpen = false;
-
-    //
     this.drawer.open = false;
   }
 
@@ -155,14 +154,32 @@ export class EditDeck extends LitElement {
           @close=${() => this.closeDeck()}
           ?open=${this.deckOpen}
         >
-          <deck-view .deck=${this.deck} .showClose=${true} @close-clicked=${() => this.closeDeck()} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
+          <deck-view
+            .deck=${this.deck}
+            .showClose=${true}
+            .userDeckId=${this.userDeckId}
+            @close-clicked=${() => this.closeDeck()}
+            @deck-cleared=${() =>
+              this.dispatchEvent(
+                new CustomEvent('deck-cleared', {bubbles: true})
+              )}
+          ></deck-view>
         </side-drawer>
         <div class="desktop">
-          <deck-view .deck=${this.deck} @deck-cleared=${() => this.dispatchEvent(new CustomEvent("deck-cleared", {bubbles: true}))}></deck-view>
+          <deck-view
+            .deck=${this.deck}
+            .userDeckId=${this.userDeckId}
+            @deck-cleared=${() =>
+              this.dispatchEvent(
+                new CustomEvent('deck-cleared', {bubbles: true})
+              )}
+          ></deck-view>
 
           <div class="cards">
             <div class="button-drawer">
-              <vaadin-button @click=${() => this.openDeck()} theme="large primary"
+              <vaadin-button
+                @click=${() => this.openDeck()}
+                theme="large primary"
                 >View Deck</vaadin-button
               >
             </div>
