@@ -22,6 +22,7 @@ export class SimpleChip extends LitElement {
         overflow: hidden;
         vertical-align: middle;
         box-sizing: border-box;
+        white-space: nowrap;
       }
     `;
   }

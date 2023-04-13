@@ -129,7 +129,7 @@ export class ArmouryCard extends LitElement {
       return html` <vaadin-button
         class="add-button"
         ?disabled=${this.disabled}
-        theme="icon medium secondary"
+        theme="icon small primary"
         aria-label="Add unit"
         style="padding: 0;"
         @click=${() => this.clickedAddButton(unit, activeVeterancy)}
@@ -147,7 +147,7 @@ export class ArmouryCard extends LitElement {
   renderInfoIcon(_unit: Unit, _pack: Pack, _deck: Deck) {
     return html`
       <vaadin-button
-        theme="tertiary icon"
+        theme="primary small icon"
         class="info-icon-button"
         @click=${() => this.open()}
         aria-label="Show unit info"

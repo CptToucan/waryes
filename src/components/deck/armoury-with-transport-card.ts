@@ -35,6 +35,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
       .details-row {
         display: flex;
         justify-content: space-between;
+        flex: 1 0 auto;
       }
 
       .details-row vaadin-icon {
@@ -43,7 +44,24 @@ export class ArmouryWithTransportCard extends ArmouryCard {
 
       .details-row > span {
         font-size: var(--lumo-font-size-s);
+        font-size: 0.6rem;
       }
+
+      .details-row > span.unit-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1 1 auto;
+      }
+
+      .details-row > span.unit-points {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 0 0 auto;
+        text-align: right;
+      }
+
 
       .transport-settings {
         display: flex;
@@ -57,7 +75,10 @@ export class ArmouryWithTransportCard extends ArmouryCard {
       }
 
       .unit-details {
-        flex: 1 1 100%;
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        width: calc(100% - 24px);
       }
 
       .category-icon {
@@ -95,7 +116,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
       return html` <vaadin-button
         class="add-button"
         ?disabled=${false}
-        theme="icon medium secondary"
+        theme="icon small primary"
         aria-label="Remove unit from deck"
         style="padding: 0;"
         @click=${() => this.clickedRemoveButton(unit)}
@@ -114,19 +135,19 @@ export class ArmouryWithTransportCard extends ArmouryCard {
     _deck: Deck
   ) {
     let unitHtml = html`<div class="details-row">
-      <span
+      <span class="unit-name"
         ><vaadin-icon icon=${getIconForUnit(unit)}></vaadin-icon
         >${unit.name}</span
-      ><span>${unit.commandPoints}</span>
+      ><span class="unit-points">${unit.commandPoints}</span>
     </div>`;
 
     if (this.transport) {
       unitHtml = html`${unitHtml}
         <div class="details-row">
-          <span
+          <span class="unit-name"
             ><vaadin-icon icon=${getIconForUnit(this.transport)}></vaadin-icon
             >${this.transport?.name}</span
-          ><span>${this.transport.commandPoints}</span>
+          ><span class="unit-points">${this.transport.commandPoints}</span>
         </div>`;
     }
     return html`
@@ -153,7 +174,7 @@ export class ArmouryWithTransportCard extends ArmouryCard {
           this.transportChangeClicked();
         }}
       >
-        <vaadin-icon style="font-size: 24px;" icon="vaadin:cog-o"></vaadin-icon>
+        <vaadin-icon style="font-size: 16px;" icon="vaadin:cog-o"></vaadin-icon>
       </vaadin-button>
     </div>`;
   }

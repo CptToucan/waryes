@@ -5,7 +5,7 @@ import { FirebaseService } from "../services/firebase";
 import { notificationService } from "../services/notification";
 
 
-export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckRef?: DocumentReference) {
+export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckRef?: DocumentReference, isPublic?: boolean) {
   if(selectedTags.length > 5) {
     notificationService.instance?.addNotification({
       content: 'Too many tags',
@@ -38,6 +38,7 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
         updated: Timestamp.fromDate(new Date()),
         created_by: getAuth().currentUser?.uid,
         copied_from: copiedDeckRef,
+        public: isPublic,
       });
 
       notificationService.instance?.addNotification({

@@ -68,10 +68,20 @@ const defaultMenu: MenuDefinition = {
       href: '/deck-library',
     },
     {
+      name: 'My Decks',
+      icon: 'vaadin:folder',
+      href: '/my-decks',
+    },
+    {
       name: 'Discord',
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H',
     },
+    {
+      name: 'Privacy Policy',
+      icon: 'vaadin:file-text',
+      href: '/privacy-policy',
+    }
   ],
   guest: [
     {
@@ -110,6 +120,12 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:comments',
       href: 'https://discord.gg/gqBgvgGj8H',
     },
+
+    {
+      name: 'Privacy Policy',
+      icon: 'vaadin:file-text',
+      href: '/privacy-policy',
+    }
   ],
 };
 
@@ -150,10 +166,11 @@ export class AuthenticatedMenu extends LitElement {
         align-items: center;
         flex: 1 1 0;
         overflow: hidden;
+        gap: var(--lumo-space-m);
       }
 
       unit-search {
-        margin-left: var(--lumo-space-m);
+
         flex: 1 1 0px;
         max-width: 256px;
         min-width: 0px;
@@ -168,6 +185,10 @@ export class AuthenticatedMenu extends LitElement {
 
       @media (max-width: 640px) {
         .desktop-only {
+          display: none;
+        }
+
+        a.logo {
           display: none;
         }
       }

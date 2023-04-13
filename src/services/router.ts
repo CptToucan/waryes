@@ -16,6 +16,7 @@ const routes: Route[] = [
   {path: '/privacy-policy', component: 'privacy-policy-route'},
   {path: '/verify-email', component: 'verify-email-route'},
   {path: '/user-settings', component: 'user-settings-route'},
+  {path: '/my-decks', component: 'my-decks-route'},
 ];
 
 // Features.firebase_auth routes
