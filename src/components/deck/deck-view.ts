@@ -188,7 +188,6 @@ export class DeckView extends LitElement {
   }
 
   async uploadDeck() {
-    console.log(this.userDeckId);
     const deckCode = this.deck?.toDeckCode();
     if(this.userDeckId && deckCode) {
       await updateDeckToFirebase(this.userDeckId, deckCode);

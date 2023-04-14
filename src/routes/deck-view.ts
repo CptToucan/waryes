@@ -66,33 +66,71 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     `;
   }
 
+  @state()
+  actionHappening = false;
+
   get toolbarItems(): MenuBarItem[] {
-    const items = [
+    const items: MenuBarItem[] = [
       {
-        component: this.createItem('plus', `Vote (${this.voteCount})`),
+        component: this.createItem(
+          'plus',
+          `Vote (${this.voteCount})`,
+          false,
+          this.actionHappening
+        ),
         text: 'Vote',
+        disabled: this.actionHappening,
       },
-      {component: this.createItem('compile', 'Export'), text: 'Export'},
+      {
+        component: this.createItem(
+          'compile',
+          'Export',
+          false,
+          this.actionHappening
+        ),
+        text: 'Export',
+        disabled: this.actionHappening,
+      },
     ];
 
     if (this.loggedInUser?.uid) {
-      items.push({component: this.createItem('copy', 'Copy'), text: 'Copy'});
+      items.push({
+        component: this.createItem('copy', 'Copy', false, this.actionHappening),
+        text: 'Copy',
+        disabled: this.actionHappening,
+      });
     }
     if (
       this.loggedInUser &&
       this.userDeck?.created_by === this.loggedInUser?.uid
     ) {
-      items.push({component: this.createItem('edit', 'Edit'), text: 'Edit'});
+      items.push({
+        component: this.createItem('edit', 'Edit', false, this.actionHappening),
+        text: 'Edit',
+        disabled: this.actionHappening,
+      });
 
       if (this.userDeck?.public) {
         items.push({
-          component: this.createItem('eye-slash', 'Private'),
+          component: this.createItem(
+            'eye-slash',
+            'Private',
+            false,
+            this.actionHappening
+          ),
           text: 'Private',
+          disabled: this.actionHappening,
         });
       } else {
         items.push({
-          component: this.createItem('eye', 'Public'),
+          component: this.createItem(
+            'eye',
+            'Public',
+            false,
+            this.actionHappening
+          ),
           text: 'Public',
+          disabled: this.actionHappening,
         });
       }
     }
@@ -138,12 +176,20 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         this.loggedInUser = user;
       });
       await this.fetchDeck(this.deckId);
-    }
-    catch(err) {
+
+      const params = new URLSearchParams(location.search);
+      const copied = params.get('copied');
+      if(copied) {
+        this.actionHappening = true;
+        setTimeout(async () => {
+          this.actionHappening = false;
+        }, 5000);
+      }
+
+    } catch (err) {
       console.error(err);
       this.deckError = true;
     }
-
   }
 
   async fetchDeck(deckId: string) {
@@ -166,11 +212,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         } else {
           this.copyDeck = undefined;
         }
-      }
-      catch(err) {
+      } catch (err) {
         console.error(err);
       }
-
     }
 
     this.voteCount = this.userDeck?.vote_count || 0;
@@ -240,6 +284,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async copy(userDeck: DocumentData | undefined, deck: Deck | undefined) {
+    this.actionHappening = true;
     if (userDeck && deck) {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -251,8 +296,11 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         userDeck.tags,
         this.userDeckRef
       );
-      Router.go(`/deck/${deckRef?.id}`);
+      Router.go(`/deck/${deckRef?.id}?copied=true`);
     }
+    setTimeout(() => {
+      this.actionHappening = false;
+    }, 2000);
   }
 
   async togglePublic(userDeck: DocumentData | undefined) {
@@ -269,7 +317,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
   }
 
-  toolbarItemSelected(value: string) {
+  async toolbarItemSelected(value: string) {
     switch (value) {
       case 'Vote':
         this.vote(this.userDeck?.id, this.loggedInUser?.uid as string);
@@ -277,14 +325,23 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       case 'Copy':
         this.copy(this.userDeck, this.deck);
         break;
-      case 'Export':
-        exportDeckToCode(this.deck);
+      case 'Export':    
+        this.actionHappening = true;
+        await exportDeckToCode(this.deck);
+        setTimeout(() => {
+          this.actionHappening = false;
+        }, 1000);
         break;
       case 'Public':
       case 'Private':
-        this.togglePublic(this.userDeck);
+        this.actionHappening = true;
+        await this.togglePublic(this.userDeck);
+        setTimeout(() => {
+          this.actionHappening = false;
+        }, 1000);
         break;
       case 'Edit':
+        this.actionHappening = true;
         if (this.deck) {
           viewDeckCode(
             this.deck.toDeckCode(),
@@ -295,13 +352,25 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         } else {
           console.error('No deck to edit');
         }
+        setTimeout(() => {
+          this.actionHappening = false;
+        }, 1000);
         break;
     }
   }
 
-  createItem(iconName: string, text: string, isChild = false) {
+  createItem(
+    iconName: string,
+    text: string,
+    isChild = false,
+    disabled = false
+  ) {
     const item = document.createElement('vaadin-context-menu-item');
     const icon = document.createElement('vaadin-icon');
+
+    if (disabled) {
+      item.setAttribute('disabled', '');
+    }
 
     if (isChild) {
       icon.style.width = 'var(--lumo-icon-size-s)';
@@ -322,8 +391,10 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   render(): TemplateResult {
-    if(this.deckError) {
-      return html`<h1 style="padding: var(--lumo-space-l);">Deck not found</h1>`
+    if (this.deckError) {
+      return html`<h1 style="padding: var(--lumo-space-l);">
+        Deck not found
+      </h1>`;
     }
     if (!this.deck) {
       return html`<div>Loading...</div>`;
@@ -384,6 +455,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
 
   async vote(itemId: string, userId: string): Promise<void> {
     const db = FirebaseService.db;
+    this.actionHappening = true;
     try {
       // Check if the user has already voted on the item
       const userVoteDoc = doc(db, `decks/${itemId}/user_votes/${userId}`);
@@ -433,6 +505,10 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         theme: 'error',
         duration: 5000,
       });
+    } finally {
+      setTimeout(() => {
+        this.actionHappening = false;
+      }, 1000);
     }
   }
 }
