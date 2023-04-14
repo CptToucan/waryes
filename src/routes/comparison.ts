@@ -268,7 +268,7 @@ export class ComparisonRoute extends LitElement {
         data: legend,
       },
       textStyle: {
-        fontFamily: 'Orbitron',
+        fontFamily: 'RobotoMono',
       },
       tooltip: {
         trigger: 'item',

@@ -128,12 +128,22 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   @property()
   loggedInUser: User | null | undefined;
 
+  @state()
+  deckError = false;
+
   async onBeforeEnter(location: RouterLocation) {
-    this.deckId = location.params.deckId as string;
-    FirebaseService.auth?.onAuthStateChanged((user) => {
-      this.loggedInUser = user;
-    });
-    await this.fetchDeck(this.deckId);
+    try {
+      this.deckId = location.params.deckId as string;
+      FirebaseService.auth?.onAuthStateChanged((user) => {
+        this.loggedInUser = user;
+      });
+      await this.fetchDeck(this.deckId);
+    }
+    catch(err) {
+      console.error(err);
+      this.deckError = true;
+    }
+
   }
 
   async fetchDeck(deckId: string) {
@@ -312,6 +322,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   render(): TemplateResult {
+    if(this.deckError) {
+      return html`<h1 style="padding: var(--lumo-space-l);">Deck not found</h1>`
+    }
     if (!this.deck) {
       return html`<div>Loading...</div>`;
     }
