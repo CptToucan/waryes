@@ -48,6 +48,20 @@ export const armouryCardStyles = css`
     border: 1px solid transparent;
   }
 
+  .traits {
+    display: flex;
+    padding: var(--lumo-space-xs);
+    gap: var(--lumo-space-s);
+    border-bottom: 1px solid var(--lumo-contrast-10pct);
+    width: 100%;
+    box-sizing: border-box;    
+    font-size: var(--lumo-font-size-xs);
+    min-height: 20px;
+    justify-content: space-around;
+    color: var(--lumo-contrast-60pct);
+  }
+
+
   .veterancy > div.active {
     background-color: var(--lumo-contrast-10pct);
     border: 1px solid var(--lumo-primary-color-50pct);

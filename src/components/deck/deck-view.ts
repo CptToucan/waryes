@@ -14,6 +14,7 @@ import './upload-deck';
 import {exportDeckToCode} from '../../utils/export-deck-to-code';
 import { Router } from '@vaadin/router';
 import { updateDeckToFirebase } from '../../utils/update-deck-to-firebase';
+import { DetailsOpenedChangedEvent } from '@vaadin/details';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -153,6 +154,11 @@ export class DeckView extends LitElement {
 
   @property()
   userDeckId?: string;
+
+  @state()
+  openAreas: {
+    [key in UnitCategory]?: boolean;
+  } = {}
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -398,6 +404,18 @@ export class DeckView extends LitElement {
     ];
   }
 
+  openedAreasChanged(category: UnitCategory, open: boolean) {
+    this.openAreas[category] = open;
+
+    this.dispatchEvent(
+      new CustomEvent('open-areas-changed', {
+        detail: {
+          openAreas: this.openAreas,
+        },
+      })
+    )
+  }
+
   renderDeck(deck: Deck) {
     const renderOutput: TemplateResult[] = [];
     for (const category of deck.unitCategories) {
@@ -441,7 +459,7 @@ export class DeckView extends LitElement {
       );
     }
 
-    return html`<vaadin-details ?opened=${true} class="deck-section">
+    return html`<vaadin-details ?opened=${true} class="deck-section" @opened-changed=${(event: DetailsOpenedChangedEvent) => this.openedAreasChanged(category, event.detail.value)}>
       <div class="deck-category-headings" slot="summary">
         <div class="deck-category-heading-row">
           <h3 class="deck-category-heading-title">

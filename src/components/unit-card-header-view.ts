@@ -7,7 +7,7 @@ import './trait-badge';
 import './unit-image';
 import '@vaadin/button';
 import {Unit} from '../types/unit';
-import {getIconForSpecialty} from '../utils/get-icon-for-specialty';
+import {getIconForTrait} from '../utils/get-icon-for-trait';
 import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
 
 /**
@@ -77,9 +77,6 @@ export class UnitCardHeaderView extends LitElement {
 
   render(): TemplateResult {
     const traits = this.unit?.specialities.slice(1) || [];
-    // const categorySpeciality = this.unit?.specialities[0] || '';
-
-
     if(this.unit) {
       const icons = getIconsWithFallback(this.unit);
   
@@ -111,9 +108,7 @@ export class UnitCardHeaderView extends LitElement {
         <div class="traits">
           ${traits.map(
             (speciality) => html`<div class="icon-container">
-              <vaadin-icon
-                icon="waryes:${getIconForSpecialty(speciality)}"
-              ></vaadin-icon>
+              ${getIconForTrait(speciality)}
             </div>`
           )}
         </div>
