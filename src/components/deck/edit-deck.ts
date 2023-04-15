@@ -6,6 +6,10 @@ import './deck-view';
 import 'side-drawer';
 import {DeckController} from '../../controllers/deck-controller';
 import {SideDrawer} from 'side-drawer';
+import {UnitCategory} from '../../types/deck-builder';
+import {MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
+
+const SYNC_ARMOURY_TEXT = 'Sync collapsed areas with armoury';
 
 @customElement('edit-deck')
 export class EditDeck extends LitElement {
@@ -44,7 +48,6 @@ export class EditDeck extends LitElement {
       .container {
         flex: 1 1 0;
         max-height: 100%;
-        padding-top: var(--lumo-space-s);
         padding-bottom: var(--lumo-space-s);
 
         overflow: hidden;
@@ -52,7 +55,7 @@ export class EditDeck extends LitElement {
 
       .cards {
         height: 100%;
-        overflow: auto;
+        overflow-y: scroll;
         position: relative;
       }
 
@@ -72,6 +75,12 @@ export class EditDeck extends LitElement {
         overflow-y: auto;
         min-width: 300px;
         border-right: 1px solid var(--lumo-contrast-20pct);
+      }
+
+      .button-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        padding: var(--lumo-space-s);
       }
 
       .button-drawer {
@@ -123,6 +132,30 @@ export class EditDeck extends LitElement {
   @query('side-drawer')
   drawer!: SideDrawer;
 
+  @state()
+  openAreas: {
+    [key in UnitCategory]?: boolean;
+  } = {
+    [UnitCategory.AA]: true,
+    [UnitCategory.ART]: true,
+    [UnitCategory.AIR]: true,
+    [UnitCategory.INF]: true,
+    [UnitCategory.HEL]: true,
+    [UnitCategory.LOG]: true,
+    [UnitCategory.REC]: true,
+    [UnitCategory.TNK]: true,
+  };
+
+  @state()
+  syncDeckViewWithArmoury = false;
+
+  syncDeckWithArmoury(openAreas: {[key in UnitCategory]?: boolean}) {
+    this.openAreas = {...openAreas};
+  }
+
+  @state()
+  showUnitTraits = false;
+
   openDeck() {
     this.deckOpen = true;
     this.drawer.open = true;
@@ -144,6 +177,22 @@ export class EditDeck extends LitElement {
     if (this.deck !== undefined && this.deckController) {
       this.deckController.initialiseControllerAgainstDeck(this.deck);
     }
+  }
+
+  get tooltipItems() {
+    const childTooltipItems = [];
+
+    childTooltipItems.push({
+      text: SYNC_ARMOURY_TEXT,
+      checked: this.syncDeckViewWithArmoury,
+    });
+
+    return [
+      {
+        text: 'Options',
+        children: childTooltipItems,
+      },
+    ];
   }
 
   render(): TemplateResult {
@@ -169,6 +218,11 @@ export class EditDeck extends LitElement {
           <deck-view
             .deck=${this.deck}
             .userDeckId=${this.userDeckId}
+            @open-areas-changed=${(event: CustomEvent) => {
+              if(this.syncDeckViewWithArmoury) {
+                this.syncDeckWithArmoury(event.detail.openAreas);
+              }
+            }}
             @deck-cleared=${() =>
               this.dispatchEvent(
                 new CustomEvent('deck-cleared', {bubbles: true})
@@ -176,6 +230,30 @@ export class EditDeck extends LitElement {
           ></deck-view>
 
           <div class="cards">
+            <div class="button-toolbar">
+              <vaadin-menu-bar
+                theme=""
+                .items="${this.tooltipItems}"
+                @item-selected=${(event: MenuBarItemSelectedEvent) => {
+                  const item = event.detail.value;
+                  if (item.text === SYNC_ARMOURY_TEXT) {
+                    this.syncDeckViewWithArmoury =
+                      !this.syncDeckViewWithArmoury;
+
+                    this.syncDeckWithArmoury({
+                      [UnitCategory.AA]: true,
+                      [UnitCategory.ART]: true,
+                      [UnitCategory.AIR]: true,
+                      [UnitCategory.INF]: true,
+                      [UnitCategory.HEL]: true,
+                      [UnitCategory.LOG]: true,
+                      [UnitCategory.REC]: true,
+                      [UnitCategory.TNK]: true,
+                    });
+                  }
+                }}
+              ></vaadin-menu-bar>
+            </div>
             <div class="button-drawer">
               <vaadin-button
                 @click=${() => this.openDeck()}
@@ -184,9 +262,10 @@ export class EditDeck extends LitElement {
               >
             </div>
 
-            <armoury-view .deck=${this.deck}></armoury-view>
-
-            <div style="height: 60px;"></div>
+            <armoury-view
+              .deck=${this.deck}
+              .visibleAreas=${this.openAreas}
+            ></armoury-view>
           </div>
         </div>
       </div>
@@ -199,8 +278,3 @@ declare global {
     'edit-deck': EditDeck;
   }
 }
-
-/**
-           @close=${() => (this.deckOpen = false)}
-          @open=${() => (this.deckOpen = true)}
- */

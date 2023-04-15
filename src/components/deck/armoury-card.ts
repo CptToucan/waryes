@@ -11,6 +11,7 @@ import {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import '@vaadin/dialog';
 import '../unit-card';
+import {getIconForTrait} from '../../utils/get-icon-for-trait';
 export interface ArmouryCardOptions {
   unit: Unit;
   veterancyOptions?: ArmouryCardVeterancyOptions;
@@ -101,6 +102,9 @@ export class ArmouryCard extends LitElement {
     const veterancyQuantities = deck.getVeterancyQuantitiesForPack(pack);
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
+      <div class="traits">
+        ${unit.specialities.length > 1 ? unit.specialities.slice(1).map((trait) => getIconForTrait(trait)) : "No Traits"} 
+      </div>
       <div class="body">
         <div class="top-section">
           ${this.renderButton(this.activeVeterancy, unit, pack, deck)}
@@ -161,7 +165,7 @@ export class ArmouryCard extends LitElement {
   }
 
   renderUnitIcon(unit: Unit, _pack: Pack, _deck: Deck) {
-    return html`<unit-image .unit=${unit}></unit-image>`
+    return html`<unit-image .unit=${unit}></unit-image>`;
   }
 
   renderUnitModal(_unit: Unit) {
@@ -249,7 +253,8 @@ export class ArmouryCard extends LitElement {
     veterancyIndex: number,
     activeVeterancy: number
   ) {
-    const isDisabled = numberOfUnitsInPacksAfterXPMultiplier[veterancyIndex] === 0;
+    const isDisabled =
+      numberOfUnitsInPacksAfterXPMultiplier[veterancyIndex] === 0;
 
     return html`<div
       role="button"

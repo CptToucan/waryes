@@ -29,6 +29,21 @@ export class ArmouryView extends LitElement {
         color: var(--lumo-contrast-90pct);
         margin: 0;
       }
+
+      :host {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .main {
+        /*background: linear-gradient(
+          135deg,
+          transparent 0%,
+          hsla(305, 90%, 55%, 0.13) 100%
+        );
+        background-attachment: fixed;
+        */
+      }
     `;
   }
 
@@ -39,9 +54,17 @@ export class ArmouryView extends LitElement {
   })
   deck?: Deck;
 
+  @property()
+  visibleAreas: {
+    [key in UnitCategory]?: boolean;
+  } = {};
+
   render(): TemplateResult {
     if (this.deck) {
-      return html`${this.renderCardCategories(this.deck)}`;
+      return html`<div class="main">
+        ${this.renderCardCategories(this.deck)}
+        <div></div>
+      </div>`;
     } else {
       return html`NO DECK`;
     }
@@ -65,21 +88,30 @@ export class ArmouryView extends LitElement {
     const unitPacksInCategory = deck.availableUnits[category];
 
     const unitPacksInCategoryRender: TemplateResult[] = [];
-    for (const unitPack of unitPacksInCategory) {
-      unitPacksInCategoryRender.push(
-        html`<pack-armoury-card
-          .pack=${unitPack}
-          .deck=${this.deck}
-        ></pack-armoury-card>`
-      );
+    for (const group in unitPacksInCategory) {
+      const unitPacks = unitPacksInCategory[group];
+      const unitPacksInGroupRender: TemplateResult[] = [];
+
+      for (const unitPack of unitPacks) {
+        unitPacksInGroupRender.push(
+          html`<pack-armoury-card
+            .pack=${unitPack}
+            .deck=${this.deck}
+          ></pack-armoury-card>`
+        );
+      }
+
+      unitPacksInCategoryRender.push(html`<div class="armoury-category-cards">
+        ${unitPacksInGroupRender}
+      </div>`);
     }
 
     return html`<div class="card-section">
       <div>
-        <h2 class="category">${getCodeForFactoryDescriptor(category)}</h2>
+        <h2 class="category">${getCodeForFactoryDescriptor(category)} ${this.visibleAreas[category] ? "" : "HIDDEN"}</h2>
       </div>
 
-      <div class="armoury-category-cards">${unitPacksInCategoryRender}</div>
+      <div class="category-group">${this.visibleAreas[category] ? unitPacksInCategoryRender : html``}</div>
     </div>`;
   }
 }

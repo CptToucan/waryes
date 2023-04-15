@@ -28,6 +28,14 @@ export type GroupedPacks = {
   [key in UnitCategory]: Pack[];
 };
 
+export type GroupedPacksByCategory = {
+  [key in UnitCategory]: GroupedPacksByUnitCategory;
+};
+
+export type GroupedPacksByUnitCategory = {
+  [key: string]: Pack[];
+};
+
 export type GroupedDeckUnitsByDescriptor = {
   [key: string]: DeckUnit[];
 };
@@ -63,10 +71,10 @@ export class Deck {
 
     const slotCosts: SlotCosts = {
       [UnitCategory.LOG]: [],
-      [UnitCategory.REC]: [],
       [UnitCategory.INF]: [],
-      [UnitCategory.TNK]: [],
       [UnitCategory.ART]: [],
+      [UnitCategory.TNK]: [],
+      [UnitCategory.REC]: [],
       [UnitCategory.AA]: [],
       [UnitCategory.HEL]: [],
       [UnitCategory.AIR]: [],
@@ -94,7 +102,8 @@ export class Deck {
   }
   public set units(value: DeckUnit[]) {
     this._units = value;
-    this._unitsInDeckGroupedUnitsByCategory = this._groupUnitsByCategory(value);
+    this._unitsInDeckGroupedUnitsByCategory =
+      this._groupUnitsByDeckCategory(value);
     this._unitInDeckGroupedUnitsByDescriptor =
       this._groupUnitsByDescriptor(value);
   }
@@ -121,9 +130,9 @@ export class Deck {
     return this._unitInDeckGroupedUnitsByDescriptor;
   }
 
-  private _groupedAvailableUnits: GroupedPacks;
+  private _groupedAvailableUnits: GroupedPacksByCategory;
 
-  public get availableUnits(): GroupedPacks {
+  public get availableUnits(): GroupedPacksByCategory {
     return this._groupedAvailableUnits;
   }
 
@@ -148,13 +157,13 @@ export class Deck {
     return totalActivationPoints;
   }
 
-  private _groupUnitsByCategory(units: DeckUnit[]): GroupedDeckUnits {
+  private _groupUnitsByDeckCategory(units: DeckUnit[]): GroupedDeckUnits {
     const groupedUnits: GroupedDeckUnits = {
       [UnitCategory.LOG]: [],
-      [UnitCategory.REC]: [],
       [UnitCategory.INF]: [],
-      [UnitCategory.TNK]: [],
       [UnitCategory.ART]: [],
+      [UnitCategory.TNK]: [],
+      [UnitCategory.REC]: [],
       [UnitCategory.AA]: [],
       [UnitCategory.HEL]: [],
       [UnitCategory.AIR]: [],
@@ -194,26 +203,83 @@ export class Deck {
     return groupedUnits;
   }
 
-  private _groupAvailableUnits(division: Division): GroupedPacks {
+  /**
+   * Groups the available units by the deck category, then by the unit category
+   * @param division
+   * @returns
+   */
+  private _groupAvailableUnits(division: Division): GroupedPacksByCategory {
+
+    const groupedPacksByCategoryByUnitCategory: GroupedPacksByCategory = {
+      [UnitCategory.LOG]: {},
+      [UnitCategory.INF]: {},
+      [UnitCategory.ART]: {},
+      [UnitCategory.TNK]: {},
+      [UnitCategory.REC]: {},
+      [UnitCategory.AA]: {},
+      [UnitCategory.HEL]: {},
+      [UnitCategory.AIR]: {},
+    };
+
+    for (const pack of division.packs) {
+      const categoryDescriptor =
+        this.getDeckCategoryForPack(pack) || UnitCategory.LOG;
+      const unitSpeciality = this.getSpecialityForPack(pack);
+
+      if (
+        groupedPacksByCategoryByUnitCategory[categoryDescriptor][
+          unitSpeciality
+        ] === undefined
+      ) {
+        groupedPacksByCategoryByUnitCategory[categoryDescriptor][
+          unitSpeciality
+        ] = [];
+      }
+
+      groupedPacksByCategoryByUnitCategory[categoryDescriptor][
+        unitSpeciality
+      ].push(pack);
+    }
+
+    for (const category in groupedPacksByCategoryByUnitCategory) {
+      const group =
+        groupedPacksByCategoryByUnitCategory[category as UnitCategory];
+      for (const speciality in group) {
+        // sort by command points
+        group[speciality] = group[speciality].sort((a, b) => {
+          const unitA = this.getUnitForPack(a);
+          const unitB = this.getUnitForPack(b);
+          return (unitA?.commandPoints || 0) - (unitB?.commandPoints || 0);
+        });
+      }
+    }
+
+
+    return groupedPacksByCategoryByUnitCategory;
+
+    /*
     const groupedPacks: GroupedPacks = {
       [UnitCategory.LOG]: [],
-      [UnitCategory.REC]: [],
       [UnitCategory.INF]: [],
-      [UnitCategory.TNK]: [],
       [UnitCategory.ART]: [],
+      [UnitCategory.TNK]: [],
+      [UnitCategory.REC]: [],
       [UnitCategory.AA]: [],
       [UnitCategory.HEL]: [],
       [UnitCategory.AIR]: [],
     };
 
+
+
     for (const pack of division.packs) {
-      const categoryDescriptor = this.getCategoryForPack(pack);
+      const categoryDescriptor = this.getDeckCategoryForPack(pack);
 
       if (categoryDescriptor !== undefined) {
         groupedPacks[categoryDescriptor].push(pack);
       }
     }
     return groupedPacks;
+    */
   }
 
   public addUnit(deckUnit: DeckUnit) {
@@ -225,7 +291,7 @@ export class Deck {
       return;
     }
 
-    const unitCategory = this.getCategoryForPack(deckUnit.pack);
+    const unitCategory = this.getDeckCategoryForPack(deckUnit.pack);
 
     if (unitCategory) {
       const nextSlotCost = this.getNextSlotCostForCategory(unitCategory);
@@ -259,10 +325,10 @@ export class Deck {
   public get unitCategories(): UnitCategory[] {
     return [
       UnitCategory.LOG,
-      UnitCategory.REC,
       UnitCategory.INF,
       UnitCategory.ART,
       UnitCategory.TNK,
+      UnitCategory.REC,
       UnitCategory.AA,
       UnitCategory.HEL,
       UnitCategory.AIR,
@@ -334,7 +400,7 @@ export class Deck {
     const unitsInDeckCategory =
       this.unitsInDeckGroupedUnitsByCategory[category];
     const numberOfUnitsInCategory = unitsInDeckCategory.length;
-   
+
     return numberOfUnitsInCategory;
   }
 
@@ -357,7 +423,6 @@ export class Deck {
     return unitCount;
   }
 
-
   public getSumOfUnitCostsForCategory(category: UnitCategory): number {
     const unitsInDeckCategory =
       this.unitsInDeckGroupedUnitsByCategory[category];
@@ -367,7 +432,9 @@ export class Deck {
       const transportCost = deckUnit.transport?.commandPoints || 0;
       const unitCost = this.getUnitForPack(deckUnit.pack)?.commandPoints || 0;
       const costPerCard = unitCost + transportCost;
-      const veterancyQuantities = this.getVeterancyQuantitiesForPack(deckUnit.pack);
+      const veterancyQuantities = this.getVeterancyQuantitiesForPack(
+        deckUnit.pack
+      );
       const quantityInCard = veterancyQuantities[deckUnit.veterancy];
       totalCost += costPerCard * quantityInCard;
     }
@@ -383,7 +450,6 @@ export class Deck {
 
     return totalSum;
   }
-
 
   public get usedActivationPoints() {
     let totalPoints = 0;
@@ -408,10 +474,14 @@ export class Deck {
     return totalPoints;
   }
 
-  public getCategoryForPack(pack: Pack) {
+  public getDeckCategoryForPack(pack: Pack) {
     return convertUnitFactoryDescriptorToCategoryDescriptor(
       this.getUnitForPack(pack)?.factoryDescriptor || ''
     );
+  }
+
+  public getSpecialityForPack(pack: Pack) {
+    return this.getUnitForPack(pack)?.specialities[0] || '';
   }
 
   public toDeckCode() {
@@ -422,7 +492,7 @@ export class Deck {
       name: this.division.descriptor,
       country: this.division.country,
       alliance: this.division.alliance,
-      descriptor: this.division.descriptor
+      descriptor: this.division.descriptor,
     };
 
     this.division;
