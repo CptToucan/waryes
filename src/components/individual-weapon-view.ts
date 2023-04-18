@@ -103,8 +103,13 @@ export class IndividualWeaponView extends LitElement {
     const layout: (WeaponGroupLayout | WeaponStat)[] = [];
 
     layout.push({
-      name: 'Name',
-      value: weapon.weaponName,
+      name: 'Weapon',
+      value: `${weapon.weaponName} x ${weapon.numberOfWeapons}`,
+    });
+
+    layout.push({
+      name: 'Ammunition',
+      value: weapon.ammunitionPerSalvo * weapon.numberOfSalvos,
     });
 
     layout.push({
@@ -159,11 +164,11 @@ export class IndividualWeaponView extends LitElement {
         },
         {
           name: 'HE',
-          value: weapon.he,
+          value: weapon.totalHeDamage?.toFixed(2),
         },
         {
-          name: 'Total HE',
-          value: weapon.totalHeDamage?.toFixed(2),
+          name: 'HE per weapon',
+          value: weapon.he,
           expert: true,
         },
         {
@@ -182,9 +187,12 @@ export class IndividualWeaponView extends LitElement {
         },
         {
           name: 'Armor 1-shot at Max Range',
-          value: weapon.instaKillAtMaxRangeArmour > 0 ? weapon.instaKillAtMaxRangeArmour : 'N/A',
+          value:
+            weapon.instaKillAtMaxRangeArmour > 0
+              ? weapon.instaKillAtMaxRangeArmour
+              : 'N/A',
           expert: true,
-        }
+        },
       ],
     });
 
@@ -208,7 +216,6 @@ export class IndividualWeaponView extends LitElement {
           name: 'Helicopter Min Range',
           value: displayDistance(weapon.helicopterMinRange),
           expert: true,
-
         },
         {
           name: 'Aircraft',
@@ -348,8 +355,7 @@ export class IndividualWeaponView extends LitElement {
   }
 
   renderWeaponGroupLayout(weaponGroupLayout: WeaponGroupLayout) {
-
-    if(this.shouldRenderField(weaponGroupLayout.expert)) {
+    if (this.shouldRenderField(weaponGroupLayout.expert)) {
       return html`${this.renderWeaponGroupTitle(
         weaponGroupLayout.name
       )}${weaponGroupLayout.stats.map((stat) => this.renderWeaponStat(stat))}
@@ -395,26 +401,37 @@ export class IndividualWeaponView extends LitElement {
     return html``;
   }
 
-  renderAccuracyScaling(
-    scaling: AccuracyScaling,
-    expertStat: boolean
-  ) {
-
+  renderAccuracyScaling(scaling: AccuracyScaling, expertStat: boolean) {
     if (this.shouldRenderField(expertStat)) {
       const series = [];
       const legend = [];
 
-      if(scaling.ground) {
-        series.push({name: 'Ground',type: "line", data: scaling.ground.map((scale) => [scale.distance, scale.accuracy])});
-        legend.push("Ground");
+      if (scaling.ground) {
+        series.push({
+          name: 'Ground',
+          type: 'line',
+          data: scaling.ground.map((scale) => [scale.distance, scale.accuracy]),
+        });
+        legend.push('Ground');
       }
-      if(scaling.helicopter) {
-        series.push({name: 'Heli', type: "line", data: scaling.helicopter.map((scale) => [scale.distance, scale.accuracy])});
-        legend.push("Heli");
+      if (scaling.helicopter) {
+        series.push({
+          name: 'Heli',
+          type: 'line',
+          data: scaling.helicopter.map((scale) => [
+            scale.distance,
+            scale.accuracy,
+          ]),
+        });
+        legend.push('Heli');
       }
-      if(scaling.plane) {
-        series.push({name: 'Plane', type: "line", data: scaling.plane.map((scale) => [scale.distance, scale.accuracy])});
-        legend.push("Plane");
+      if (scaling.plane) {
+        series.push({
+          name: 'Plane',
+          type: 'line',
+          data: scaling.plane.map((scale) => [scale.distance, scale.accuracy]),
+        });
+        legend.push('Plane');
       }
 
       const option = {
@@ -450,10 +467,10 @@ export class IndividualWeaponView extends LitElement {
           /*
           
           */
-          
+
           containLabel: true,
         },
-        series
+        series,
       };
       return html`<div class="accuracy-scaling">
         <div>

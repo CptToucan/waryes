@@ -97,8 +97,8 @@ export const armouryCardStyles = css`
 
   .info-icon-button {
     position: absolute;
-    top: 0 ; //var(--lumo-space-xs);
-    right: 0; // var(--lumo-space-xs);
+    top: var(--lumo-space-xs);
+    right:  var(--lumo-space-xs);
   
     margin: 0;
     border-bottom-left-radius: var(--lumo-border-radius-s);

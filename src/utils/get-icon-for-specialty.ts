@@ -33,8 +33,11 @@ export const iconMap: IconMap = {
   howitzer: 'artillery',
   armor: 'tank',
   AA: 'aa',
+  mlrs: 'mlrs',
   sead: 'sead',
 };
+
+
 
 export function getIconForSpecialty(specialty: string) {
   const icon = iconMap[specialty];

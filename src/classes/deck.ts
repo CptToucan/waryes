@@ -256,30 +256,6 @@ export class Deck {
 
 
     return groupedPacksByCategoryByUnitCategory;
-
-    /*
-    const groupedPacks: GroupedPacks = {
-      [UnitCategory.LOG]: [],
-      [UnitCategory.INF]: [],
-      [UnitCategory.ART]: [],
-      [UnitCategory.TNK]: [],
-      [UnitCategory.REC]: [],
-      [UnitCategory.AA]: [],
-      [UnitCategory.HEL]: [],
-      [UnitCategory.AIR]: [],
-    };
-
-
-
-    for (const pack of division.packs) {
-      const categoryDescriptor = this.getDeckCategoryForPack(pack);
-
-      if (categoryDescriptor !== undefined) {
-        groupedPacks[categoryDescriptor].push(pack);
-      }
-    }
-    return groupedPacks;
-    */
   }
 
   public addUnit(deckUnit: DeckUnit) {
