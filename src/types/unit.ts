@@ -78,6 +78,7 @@ interface Weapon {
     trueRateOfFire: number
     missileProperties?: MissileProperties
     smokeProperties?: SmokeProperties
+    numberOfSalvos: number
 
 
     // TODO: Audit / remove
@@ -141,6 +142,7 @@ interface Unit {
     bombStrategy:           string,
     weapons:                Weapon[]
     _searchNameHelper:      string
+    isSellable:             boolean
     _display:               boolean
 
     // TODO: Audit / remove

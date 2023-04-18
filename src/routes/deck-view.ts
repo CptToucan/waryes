@@ -23,6 +23,9 @@ import {exportDeckToCode} from '../utils/export-deck-to-code';
 import {saveDeckToFirebase} from '../utils/save-deck-to-firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
 import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
+import '../components/intel-report';
+import '@vaadin/tabs';
+import {TabsSelectedChangedEvent} from '@vaadin/tabs';
 
 @customElement('deck-view-route')
 export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
@@ -169,6 +172,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   @state()
   deckError = false;
 
+  @state()
+  selectedTabIndex = 0;
+
   async onBeforeEnter(location: RouterLocation) {
     try {
       this.deckId = location.params.deckId as string;
@@ -179,13 +185,12 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
 
       const params = new URLSearchParams(location.search);
       const copied = params.get('copied');
-      if(copied) {
+      if (copied) {
         this.actionHappening = true;
         setTimeout(async () => {
           this.actionHappening = false;
         }, 5000);
       }
-
     } catch (err) {
       console.error(err);
       this.deckError = true;
@@ -201,7 +206,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
 
       try {
         if (this.userDeck?.copied_from) {
-          console.log(this.userDeck?.copied_from);
           const copyDoc = await getDoc(deckSnap.data().copied_from);
           this.copyDeck = copyDoc.exists()
             ? {
@@ -306,7 +310,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   async togglePublic(userDeck: DocumentData | undefined) {
     if (userDeck) {
       if (this.loggedInUser?.uid === userDeck.created_by) {
-        console.log(userDeck);
         await updateDeckToFirebase(userDeck.id, undefined, !userDeck.public);
 
         this.userDeck = {
@@ -325,7 +328,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       case 'Copy':
         this.copy(this.userDeck, this.deck);
         break;
-      case 'Export':    
+      case 'Export':
         this.actionHappening = true;
         await exportDeckToCode(this.deck);
         setTimeout(() => {
@@ -400,6 +403,16 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       return html`<div>Loading...</div>`;
     }
 
+    let tabContent = html``;
+    switch (this.selectedTabIndex) {
+      case 0:
+        tabContent = html`<summary-view .deck=${this.deck}></summary-view>`;
+        break;
+      case 1:
+        tabContent = html`<intel-report .deck=${this.deck}></intel-report>`;
+        break;
+    }
+
     return html`<div class="container">
       <deck-header .deck=${this.deck}>
         <div slot="title" style="display: flex; width: 100%;">
@@ -427,8 +440,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                       Copied from:
 
                       <a
-                        style="  overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap;"
+                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
                         href="/deck/${this.copyDeck?.id}"
                         target="_blank"
                       >
@@ -449,7 +461,16 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
           ></vaadin-menu-bar>
         </div>
       </deck-header>
-      <summary-view .deck=${this.deck}></summary-view>
+      <vaadin-tabs
+        @selected-changed=${(e: TabsSelectedChangedEvent) => {
+          const tabIndex = e.detail.value;
+          this.selectedTabIndex = tabIndex;
+        }}
+      >
+        <vaadin-tab>Deck</vaadin-tab>
+        <vaadin-tab>Report</vaadin-tab>
+      </vaadin-tabs>
+      ${tabContent}
     </div>`;
   }
 
