@@ -3,10 +3,12 @@ import {Division, Pack, UnitCategory} from '../types/deck-builder';
 import {Unit, UnitMap} from '../types/unit';
 import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../utils/convert-unit-factory-descriptor-to-category-descriptor';
 import {
-  Deck as DeckBuilder,
+  SimpleDeck,
+  SimpleUnitCard,
   decodeDeckString,
   encodeDeck,
 } from '@izohek/warno-deck-utils';
+import { WaryesLookupAdapter } from './WaryesLookupAdapter';
 
 export interface DeckConstructorOptions {
   division: Division;
@@ -415,28 +417,23 @@ export class Deck {
   }
 
   public toDeckCode() {
-    const deckBuilder = new DeckBuilder();
-
-    deckBuilder.division = {
-      id: this.division.id,
-      name: this.division.descriptor,
-      country: this.division.country,
-      alliance: this.division.alliance,
-      descriptor: this.division.descriptor
+    const deckBuilder: SimpleDeck = {
+      modded: false,
+      division: {
+        id: this.division.id
+      },
+      numberCards: this.units.length,
+      cards: this.units.map( unit => {
+        const unitCard = this.getUnitForPack(unit.pack)
+        return unitCard && {
+          unit: {
+            id: unitCard.id
+          },
+          veterancy: unit.veterancy,
+          transport: unit.transport?.id
+        } as SimpleUnitCard
+      }).filter ( item => item !== undefined) as SimpleUnitCard[]
     };
-
-    this.division;
-
-    for (const deckUnit of this.units) {
-      const unit = this.getUnitForPack(deckUnit.pack);
-      if (unit) {
-        deckBuilder.addUnitWithId(
-          unit.id,
-          deckUnit.veterancy,
-          deckUnit.transport?.id
-        );
-      }
-    }
 
     const deckString = encodeDeck(deckBuilder);
     return deckString;
@@ -450,7 +447,8 @@ export class Deck {
    * @returns
    */
   public static fromDeckCode(_deckString: string, options: DeckStringOptions) {
-    const deckStringDeck = decodeDeckString(_deckString);
+    const lookupAdapter = new WaryesLookupAdapter(options.unitMap, options.divisions)
+    const deckStringDeck = decodeDeckString(_deckString, lookupAdapter);
 
     const decodedDivision = options.divisions?.find((d) => {
       return d.descriptor == deckStringDeck.division?.descriptor;
@@ -468,11 +466,11 @@ export class Deck {
 
     // Convert decoded cards into this objects internal structure
     for (const card of deckStringDeck.cards) {
-      if (!card.descriptor) {
+      if (!card.unit.descriptor) {
         throw new Error('Decoded invalid unit card descriptor');
       }
       const pack = builtDeck.division.packs.find((divisionPack) => {
-        return divisionPack.unitDescriptor === card.descriptor;
+        return divisionPack.unitDescriptor === card.unit.descriptor;
       });
 
       // NOTE: we currently bail hard if we can't find a unit with the thinking
@@ -480,7 +478,7 @@ export class Deck {
       // represent the deck code.
       if (!pack) {
         throw new Error(
-          'Decoded pack could not find pack for: ' + card.descriptor
+          'Decoded pack could not find pack for: ' + card.unit.descriptor
         );
       }
 
