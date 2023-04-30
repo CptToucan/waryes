@@ -24,6 +24,10 @@ export enum Tag {
   FourVsFour = '4v4',
   TenVsTen = '10v10',
   Cheese = 'Cheese',
+  Early = 'Early',
+  Mid = 'Mid',
+  Late = 'Late',
+  SlowGrind = "Slow Grind",
 }
 
 const tags = Object.values(Tag);
