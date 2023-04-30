@@ -93,7 +93,6 @@ export class DeckLibraryRoute extends LitElement {
       }
 
       #mobile-pagination > * {
-
       }
 
       @media only screen and (min-width: 801px) {
@@ -133,6 +132,15 @@ export class DeckLibraryRoute extends LitElement {
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
 
+  @state()
+  selectedTags: string[] = [];
+
+  @state()
+  selectedDivision: Division | null = null;
+
+  @state()
+  selectedPro = false;
+
   @state({
     hasChanged: () => {
       return true;
@@ -165,10 +173,9 @@ export class DeckLibraryRoute extends LitElement {
 
   async firstUpdated() {
     await this.queryFirebase({
-      division: null,
-      country: null,
-      tags: [],
-      pro: false,
+      division: this.selectedDivision,
+      tags: this.selectedTags,
+      pro: this.selectedPro,
     });
   }
 
@@ -229,12 +236,10 @@ export class DeckLibraryRoute extends LitElement {
   async queryFirebase(
     {
       division,
-      country,
       tags,
       pro,
     }: {
       division: Division | null | undefined;
-      country: Country | null | undefined;
       tags: string[];
       pro: boolean;
     },
@@ -244,7 +249,6 @@ export class DeckLibraryRoute extends LitElement {
 
     const queryConditions: QueryConstraint[] = this.getQueryConstraints(
       division,
-      country,
       pro,
       tags
     );
@@ -289,7 +293,7 @@ export class DeckLibraryRoute extends LitElement {
 
     const q = queryBuilder(
       decksRef,
-      orderBy('vote_count', 'desc'),
+      orderBy('created', 'desc'),
       limit(this.pageLimit),
       ...queryConditions
     );
@@ -365,7 +369,6 @@ export class DeckLibraryRoute extends LitElement {
    */
   private getQueryConstraints(
     division: Division | null | undefined,
-    country: Country | null | undefined,
     pro: boolean,
     tags: string[]
   ) {
@@ -375,10 +378,6 @@ export class DeckLibraryRoute extends LitElement {
 
     if (division) {
       queryConditions.push(where('division', '==', division?.descriptor));
-    }
-
-    if (country) {
-      queryConditions.push(where('country', '==', country));
     }
 
     if (pro) {
@@ -396,12 +395,15 @@ export class DeckLibraryRoute extends LitElement {
    * @param page The page to change to
    */
   changePage(page: number) {
+    this.selectedDivision = null;
+    this.selectedTags = [];
+    this.selectedPro = false;
+
     this.queryFirebase(
       {
-        division: null,
-        country: null,
-        tags: [],
-        pro: false,
+        division: this.selectedDivision,
+        tags: this.selectedTags,
+        pro: this.selectedPro,
       },
       page
     );
@@ -438,8 +440,22 @@ export class DeckLibraryRoute extends LitElement {
           </div>
           <div class="filters">
             <deck-filters
+              .selectedTags=${this.selectedTags}
+              .selectedDivision=${this.selectedDivision}
+              .pro=${this.selectedPro}
               @filters-changed=${(event: CustomEvent) => {
-                this.queryFirebase(event.detail, 1);
+                this.selectedDivision = event.detail.division;
+                this.selectedTags = event.detail.tags;
+                this.selectedPro = event.detail.pro;
+
+                this.queryFirebase(
+                  {
+                    division: this.selectedDivision,
+                    tags: this.selectedTags,
+                    pro: this.selectedPro,
+                  },
+                  1
+                );
               }}
             ></deck-filters>
             <pagination-controls
@@ -475,8 +491,22 @@ export class DeckLibraryRoute extends LitElement {
             html`
               <deck-filters
                 style="width: unset;"
+                .selectedTags=${this.selectedTags}
+                .selectedDivision=${this.selectedDivision}
+                .pro=${this.selectedPro}
                 @filters-changed=${(event: CustomEvent) => {
-                  this.queryFirebase(event.detail, 1);
+                  this.selectedDivision = event.detail.division;
+                  this.selectedTags = event.detail.tags;
+                  this.selectedPro = event.detail.pro;
+
+                  this.queryFirebase(
+                    {
+                      division: this.selectedDivision,
+                      tags: this.selectedTags,
+                      pro: this.selectedPro,
+                    },
+                    1
+                  );
                   this.closeFiltersDialog();
                 }}
               ></deck-filters>

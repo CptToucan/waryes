@@ -30,8 +30,16 @@ export class UserSettingsRoute extends LitElement {
         border-radius: var(--lumo-border-radius);
       }
 
-      h2 {
+      h2, h3 {
         margin: 0;
+        margin-bottom: var(--lumo-space-s);
+      }
+      h3 {
+        margin-top: var(--lumo-space-m);
+      }
+      p {
+        margin: 0;
+        margin-bottom: var(--lumo-space-s);
       }
     `;
   }
@@ -109,12 +117,18 @@ export class UserSettingsRoute extends LitElement {
 
       <div class="page">
         <h2>User Settings</h2>
+        <h3>User Id</h3>
+        <p>${this.loggedInUser.uid}</p>
+        <p>
+          This is your unique user id, you can show this to the admins to reference your account.
+        </p>
+
 
         <h3>Delete Account</h3>
         If you want to delete your account you can do so here. This will delete
         all of your data and you will no longer be able to log in.
         <vaadin-button
-          theme="error"
+          theme="error primary"
           @click="${() => {
             this.showingLogin = true;
           }}"
