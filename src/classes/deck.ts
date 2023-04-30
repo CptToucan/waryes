@@ -476,7 +476,7 @@ export class Deck {
             id: unitCard.id
           },
           veterancy: unit.veterancy,
-          transport: unit.transport?.id
+          transport: unit.transport ? { id: unit.transport?.id } : undefined
         } as SimpleUnitCard
       }).filter ( item => item !== undefined) as SimpleUnitCard[]
     };
