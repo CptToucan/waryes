@@ -317,7 +317,7 @@ export class MyDecksRoute extends LitElement {
 
     return html`
       <div class="page">
-        <h2>My Decks</h2>
+        <h2>My Decks ${this.decks?.length || 0}/60</h2>
         <span
           >Changed deck names will only be visible to you for organisation
           purposes, this is to prevent abuse.</span

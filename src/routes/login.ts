@@ -2,7 +2,7 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {getAuth, signInWithEmailAndPassword} from 'firebase/auth';
 import '@vaadin/login/vaadin-login-form';
-import {LoginFormLoginEvent} from '@vaadin/login/vaadin-login-form';
+import {LoginFormLoginEvent, LoginI18n} from '@vaadin/login/vaadin-login-form';
 import '@vaadin/button';
 import {Router} from '@vaadin/router';
 import {notificationService} from '../services/notification';
@@ -116,10 +116,29 @@ export class LoginRoute extends LitElement {
     }
   }
 
+  loginI18n: LoginI18n = {
+    form: {
+      title: 'Sign in',
+      username: 'Email Address',
+      password: 'Password',
+      submit: 'Sign in',
+      forgotPassword: 'Forgot password',
+    },
+    errorMessage: {
+      title: 'Incorrect username or password',
+      message: 'Check that you have entered the correct username and password and try again.',
+    },
+    header: {
+      title: 'Login to WarYes',
+    }
+  };
+
+
   render(): TemplateResult {
     return html`
       <div class="page">
         <vaadin-login-form
+          .i18n=${this.loginI18n}
           no-autofocus
           @login=${this.login}
           @forgot-password=${() => Router.go('/forgot-password')}

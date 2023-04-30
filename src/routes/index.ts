@@ -196,7 +196,6 @@ export class IndexRoute extends LitElement {
             </div>
           </div>
         </div>
-
         ${this.renderSelectOrImportChoice()}
       </div>
     `;
