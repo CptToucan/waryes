@@ -9,11 +9,6 @@ module.exports = {
   output: {
     publicPath: 'auto',
   },
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
-  },
 
   devServer: {
     historyApiFallback: true,
