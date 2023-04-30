@@ -24,6 +24,8 @@ import '@vaadin/confirm-dialog';
 import {ConfirmDialogOpenedChangedEvent} from '@vaadin/confirm-dialog';
 import {notificationService} from '../services/notification';
 
+const TOTAL_ALLOWED_DECKS = 60;
+
 @customElement('my-decks-route')
 export class MyDecksRoute extends LitElement {
   static get styles() {
@@ -120,6 +122,15 @@ export class MyDecksRoute extends LitElement {
   @state()
   deckToDelete: DocumentData | null = null;
 
+  @state()
+  private _numberOfDecks = 0;
+  public get numberOfDecks() {
+    return this._numberOfDecks;
+  }
+  public set numberOfDecks(value) {
+    this._numberOfDecks = value;
+  }
+
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
 
@@ -132,6 +143,7 @@ export class MyDecksRoute extends LitElement {
         this.loggedInUser?.uid &&
         !this.decksByDivision
       ) {
+
         const deckCollection = collection(FirebaseService.db, 'user_decks');
         const deckSnap = await getDoc(
           doc(deckCollection, this.loggedInUser?.uid)
@@ -164,7 +176,6 @@ export class MyDecksRoute extends LitElement {
           querySnapshots.forEach((querySnapshot) => {
             querySnapshot.forEach((docSnapshot) => {
               if (docSnapshot.exists()) {
-                // const docData = docSnapshot.data();
                 decks.push(docSnapshot);
               }
             });
@@ -172,6 +183,8 @@ export class MyDecksRoute extends LitElement {
         });
 
         this.decks = decks;
+
+        this.numberOfDecks = this.decks?.length || 0
 
         // group decks by division
         this.decksByDivision = this.decks.reduce((acc, deck) => {
@@ -291,6 +304,7 @@ export class MyDecksRoute extends LitElement {
         this.decksByDivision[division] = newDivisionDecks;
       }
 
+      this.numberOfDecks--;
       this.requestUpdate();
     } catch (err) {
       console.error(err);
@@ -317,7 +331,7 @@ export class MyDecksRoute extends LitElement {
 
     return html`
       <div class="page">
-        <h2>My Decks ${this.decks?.length || 0}/60</h2>
+        <h2>My Decks ${this.numberOfDecks}/${TOTAL_ALLOWED_DECKS}</h2>
         <span
           >Changed deck names will only be visible to you for organisation
           purposes, this is to prevent abuse.</span
