@@ -12,9 +12,9 @@ import '@vaadin/tooltip';
 import {getDeckShareUrl} from '../../utils/get-deck-share-url';
 import './upload-deck';
 import {exportDeckToCode} from '../../utils/export-deck-to-code';
-import { Router } from '@vaadin/router';
-import { updateDeckToFirebase } from '../../utils/update-deck-to-firebase';
-import { DetailsOpenedChangedEvent } from '@vaadin/details';
+import {Router} from '@vaadin/router';
+import {updateDeckToFirebase} from '../../utils/update-deck-to-firebase';
+import {DetailsOpenedChangedEvent} from '@vaadin/details';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -158,7 +158,7 @@ export class DeckView extends LitElement {
   @state()
   openAreas: {
     [key in UnitCategory]?: boolean;
-  } = {}
+  } = {};
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -195,11 +195,10 @@ export class DeckView extends LitElement {
 
   async uploadDeck() {
     const deckCode = this.deck?.toDeckCode();
-    if(this.userDeckId && deckCode) {
+    if (this.userDeckId && deckCode) {
       await updateDeckToFirebase(this.userDeckId, deckCode);
       Router.go(`/deck/${this.userDeckId}`);
-    }
-    else {
+    } else {
       try {
         if (this.deck) {
           this.uploading = true;
@@ -215,7 +214,6 @@ export class DeckView extends LitElement {
         console.error(err);
       }
     }
-
   }
 
   menuItemSelected(item: MenuBarItemSelectedEvent) {
@@ -249,7 +247,7 @@ export class DeckView extends LitElement {
     }
   }
 
-  createItem(iconName: string, text: string, id: string, isChild = false) {
+  createItem(iconName: string, text: string, id: string, isChild = false, disabled = false) {
     const item = document.createElement('vaadin-context-menu-item');
     const span = document.createElement('span');
     const icon = document.createElement('vaadin-icon');
@@ -266,11 +264,19 @@ export class DeckView extends LitElement {
       item.style.justifyContent = 'center';
     }
 
+
+
     item.style.display = 'flex';
     item.style.alignItems = 'center';
 
     icon.setAttribute('icon', `vaadin:${iconName}`);
     item.setAttribute('menu-id', id);
+
+    if (disabled) {
+      span.style.color = 'var(--lumo-disabled-text-color)';
+      icon.style.color = 'var(--lumo-disabled-text-color)';
+      item.setAttribute('disabled', '');
+    }
 
     if (isChild) {
       item.appendChild(icon);
@@ -367,9 +373,18 @@ export class DeckView extends LitElement {
     childTooltipItems.push({
       component: this.createItem('compile', 'Export to code', 'export', true),
     });
-    childTooltipItems.push({
-      component: this.createItem('harddrive', 'Save', 'save', true),
-    });
+
+    // if logged in show the save button
+    if (this.userDeckId) {
+      childTooltipItems.push({
+        component: this.createItem('harddrive', 'Save', 'save', true),
+      });
+    }
+    else {
+      childTooltipItems.push({
+        component: this.createItem('harddrive', 'Log in to save', 'save', true, true),
+      });
+    }
     childTooltipItems.push({
       component: this.createItem('share', 'Share', 'share', true),
     });
@@ -413,7 +428,7 @@ export class DeckView extends LitElement {
           openAreas: this.openAreas,
         },
       })
-    )
+    );
   }
 
   renderDeck(deck: Deck) {
@@ -459,7 +474,12 @@ export class DeckView extends LitElement {
       );
     }
 
-    return html`<vaadin-details ?opened=${true} class="deck-section" @opened-changed=${(event: DetailsOpenedChangedEvent) => this.openedAreasChanged(category, event.detail.value)}>
+    return html`<vaadin-details
+      ?opened=${true}
+      class="deck-section"
+      @opened-changed=${(event: DetailsOpenedChangedEvent) =>
+        this.openedAreasChanged(category, event.detail.value)}
+    >
       <div class="deck-category-headings" slot="summary">
         <div class="deck-category-heading-row">
           <h3 class="deck-category-heading-title">

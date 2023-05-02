@@ -148,6 +148,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Information',
       items: [
         {
+          name: 'Login',
+          icon: 'vaadin:sign-in',
+          href: '/login',
+        },
+        {
           name: 'Discord',
           icon: 'vaadin:comments',
           href: 'https://discord.gg/gqBgvgGj8H',
