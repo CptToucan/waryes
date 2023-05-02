@@ -124,6 +124,11 @@ export class DeckBuilderRoute
         justify-content: center;
       }
 
+      button > span {
+        display: flex;
+        flex: 1 1 0%;
+      }
+
       country-flag {
         margin-right: var(--lumo-space-s);
       }
