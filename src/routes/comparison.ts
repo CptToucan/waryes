@@ -199,13 +199,17 @@ export class ComparisonRoute extends LitElement {
    * Applies the settings from the detail panel to the master state
    */
   applySettingsToMaster(closeDetail?: boolean): void {
-    const newState: MasterState = {
-      units: [...this.selectedUnits],
-      unitWeapons: {...this.selectedUnitWeapons},
-      fields: [...this.selectedFields],
-    };
+    // set new state in timeout to avoid flickering
+    setTimeout(() => {
+      const newState: MasterState = {
+        units: [...this.selectedUnits],
+        unitWeapons: {...this.selectedUnitWeapons},
+        fields: [...this.selectedFields],
+      };
+  
+      this.masterState = newState;
+    }, 500);
 
-    this.masterState = newState;
 
     if (closeDetail) {
       this.toggleSidebar();
@@ -306,7 +310,7 @@ export class ComparisonRoute extends LitElement {
         },
       ],
     };
-    console.log(JSON.stringify(seriesData))
+
     return chartOption;
   }
 
