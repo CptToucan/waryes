@@ -15,6 +15,8 @@ import {exportDeckToCode} from '../../utils/export-deck-to-code';
 import {Router} from '@vaadin/router';
 import {updateDeckToFirebase} from '../../utils/update-deck-to-firebase';
 import {DetailsOpenedChangedEvent} from '@vaadin/details';
+import { FirebaseService } from '../../services/firebase';
+import { User } from 'firebase/auth';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -159,6 +161,16 @@ export class DeckView extends LitElement {
   openAreas: {
     [key in UnitCategory]?: boolean;
   } = {};
+
+  @property()
+  loggedInUser: User | null | undefined;
+
+  async firstUpdated() {
+    FirebaseService.auth?.onAuthStateChanged((user) => {
+      this.loggedInUser = user;
+    });
+  }
+
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -338,7 +350,7 @@ export class DeckView extends LitElement {
               <vaadin-menu-bar
                 theme="primary icon"
                 @item-selected=${this.menuItemSelected}
-                .items="${this.generateTooltipItems()}"
+                .items="${this.generateTooltipItems(this.loggedInUser)}"
               ></vaadin-menu-bar>
             </div>
           </div>
@@ -367,7 +379,7 @@ export class DeckView extends LitElement {
     }
   }
 
-  generateTooltipItems() {
+  generateTooltipItems(user?: User | undefined | null) {
     const childTooltipItems = [];
 
     childTooltipItems.push({
@@ -375,7 +387,7 @@ export class DeckView extends LitElement {
     });
 
     // if logged in show the save button
-    if (this.userDeckId) {
+    if (user) {
       childTooltipItems.push({
         component: this.createItem('harddrive', 'Save', 'save', true),
       });
