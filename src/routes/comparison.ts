@@ -208,7 +208,7 @@ export class ComparisonRoute extends LitElement {
       };
   
       this.masterState = newState;
-    }, 500);
+    }, 1000);
 
 
     if (closeDetail) {
