@@ -26,7 +26,7 @@ export class EChart extends LitElement {
       if (this.echartsInstance) {
         this.echartsInstance.resize();
       }
-    }, 100);
+    }, 500);
   }
 
   resizeHandler: any;
