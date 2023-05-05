@@ -88,6 +88,16 @@ const defaultMenu: MenuDefinition = {
       ],
     },
     {
+      name: 'Division',
+      items: [
+        {
+          name: 'Analysis',
+          icon: 'vaadin:bar-chart',
+          href: '/division-analysis',
+        },
+      ],
+    },
+    {
       name: 'Information',
       items: [
         {
@@ -141,6 +151,16 @@ const defaultMenu: MenuDefinition = {
           name: 'Library',
           icon: 'vaadin:book',
           href: '/deck-library',
+        },
+      ],
+    },
+    {
+      name: 'Division',
+      items: [
+        {
+          name: 'Analysis',
+          icon: 'vaadin:bar-chart',
+          href: '/division-analysis',
         },
       ],
     },

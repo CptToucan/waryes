@@ -25,6 +25,7 @@ import "./routes/forgot-password";
 import "./routes/privacy-policy";
 import "./routes/user-settings";
 import "./routes/my-decks";
+import "./routes/division-analysis";
 
 /** Components */
 import "./components/unit-card";
