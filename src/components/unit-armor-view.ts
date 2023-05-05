@@ -18,6 +18,7 @@ export class UnitArmorView extends LitElement {
       div.armor-section p.armor-value {
         text-align: center;
         flex-grow: 0;
+        flex-shrink: 0;
         justify-content: space-around;
         margin: 0;
         font-size: var(--lumo-font-size-xxl);
