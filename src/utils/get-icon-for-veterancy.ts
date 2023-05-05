@@ -7,7 +7,7 @@ export function getIconForVeterancy(veterancy: number): TemplateResult {
   const elementId = `veterancy-${veterancy}`;
   return html` <vaadin-icon
       id="${elementId}"
-      style=${veterancy !== 3 ? 'transform: rotate(180deg)' : ''}
+      style='transform: rotate(180deg)'
       icon="waryes:${veterancies[veterancy]}"
     ></vaadin-icon
     ><vaadin-tooltip for=${elementId} text=${veterancies[veterancy]} position="top"></vaadin-tooltip>`;
