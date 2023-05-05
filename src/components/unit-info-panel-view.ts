@@ -35,7 +35,7 @@ export class UnitInfoPanelView extends LitElement {
       }
 
       .stat {
-        flex: 1 1 0;
+        flex: 1 1 0px;
         padding: var(--lumo-space-xs);
       }
 

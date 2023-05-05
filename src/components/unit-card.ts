@@ -49,7 +49,6 @@ export class UnitCard extends LitElement {
 
       unit-info-panel-view {
         margin-top: var(--lumo-space-s);
-        flex: 1 1 0;
       }
 
       .image-container {
