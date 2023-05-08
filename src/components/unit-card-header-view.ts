@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import './unit-armor-view';
 import './unit-weapon-view';
 import './unit-info-panel-view';
@@ -9,6 +9,8 @@ import '@vaadin/button';
 import {Unit} from '../types/unit';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
 import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
+import { DivisionsDatabaseService } from '../services/divisions-db';
+import { Division } from '../types/deck-builder';
 
 /**
  * Component for rendering the details of a single unit
@@ -76,17 +78,35 @@ export class UnitCardHeaderView extends LitElement {
   @property()
   expert = false;
 
+  @state()
+  private unitDivisions?: Division[];
+
+  async fetchUnitDivisions() {
+    this.unitDivisions = this.unit && await DivisionsDatabaseService.divisionsForUnit(this.unit);
+  }
+  
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.fetchUnitDivisions();
+  }
+
   render(): TemplateResult {
     const traits = this.unit?.specialities.slice(1) || [];
     if(this.unit) {
       const icons = getIconsWithFallback(this.unit);
+
+      const divisionFlags = this.unitDivisions?.map( division => {
+        return html`<division-flag .division=${division} />` 
+      })
   
       return html`
       <div class="top-bar">
         <country-flag
           .country=${this.unit?.unitType.motherCountry}
         ></country-flag
-        ><vaadin-button
+        >
+        ${divisionFlags}
+        <vaadin-button
           theme="primary"
           @click=${() =>
             this.dispatchEvent(
