@@ -25,6 +25,7 @@ import "./routes/forgot-password";
 import "./routes/privacy-policy";
 import "./routes/user-settings";
 import "./routes/my-decks";
+import "./routes/patch-notes";
 
 /** Components */
 import "./components/unit-card";
