@@ -49,19 +49,19 @@ interface Weapon {
     traits: string[]
     ammoDescriptorName: string
     weaponName: string
-    he?:                number
-    heDamageRadius: number | null
-    suppress?:          number
-    suppressDamagesRadius: number | null
-    groundRange?:       number
-    groundMinRange?:    number
-    helicopterRange?:   number
-    helicopterMinRange?: number
-    planeRange?:        number
-    planeMinRange?:     number
-    aimingTime?:        number
-    reloadTime?:        number
-    salvoLength?:       number
+    he:                number
+    heDamageRadius: number
+    suppress:          number
+    suppressDamagesRadius: number
+    groundRange:       number
+    groundMinRange:    number
+    helicopterRange:   number
+    helicopterMinRange: number
+    planeRange:        number
+    planeMinRange:     number
+    aimingTime:        number
+    reloadTime:        number
+    salvoLength:       number
     totalHeDamage:      number
     // this is actually time between shots
     timeBetweenSalvos:  number
@@ -73,32 +73,23 @@ interface Weapon {
     movingAccuracy:     number
     staticAccuracyScaling?: AccuracyScaling
     movingAccuracyScaling?: AccuracyScaling
-    penetration?:       number
+    penetration:       number
     instaKillAtMaxRangeArmour: number
     trueRateOfFire: number
     missileProperties?: MissileProperties
     smokeProperties?: SmokeProperties
     numberOfSalvos: number
-
-
-    // TODO: Audit / remove
-    // old vlaues missing or removed
-    // aiming?:            number,
-    // aircraft?:          string,
-    // ammunition?:        string,
-    // ground?:            number,
-    // helicopter?:        number,
-    // motion?:            number,
-    // name?:              string,
-    // reload?:            number,
-    // static?:            number,
-    // type?:              string,
 }
 
 interface UnitType {
-  nationality: string
+  nationality: Alliance
   motherCountry: Country
   formation: string
+}
+
+enum Alliance {
+  NATO = "ENationalite/Allied",
+  PACT = "ENationalite/Axis"
 }
 
 interface SpeedForTerrain {
@@ -126,17 +117,17 @@ interface Unit {
     speedsForTerrains:       SpeedForTerrain[]
     roadSpeed:              number
     rotationTime:           number
-    optics?:                number
-    airOptics?:             number
-    stealth?:               number
-    infoPanelType?:         InfoPanelType
-    advancedDeployment?:    number | null
-    fuel?:                  number | null
-    fuelMove?:              number | null
-    supply?:                number | null
-    ecm:                    number | null
-    agility?:               number | null
-    travelTime?:            number | null
+    optics:                number
+    airOptics:             number
+    stealth:               number
+    infoPanelType:         InfoPanelType
+    advancedDeployment:    number
+    fuel:                  number | null
+    fuelMove:              number | null
+    supply:                number | null
+    ecm:                    number
+    agility?:               number
+    travelTime:            number | null
     hasDefensiveSmoke:      boolean
     specialities:           string[],
     bombStrategy:           string,
@@ -144,19 +135,6 @@ interface Unit {
     _searchNameHelper:      string
     isSellable:             boolean
     _display:               boolean
-
-    // TODO: Audit / remove
-    // old values missing or removed
-    // _name:              string,
-    // autonomy?:          number,
-    // commandPoints:      number,
-    // id:                 string,
-    // revealInfluence:    boolean,
-    // strength?:          number,
-    // trajectory?:        number,
-    // transport?:         string,
-    // version:            string,
-    // weaponMetadata:     WeaponMetaData[],
 }
 
 
@@ -217,4 +195,4 @@ type UnitMap = {
 }
 
 
-export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, AccuracyScalingItem, InfoPanelType, MissileProperties, SmokeProperties};
+export {Unit, Weapon, FieldMetadata,FieldMetadataMap, UnitFieldType, UnitMap, AccuracyScaling, AccuracyScalingItem, InfoPanelType, MissileProperties, SmokeProperties, Alliance, SpeedForTerrain, UnitType};
