@@ -105,11 +105,13 @@ export class PatchNotesRoute extends LitElement {
         margin: 0;
         margin-bottom: var(--lumo-space-s);
         text-overflow: ellipsis;
-        overflow: hidden;
         white-space: nowrap;
         flex: 1 1 0px;
       }
 
+      a h4 {
+        overflow: hidden;
+      }
       .card-header > a {
         flex: 1 1 0px;
         overflow: hidden;
