@@ -100,7 +100,7 @@ const fieldTypes: {
     operators: [
       ...numberOperators
     ],
-    unit: "°/s"
+    unit: "deg/s"
   },
   [FieldType.LIQUID]: {
     operators: [
@@ -124,16 +124,7 @@ const fieldTypes: {
     ],
     unit: ""
   },
-
-
 }
-
-
-
-
-
-
-
 
 export class RecordField<T> {
   constructor(id: string, label: string, value: T, fieldType: FieldType) {
@@ -161,12 +152,7 @@ export class RecordField<T> {
   }
 
   getFieldValueDisplay() {
-
-    if (this.fieldType === FieldType.BOOLEAN) {
-      return this.value ? "Yes" : "No";
-    }
-
-    return this.value;
+    return RecordField.getDisplayForValue(this.value, this.fieldType);
   }
 
   static getDisplayForValue(value: any, fieldType: FieldType) {
@@ -175,6 +161,14 @@ export class RecordField<T> {
     }
     if(fieldType === FieldType.DISTANCE) {
       return `${value} ${fieldTypes[fieldType].unit}`;
+    }
+
+    if(fieldType === FieldType.ANGULAR_SPEED) {
+      return `${(value / Math.PI) * 90} ${fieldTypes[fieldType].unit}`;
+    }
+
+    if(fieldType === FieldType.PERCENTAGE) {
+      return `${value * 100} ${fieldTypes[fieldType].unit}`;
     }
 
     return value;

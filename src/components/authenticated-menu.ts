@@ -91,6 +91,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Information',
       items: [
         {
+          name: 'Warno Patch Notes',
+          icon: 'vaadin:info-circle',
+          href: '/patch-notes',
+        },
+        {
           name: 'Discord',
           icon: 'vaadin:comments',
           href: 'https://discord.gg/gqBgvgGj8H',
@@ -147,6 +152,11 @@ const defaultMenu: MenuDefinition = {
     {
       name: 'Information',
       items: [
+        {
+          name: 'Game Patch Notes',
+          icon: 'vaadin:info-circle',
+          href: '/patch-notes',
+        },
         {
           name: 'Login',
           icon: 'vaadin:sign-in',

@@ -213,6 +213,41 @@ export class WeaponRecord {
       FieldType.NUMBER
     );
 
+    this.missileAcceleration = new RecordField(
+      'missileAcceleration',
+      'Missile acceleration',
+      weapon.missileProperties?.maxMissileAcceleration,
+      FieldType.PROJECTILE_ACCELERATION
+    );
+
+    this.missileSpeed = new RecordField(
+      'missileSpeed',
+      'Missile speed',
+      weapon.missileProperties?.maxMissileSpeed,
+      FieldType.PROJECTILE_SPEED
+    );
+
+    this.smokeAltitude = new RecordField(
+      'smokeAltitude',
+      'Smoke altitude',
+      weapon.smokeProperties?.altitude,
+      FieldType.DISTANCE
+    );
+
+    this.smokeLifeSpan = new RecordField(
+      'smokeLifeSpan',
+      'Smoke life span',
+      weapon.smokeProperties?.lifeSpan,
+      FieldType.TIME
+    );
+
+    this.smokeRadius = new RecordField(
+      'smokeRadius',
+      'Smoke radius',
+      weapon.smokeProperties?.radius,
+      FieldType.DISTANCE
+    );
+    
   }
 
   showInInterface: RecordField<boolean>;
@@ -248,6 +283,13 @@ export class WeaponRecord {
   missileProperties: RecordField<MissileProperties | undefined>;
   smokeProperties: RecordField<SmokeProperties | undefined>;
   numberOfSalvos: RecordField<number>;
+
+  missileAcceleration: RecordField<number | undefined>;
+  missileSpeed: RecordField<number | undefined>;
+
+  smokeAltitude: RecordField<number | undefined>;
+  smokeLifeSpan: RecordField<number | undefined>;
+  smokeRadius: RecordField<number | undefined>;
 
   getFields(): RecordField<unknown>[] {
     const fields: string[] = Object.getOwnPropertyNames(this);
