@@ -46,8 +46,8 @@ export class IndexRoute extends LitElement {
         display: flex;
         justify-content: center;
         align-items: center;
-        padding-left: var(--lumo-space-xl);
-        padding-right: var(--lumo-space-xl);
+        padding-left: var(--lumo-space-xs);
+        padding-right: var(--lumo-space-xs);
       }
 
       unit-search {
