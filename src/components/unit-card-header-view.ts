@@ -5,10 +5,11 @@ import './unit-weapon-view';
 import './unit-info-panel-view';
 import './trait-badge';
 import './unit-image';
+import './mod-image';
 import '@vaadin/button';
 import {Unit} from '../types/unit';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
-import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
+import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
 
 /**
  * Component for rendering the details of a single unit
@@ -67,6 +68,18 @@ export class UnitCardHeaderView extends LitElement {
         display: flex;
         border-right: 1px dotted var(--lumo-contrast-30pct);
       }
+
+      mod-image {
+        height: 12px;
+      }
+
+      .left-side-header {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        column-gap: var(--lumo-space-s);
+      }
     `;
   }
 
@@ -78,47 +91,49 @@ export class UnitCardHeaderView extends LitElement {
 
   render(): TemplateResult {
     const traits = this.unit?.specialities.slice(1) || [];
-    if(this.unit) {
+    if (this.unit) {
       const icons = getIconsWithFallback(this.unit);
-  
+
       return html`
-      <div class="top-bar">
-        <country-flag
-          .country=${this.unit?.unitType.motherCountry}
-        ></country-flag
-        ><vaadin-button
-          theme="primary"
-          @click=${() =>
-            this.dispatchEvent(
-              new CustomEvent('mode-toggled', {detail: !this.expert})
+        <div class="top-bar">
+          <div class="left-side-header">
+            <country-flag
+              .country=${this.unit?.unitType.motherCountry}
+            ></country-flag>
+            <mod-image .mod=${this.unit?.mod}></mod-image>
+          </div>
+          <vaadin-button
+            theme="primary"
+            @click=${() =>
+              this.dispatchEvent(
+                new CustomEvent('mode-toggled', {detail: !this.expert})
+              )}
+            >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
+          >
+        </div>
+        <div class="unit-title">
+          <p class="unit-name">${this.unit?.name}</p>
+          <p class="unit-command-points">${this.unit?.commandPoints}</p>
+        </div>
+        <div class="icons">
+          <div class="unit-category icon-container">
+            <vaadin-icon icon=${icons.icon}></vaadin-icon>
+            ${icons.subIcon
+              ? html`<vaadin-icon icon=${icons.subIcon}></vaadin-icon>`
+              : html``}
+          </div>
+          <div class="traits">
+            ${traits.map(
+              (speciality) => html`<div class="icon-container">
+                ${getIconForTrait(speciality)}
+              </div>`
             )}
-          >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
-        >
-      </div>
-      <div class="unit-title">
-        <p class="unit-name">${this.unit?.name}</p>
-        <p class="unit-command-points">${this.unit?.commandPoints}</p>
-      </div>
-      <div class="icons">
-        <div class="unit-category icon-container">
-          <vaadin-icon
-            icon=${icons.icon}
-          ></vaadin-icon>
-          ${icons.subIcon ? html`<vaadin-icon icon=${icons.subIcon}></vaadin-icon>`: html``}
+          </div>
         </div>
-        <div class="traits">
-          ${traits.map(
-            (speciality) => html`<div class="icon-container">
-              ${getIconForTrait(speciality)}
-            </div>`
-          )}
-        </div>
-      </div>
-    `;
+      `;
     }
 
     return html``;
-
   }
 }
 

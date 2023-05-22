@@ -1,19 +1,12 @@
 import {
-  collection,
-  getDocs,
-  getDocsFromCache,
   Firestore,
-  loadBundle,
-  namedQuery,
 } from 'firebase/firestore';
 import {FirebaseService, FirebaseServiceClass} from './firebase';
 import {getStorage, ref, getBlob} from 'firebase/storage';
 import {Unit} from '../types/unit';
-import { isSpecialtyCommand } from '../utils/is-specialty-command';
-import { isSpecialtyRecon } from '../utils/is-specialty-recon';
-
-const CURRENT_FILE_NAME = 'bundle-units.txt';
-const CURRENT_NAMED_QUERY = 'units';
+import {isSpecialtyCommand} from '../utils/is-specialty-command';
+import {isSpecialtyRecon} from '../utils/is-specialty-recon';
+import { BundleManagerService } from './bundle-manager';
 
 // Regex to remove a lot of punctuation found in unit names, helps search methods
 export const UNIT_SEARCH_IGNORED_CHARACTERS = /[.,-\/#!$%\^\*\(\)\[\]\{\}]/g;
@@ -44,64 +37,26 @@ class UnitsDatabaseServiceClass {
    * @param strategy
    * @returns
    */
-  public async fetchUnits(
-    strategy: UnitFetchStrategy = UnitFetchStrategy.cache
-  ) {
-    switch (strategy) {
-      case UnitFetchStrategy.cache:
-        if (this.debug) {
-          console.log('Loading units from cache');
-        }
-        return await this.fetchUnitsCache();
-      case UnitFetchStrategy.forceDirect:
-        if (this.debug) {
-          console.log('Loading units from cloud');
-        }
-        return await this.fetchUnitsForceDirect();
-    }
-
-    return [];
+  public async fetchUnits() {
+    return await BundleManagerService.getUnits();
   }
 
-  /**
-   * Fetch units by loading a bundle file from firebase storage.  This will incur a storage
-   * read if it is not already cached, but will otherwise not require any requests made to the
-   * firestore database.
-   *
-   * @returns
-   */
-  async fetchUnitsCache() {
-    if (this.units) {
-      if (this.debug) {
-        console.log('Cache loading from cache cache');
-      }
+  async fetchUnitsJson() {
+    this.isFetching = true;
+    const storage = getStorage(FirebaseService.app);
+
+    if (this.units && this.units?.length > 0) {
+      this.isFetching = false;
       return this.units;
     }
-    this.isFetching = true;
-    // Create a reference with an initial file path and name
-    const storage = getStorage(FirebaseService.app);
-    const pathReference = ref(storage, CURRENT_FILE_NAME);
-    const bundleBlob = await getBlob(pathReference);
-    const bundleBlobStr = await bundleBlob.text();
 
-    if (this.db) {
-      if (!this.hasLoadedBundle) {
-        await loadBundle(this.db, bundleBlobStr);
-        this.hasLoadedBundle = true;
-      }
-    } else {
-      this.isFetching = false;
-      throw new Error('Error loading bundle file');
-    }
+    const jsonBlob = await getBlob(
+      ref(storage, 'warno/units-and-divisions.json')
+    );
+    const jsonBlobStr = await jsonBlob.text();
+    const jsonData = JSON.parse(jsonBlobStr);
 
-    const query = await namedQuery(this.db, CURRENT_NAMED_QUERY);
-    if (!query) throw new Error('Failed to find named query');
-
-    const unitsQuery = await getDocsFromCache(query);
-
-    this.units = unitsQuery.docs.map(function (doc) {
-      const unitData = doc.data() as Unit;
-
+    this.units = jsonData.units.map(function (unitData: Unit) {
       const isCommand = isSpecialtyCommand(unitData.specialities[0]);
 
       const isRecon = isSpecialtyRecon(unitData.specialities[0]);
@@ -114,57 +69,20 @@ class UnitsDatabaseServiceClass {
           .replace(UNIT_SEARCH_IGNORED_CHARACTERS, ''),
       };
 
-      if(unit.name === "") {
-        unit._display = false; 
+      if (unit.name === '') {
+        unit._display = false;
       }
-      
-      if(isCommand) {
-        unit.name = `(CMD) ${unit.name}`
+
+      if (isCommand) {
+        unit.name = `(CMD) ${unit.name}`;
+      } else if (isRecon) {
+        unit.name = `(REC) ${unit.name}`;
       }
-      else if (isRecon) {
-        unit.name = `(REC) ${unit.name}`
-      }
-      
 
       return unit;
     });
 
-    this._readCounter += this.units.length;
-    if (this.debug) {
-      console.log('Current Reads: ', this._readCounter);
-    }
-
-    this.isFetching = false;
-    return this.units;
-  }
-
-  /**
-   * Fetch units by querying firebase directly.  This will cause a number of firebase
-   * requests equal to the number of units in the database.
-   *
-   * @param force
-   * @returns
-   */
-  async fetchUnitsForceDirect(force: Boolean = false) {
-    if (this.isFetching) return this.units ?? [];
-    if (this.debug) {
-      console.log('Fetch');
-    }
-    // Cache first
-    if (this.units && !force) return this.units ?? [];
-    if (this.debug) {
-      console.log('No cache');
-    }
-    // Setup and attempt to fetch
-    if (!this.db) return null;
-
-    this.isFetching = true;
-    const unitsQuery = await getDocs(collection(this.db, 'units'));
-    this.units = unitsQuery.docs.map(function (doc) {
-      return doc.data() as Unit;
-    });
-
-    this._readCounter += this.units.length;
+    this._readCounter += this.units?.length || 0;
     if (this.debug) {
       console.log('Current Reads: ', this._readCounter);
     }

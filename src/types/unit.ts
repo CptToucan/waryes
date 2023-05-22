@@ -1,3 +1,4 @@
+import { BucketFolder } from "../services/bundle-manager";
 import { AbstractFieldMetadata } from "./AbstractFieldMetadata";
 import { Country } from "./deck-builder";
 import { NumberFieldMetadata } from "./NumberFieldMetadata";
@@ -135,6 +136,7 @@ interface Unit {
     _searchNameHelper:      string
     isSellable:             boolean
     _display:               boolean
+    mod:                    BucketFolder
 }
 
 
