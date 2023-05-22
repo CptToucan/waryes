@@ -12,17 +12,16 @@ import '@vaadin/multi-select-combo-box';
 import '@vaadin/combo-box';
 import '@vaadin/checkbox-group';
 import '@vaadin/checkbox';
-import "../components/mod-image";
+import '../components/mod-image';
 
 import '../components/unit-search';
 import {Unit} from '../types/unit';
 import {Router} from '@vaadin/router';
-import "../components/mod-selector";
+import '../components/mod-selector';
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
   static get styles() {
-
     return css`
       :host {
         height: 100%;
@@ -199,6 +198,12 @@ export class IndexRoute extends LitElement {
         'vaadin:pie-bar-chart',
         'Compare',
         'Compare units and analyse.'
+      ),
+      this.renderChoiceButton(
+        '/patch-notes',
+        'vaadin:clipboard-text',
+        'Patch Notes',
+        "See what's new in the latest patch."
       ),
     ];
 
