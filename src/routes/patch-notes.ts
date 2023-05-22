@@ -238,8 +238,6 @@ export class PatchNotesRoute extends LitElement {
       const unit = unitMap[patchNote.descriptorName];
       const divisions = unitDivisionsMap[patchNote.descriptorName];
 
-      console.log(patchNotesJson);
-
       const patchUnitRecord = new PatchUnitRecord(patchNote, unit);
       if (patchNote.new) {
         patchNotes.added.push({divisions, patchRecord: patchUnitRecord});
@@ -354,13 +352,10 @@ export class PatchNotesRoute extends LitElement {
     const outputHtml: TemplateResult[] = [];
 
     const diffForTraits = patchNote.patchRecord.patch.diff.specialities;
-    console.log(diffForTraits);
 
     if (isAnyDiffElementArray(diffForTraits)) {
-      console.log(diffForTraits);
 
       for (const traitDiff of diffForTraits) {
-        console.log(traitDiff[1]);
         if (isArrayDiffAddedElement(traitDiff)) {
           outputHtml.push(
             html`<div>Added: ${getIconForTrait(traitDiff[1])}</div>`
