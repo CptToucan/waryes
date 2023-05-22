@@ -92,7 +92,20 @@ export class UnitImage extends LitElement {
   }
 
   generateSrc() {
-    return `/images/units/${this.unit?.descriptorName}.png`
+    let descriptorName = this.unit?.descriptorName;
+
+    if(this.unit?.descriptorName === undefined) return "";
+
+    if(descriptorName?.endsWith("_frago")) {
+      descriptorName = descriptorName.replace("_frago", "");
+    }
+
+    if(descriptorName?.endsWith("_warno_let_loose")) {
+      descriptorName = descriptorName.replace("_warno_let_loose", "");
+    }
+    
+
+    return `/images/units/${descriptorName}.png`
   }
 }
 

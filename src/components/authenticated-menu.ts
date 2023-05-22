@@ -43,13 +43,13 @@ type MenuDefinition = {
 const defaultMenu: MenuDefinition = {
   user: [
     {
+      name: 'Home',
+      icon: 'vaadin:home',
+      href: '/',
+    },
+    {
       name: 'Units',
       items: [
-        {
-          name: 'Search',
-          icon: 'vaadin:search',
-          href: '/',
-        },
         {
           name: 'Database',
           icon: 'vaadin:table',
@@ -110,13 +110,14 @@ const defaultMenu: MenuDefinition = {
   ],
   guest: [
     {
+      name: 'Home',
+      icon: 'vaadin:home',
+      href: '/',
+    },
+    {
       name: 'Units',
       items: [
-        {
-          name: 'Search',
-          icon: 'vaadin:search',
-          href: '/',
-        },
+
         {
           name: 'Database',
           icon: 'vaadin:table',
