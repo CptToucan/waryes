@@ -119,8 +119,7 @@ class BundleManager {
       .map((unit: Unit) => {
         return {...unit, mod: BucketFolder.WARNO};
       });
-    this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS].divisions = [];
-    //= unitDivisions[0].divisions as Division[];
+    this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS].divisions = unitDivisions[0].divisions as Division[];
 
     // Frago
     if (this.config?.[BucketFolder.FRAGO]) {
@@ -137,8 +136,8 @@ class BundleManager {
         });
     }
 
-    this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS].divisions =
-      unitDivisions[1].divisions as Division[];
+    this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS].divisions = [];
+      // unitDivisions[1].divisions as Division[];
 
     // Warno Let Loose
     if (this.config?.[BucketFolder.WARNO_LET_LOOSE]) {
