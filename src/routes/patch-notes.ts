@@ -256,11 +256,34 @@ export class PatchNotesRoute extends LitElement {
         : 1;
     });
 
-    patchNotes.changed.sort((a) => {
-      return a.patchRecord.unitRecord.unit?.unitType.nationality ===
-        Alliance.NATO
-        ? -1
-        : 1;
+
+
+    patchNotes.changed.sort((a, b) => {
+      const allianceComparison = (alliance: Alliance) => {
+        if (alliance === Alliance.NATO) {
+          return -1;
+        } else {
+          return 1;
+        }
+      };
+    
+      const allianceComparisonResult = allianceComparison(a.patchRecord.unitRecord.unit?.unitType.nationality) - allianceComparison(b.patchRecord.unitRecord.unit?.unitType.nationality);
+      if (allianceComparisonResult !== 0) {
+        return allianceComparisonResult;
+      }
+    
+      const motherCountryA = a.patchRecord.unitRecord.unit?.unitType?.motherCountry;
+      const motherCountryB = b.patchRecord.unitRecord.unit?.unitType?.motherCountry;
+    
+      if (motherCountryA === motherCountryB) {
+        return 0;
+      }
+    
+      if (motherCountryA > motherCountryB) {
+        return 1;
+      }
+    
+      return -1;
     });
     
     this.selectedPatch = firebasePatchRecord;
