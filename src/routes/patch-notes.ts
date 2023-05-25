@@ -112,6 +112,15 @@ export class PatchNotesRoute extends LitElement {
       a h4 {
         overflow: hidden;
       }
+
+      a {
+        color: var(--lumo-contrast);
+        font-weight: bold;
+      }
+
+      a:visited {
+        color: var(--lumo-contrast);
+      }
       .card-header > a {
         flex: 1 1 0px;
         overflow: hidden;
