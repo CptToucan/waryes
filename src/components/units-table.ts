@@ -4,13 +4,13 @@ import '@vaadin/button';
 import '@vaadin/grid';
 import '@vaadin/grid/vaadin-grid-sort-column.js';
 import {GridColumn, GridItemModel} from '@vaadin/grid';
-import {UnitsDatabaseService} from '../services/units-db';
 import {FieldMetadata, Unit, UnitFieldType} from '../types/unit';
 import {router} from '../services/router';
 import './filters-builder';
 import '@vaadin/accordion';
 import { AbstractFieldMetadata } from '../types/AbstractFieldMetadata';
 import { FilterMetadata } from '../types/FilterMetadata';
+import { BundleManagerService } from '../services/bundle-manager';
 
 @customElement('units-table')
 export class UnitsTable extends LitElement {
@@ -104,7 +104,7 @@ export class UnitsTable extends LitElement {
   private units: Unit[] = [];
 
   async fetchUnits() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnits();
 
     if (units) {
       const sortedUnits = units

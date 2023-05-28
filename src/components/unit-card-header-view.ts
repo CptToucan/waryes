@@ -4,9 +4,9 @@ import './unit-armor-view';
 import './unit-weapon-view';
 import './unit-info-panel-view';
 import './trait-badge';
-import './unit-image';
 import './mod-image';
 import '@vaadin/button';
+import './division-flag';
 import {Unit} from '../types/unit';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
@@ -100,6 +100,7 @@ export class UnitCardHeaderView extends LitElement {
             <country-flag
               .country=${this.unit?.unitType.motherCountry}
             ></country-flag>
+
             <mod-image .mod=${this.unit?.mod}></mod-image>
           </div>
           <vaadin-button

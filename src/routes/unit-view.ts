@@ -3,10 +3,10 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
-import {UnitsDatabaseService} from '../services/units-db';
 import {Unit} from '../types/unit';
 import '../components/unit-armor-view';
 import '@vaadin/tabs';
+import { BundleManagerService } from '../services/bundle-manager';
 
 @customElement('unit-view-route')
 export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
@@ -14,17 +14,20 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
     return css`
       :host {
         display: flex;
-        align-items: center;
-        justify-content: center;
         padding: var(--lumo-space-s);
       }
 
       .unit-view {
-        max-width: 400px;
+        // max-width: 400px;
       }
 
       unit-image {
         width: 300px;
+      }
+
+      .border-radius {
+        border-radius: var(--lumo-border-radius-m);
+        overflow: hidden;
       }
 
       .expanded-unit-card {
@@ -64,6 +67,10 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
         border-right: 1px solid var(--lumo-contrast-30pct);
       }
 
+      .show-on-small-screens {
+        flex: 1 1 0px;
+      }
+
       individual-weapon-view {
         display: block;
       }
@@ -97,7 +104,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async fetchUnit(unitId: string) {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnits();
     this.unit = units?.find((u) => u.descriptorName === unitId);
   }
 
@@ -107,7 +114,9 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
           <div class="unit-info">
             <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${() => this.expert = !this.expert}></unit-card-header-view>
             <div class="unit-image">
+              <div class="border-radius">
               <unit-image .unit=${this.unit}></unit-image>
+              </div>
             </div>
             <unit-armor-view .unit=${this.unit}></unit-armor-view>
             <unit-info-panel-view .unit=${this.unit}></unit-info-panel-view>

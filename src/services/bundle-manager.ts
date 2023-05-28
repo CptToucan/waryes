@@ -1,6 +1,6 @@
 import {getStorage, ref, getBlob} from 'firebase/storage';
 import {Division} from '../types/deck-builder';
-import {Unit} from '../types/unit';
+import {Unit, Weapon} from '../types/unit';
 import {FirebaseService} from './firebase';
 import {isSpecialtyCommand} from '../utils/is-specialty-command';
 import {isSpecialtyRecon} from '../utils/is-specialty-recon';
@@ -20,18 +20,21 @@ type BundleMap = {
     [BucketType.UNITS_AND_DIVISIONS]: {
       units: Unit[] | null;
       divisions: Division[] | null;
+      weapons: Weapon[] | null;
     };
   };
   [BucketFolder.FRAGO]: {
     [BucketType.UNITS_AND_DIVISIONS]: {
       units: Unit[] | null;
       divisions: Division[] | null;
+      weapons: Weapon[] | null;
     };
   };
   [BucketFolder.WARNO_LET_LOOSE]: {
     [BucketType.UNITS_AND_DIVISIONS]: {
       units: Unit[] | null;
       divisions: Division[] | null;
+      weapons: Weapon[] | null;
     };
   };
 };
@@ -112,52 +115,61 @@ class BundleManager {
     ]);
 
     // Warno
-    this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS].units = (
-      unitDivisions[0].units as Unit[]
-    )
-      .map(this.mapUnits)
-      .map((unit: Unit) => {
-        return {...unit, mod: BucketFolder.WARNO};
-      });
-    this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS].divisions = unitDivisions[0].divisions as Division[];
+    this.initialiseBucket(unitDivisions[0], BucketFolder.WARNO);
 
-    // Frago
     if (this.config?.[BucketFolder.FRAGO]) {
-      this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS].units = (
-        unitDivisions[1].units as Unit[]
-      )
-        .map(this.mapUnits)
-        .map((unit: Unit) => {
-          return {
-            ...unit,
-            descriptorName: `${unit.descriptorName}_frago`,
-            mod: BucketFolder.FRAGO,
-          };
-        });
+      this.initialiseBucket(unitDivisions[1], BucketFolder.FRAGO);
     }
 
-    this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS].divisions = [];
-      // unitDivisions[1].divisions as Division[];
-
-    // Warno Let Loose
     if (this.config?.[BucketFolder.WARNO_LET_LOOSE]) {
-      this.bundles[BucketFolder.WARNO_LET_LOOSE][
-        BucketType.UNITS_AND_DIVISIONS
-      ].units = (unitDivisions[2].units as Unit[])
-        .map(this.mapUnits)
-        .map((unit: Unit) => {
-          return {
-            ...unit,
-            descriptorName: `${unit.descriptorName}_warno_let_loose`,
-            mod: BucketFolder.WARNO_LET_LOOSE,
-          };
-        });
-      this.bundles[BucketFolder.WARNO_LET_LOOSE][
-        BucketType.UNITS_AND_DIVISIONS
-      ].divisions = [];// unitDivisions[2].divisions as Division[];
+      this.initialiseBucket(unitDivisions[2], BucketFolder.WARNO_LET_LOOSE);
     }
 
     this.initialised = true;
+  }
+
+  initialiseBucket(
+    unitDivisions: UnitDivisionJsonBundle,
+    bucketFolder: BucketFolder
+  ) {
+    const units = unitDivisions.units as Unit[];
+    const parsedUnits = [];
+
+    for (const unit of units) {
+      const newUnit = this.parseUnit(unit, bucketFolder);
+      parsedUnits.push(newUnit);
+    }
+
+    this.bundles[bucketFolder][BucketType.UNITS_AND_DIVISIONS].units =
+      parsedUnits;
+
+    const divisions = unitDivisions.divisions as Division[];
+    const parsedDivisions = [];
+
+    for (const division of divisions) {
+      const newDivision = this.parseDivision(division, bucketFolder);
+      parsedDivisions.push(newDivision);
+    }
+
+    this.bundles[bucketFolder][BucketType.UNITS_AND_DIVISIONS].divisions =
+      parsedDivisions;
+
+    const weapons: {
+      [key: string]: Weapon;
+    } = {};
+
+    for (const unit of parsedUnits as Unit[]) {
+      for (const weapon of unit.weapons) {
+        if (!weapons[weapon.ammoDescriptorName]) {
+          weapons[weapon.ammoDescriptorName] = weapon;
+        }
+      }
+    }
+
+    this.bundles[bucketFolder][BucketType.UNITS_AND_DIVISIONS].weapons =
+      Object.values(weapons).sort((a, b) => {
+        return a.weaponName.localeCompare(b.weaponName);
+      });
   }
 
   async getUnits() {
@@ -191,6 +203,29 @@ class BundleManager {
     ];
   }
 
+  async getDivisionsForBucket(folder: BucketFolder) {
+    await this.initialise();
+    return this.bundles[folder][BucketType.UNITS_AND_DIVISIONS].divisions;
+  }
+
+  async getWeapons() {
+    await this.initialise();
+    return [
+      ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
+        .weapons || []),
+      ...(this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS]
+        .weapons || []),
+      ...(this.bundles[BucketFolder.WARNO_LET_LOOSE][
+        BucketType.UNITS_AND_DIVISIONS
+      ].weapons || []),
+    ];
+  }
+
+  async getWeaponsForBucket(folder: BucketFolder) {
+    await this.initialise();
+    return this.bundles[folder][BucketType.UNITS_AND_DIVISIONS].weapons;
+  }
+
   async getBundleFor<T>(
     bundleFolder: BucketFolder,
     bundleType: BucketType
@@ -205,16 +240,44 @@ class BundleManager {
     return jsonData;
   }
 
-  mapUnits(unitData: Unit) {
-    const isCommand = isSpecialtyCommand(unitData.specialities[0]);
-    const isRecon = isSpecialtyRecon(unitData.specialities[0]);
+  parseUnit(unit: Unit, mod: BucketFolder) {
+    const isCommand = isSpecialtyCommand(unit.specialities[0]);
+    const isRecon = isSpecialtyRecon(unit.specialities[0]);
 
-    const unit = {
-      ...unitData,
+    let newDescriptorName = unit.descriptorName;
+    let newDivisions = unit.divisions;
+    let newWeapons = unit.weapons;
+
+    if (mod !== BucketFolder.WARNO) {
+      newDescriptorName = `${newDescriptorName}_${mod}`;
+      newDivisions = newDivisions.map((division) => {
+        return `${division}_${mod}`;
+      });
+    }
+
+    newWeapons = newWeapons.map((weapon) => {
+      let newAmmoDescriptorName = weapon.ammoDescriptorName;
+
+      if (mod !== BucketFolder.WARNO) {
+        newAmmoDescriptorName = `${newAmmoDescriptorName}_${mod}`;
+      }
+      return {
+        ...weapon,
+        ammoDescriptorName: newAmmoDescriptorName,
+        mod,
+      };
+    });
+
+    const newUnit = {
+      ...unit,
+      descriptorName: newDescriptorName,
+      divisions: newDivisions,
+      weapons: newWeapons,
       _display: true,
-      _searchNameHelper: unitData.name
+      _searchNameHelper: unit.name
         .toLowerCase()
         .replace(UNIT_SEARCH_IGNORED_CHARACTERS, ''),
+      mod,
     };
 
     if (unit.name === '') {
@@ -227,7 +290,29 @@ class BundleManager {
       unit.name = `(REC) ${unit.name}`;
     }
 
-    return unit;
+    return newUnit;
+  }
+
+  parseDivision(division: Division, mod: BucketFolder) {
+    const newDivision = {
+      ...division,
+    };
+
+    if (mod !== BucketFolder.WARNO) {
+      newDivision.descriptor = `${newDivision.descriptor}_${mod}`;
+      for (const pack of newDivision.packs) {
+        pack.packDescriptor = `${pack.packDescriptor}_${mod}`;
+        pack.unitDescriptor = `${pack.unitDescriptor}_${mod}`;
+        if (pack.availableTransportList) {
+          pack.availableTransportList = pack.availableTransportList.map(
+            (transport) => {
+              return `${transport}_${mod}`;
+            }
+          );
+        }
+      }
+    }
+    return division;
   }
 
   bundles: BundleMap = {
@@ -235,18 +320,21 @@ class BundleManager {
       [BucketType.UNITS_AND_DIVISIONS]: {
         units: null,
         divisions: null,
+        weapons: null,
       },
     },
     [BucketFolder.FRAGO]: {
       [BucketType.UNITS_AND_DIVISIONS]: {
         units: null,
         divisions: null,
+        weapons: null,
       },
     },
     [BucketFolder.WARNO_LET_LOOSE]: {
       [BucketType.UNITS_AND_DIVISIONS]: {
         units: null,
         divisions: null,
+        weapons: null,
       },
     },
   };

@@ -1,14 +1,11 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import {UnitsDatabaseService} from '../services/units-db';
-import {Alliance, Unit /*Alliance*/} from '../types/unit';
+import {Alliance, Unit} from '../types/unit';
 import '../components/unit-image';
 import '../components/country-flag';
 import '../components/division-flag';
 import '../components/simple-chip';
 import '@vaadin/icon';
-import {DivisionsDatabaseService} from '../services/divisions-db';
-import {Division} from '../types/deck-builder';
 import {PatchUnitRecord} from '../types/PatchUnitRecord';
 import {RecordField} from '../types/RecordField';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
@@ -23,6 +20,7 @@ import {
 import {FirebaseService} from '../services/firebase';
 import "@vaadin/combo-box";
 import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 
 interface Diff {
   __old: unknown;
@@ -43,10 +41,6 @@ type AnyDiffArrayElement =
   | ArrayDiffAddedElement
   | ArrayDiffRemovedElement;
 
-type PatchedUnit = {
-  patchRecord: PatchUnitRecord;
-  divisions?: Division[];
-};
 
 type FirebasePatchRecord = {
   data: string;
@@ -136,6 +130,14 @@ export class PatchNotesRoute extends LitElement {
         border: 1px solid var(--lumo-contrast-20pct);
       }
 
+      division-flag {
+        width: 30px;
+      }
+
+      country-flag {
+        width: 30px;
+      }
+
       .unit-images {
         display: flex;
         flex-direction: row;
@@ -172,9 +174,9 @@ export class PatchNotesRoute extends LitElement {
 
   @state()
   patchNotes?: {
-    added: PatchedUnit[];
-    changed: PatchedUnit[];
-    removed: PatchedUnit[];
+    added: PatchUnitRecord[];
+    changed: PatchUnitRecord[];
+    removed: PatchUnitRecord[];
   };
 
   @state()
@@ -208,7 +210,7 @@ export class PatchNotesRoute extends LitElement {
   async setupPatch(firebasePatchRecord: FirebasePatchRecord) {
     const patchNotesJson = JSON.parse(firebasePatchRecord.data);
 
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
 
     if (!units) {
       return;
@@ -216,26 +218,14 @@ export class PatchNotesRoute extends LitElement {
 
     const unitMap: {[key: string]: Unit} = {};
 
-    const unitDivisionsMap: {[key: string]: Division[]} = {};
-
     for (const unit of units) {
       unitMap[unit.descriptorName] = unit;
-
-      const unitDivisions = await DivisionsDatabaseService.divisionsForUnit(
-        unit
-      );
-
-      if (unitDivisions) {
-        unitDivisionsMap[unit.descriptorName] = unitDivisions;
-      } else {
-        unitDivisionsMap[unit.descriptorName] = [];
-      }
     }
 
     const patchNotes: {
-      added: PatchedUnit[];
-      changed: PatchedUnit[];
-      removed: PatchedUnit[];
+      added: PatchUnitRecord[];
+      changed: PatchUnitRecord[];
+      removed: PatchUnitRecord[];
     } = {
       added: [],
       changed: [],
@@ -245,21 +235,20 @@ export class PatchNotesRoute extends LitElement {
     
     for (const patchNote of patchNotesJson) {
       const unit = unitMap[patchNote.descriptorName];
-      const divisions = unitDivisionsMap[patchNote.descriptorName];
 
       const patchUnitRecord = new PatchUnitRecord(patchNote, unit);
       if (patchNote.new) {
-        patchNotes.added.push({divisions, patchRecord: patchUnitRecord});
+        patchNotes.added.push(patchUnitRecord);
       } else if (patchNote.removed) {
-        patchNotes.removed.push({divisions, patchRecord: patchUnitRecord});
+        patchNotes.removed.push(patchUnitRecord);
       } else {
-        patchNotes.changed.push({divisions, patchRecord: patchUnitRecord});
+        patchNotes.changed.push(patchUnitRecord);
       }
     }
     
     // sort by patchNote.unit alliance
     patchNotes.added.sort((a) => {
-      return a.patchRecord.unitRecord.unit?.unitType.nationality ===
+      return a.unitRecord.unit?.unitType.nationality ===
         Alliance.NATO
         ? -1
         : 1;
@@ -276,13 +265,13 @@ export class PatchNotesRoute extends LitElement {
         }
       };
     
-      const allianceComparisonResult = allianceComparison(a.patchRecord.unitRecord.unit?.unitType.nationality) - allianceComparison(b.patchRecord.unitRecord.unit?.unitType.nationality);
+      const allianceComparisonResult = allianceComparison(a.unitRecord.unit?.unitType.nationality) - allianceComparison(b.unitRecord.unit?.unitType.nationality);
       if (allianceComparisonResult !== 0) {
         return allianceComparisonResult;
       }
     
-      const motherCountryA = a.patchRecord.unitRecord.unit?.unitType?.motherCountry;
-      const motherCountryB = b.patchRecord.unitRecord.unit?.unitType?.motherCountry;
+      const motherCountryA = a.unitRecord.unit?.unitType?.motherCountry;
+      const motherCountryB = b.unitRecord.unit?.unitType?.motherCountry;
     
       if (motherCountryA === motherCountryB) {
         return 0;
@@ -343,47 +332,47 @@ export class PatchNotesRoute extends LitElement {
     return html``;
   }
 
-  private renderPatchNote(patchNote: PatchedUnit) {
+  private renderPatchNote(patchNote: PatchUnitRecord) {
     return html` <div class="card">
       <div class="card-header">
         <a
-          href="/unit/${patchNote.patchRecord.unitRecord.descriptorName.getFieldValue()}"
+          href="/unit/${patchNote.unitRecord.descriptorName.getFieldValue()}"
         >
-          <h4>${patchNote.patchRecord.unitRecord.name.getFieldValue()}</h4>
+          <h4>${patchNote.unitRecord.name.getFieldValue()}</h4>
         </a>
-        ${patchNote.patchRecord.patch.new
+        ${patchNote.patch.new
           ? html`<simple-chip>New</simple-chip>`
           : ''}
       </div>
       <div class="unit-images">
-        <unit-image .unit=${patchNote.patchRecord.unitRecord.unit}></unit-image>
+        <unit-image .unit=${patchNote.unitRecord.unit}></unit-image>
         <div class="flags">
           <country-flag
-            .country=${patchNote.patchRecord.unitRecord.unit?.unitType
+            .country=${patchNote.unitRecord.unit?.unitType
               .motherCountry}
           ></country-flag>
           <div class="division-flags">
-            ${patchNote.divisions?.map((division) => {
+            ${patchNote.unitRecord.unit.divisions?.map((division) => {
               return html`<division-flag
-                .division=${division}
+                .divisionId=${division}
               ></division-flag>`;
             })}
           </div>
         </div>
       </div>
-      ${!patchNote.patchRecord.patch.new
+      ${!patchNote.patch.new
         ? html`${this.renderPatchNoteDiff(patchNote)}`
         : html``}
     </div>`;
   }
 
-  private renderPatchNoteDiff(patchNote: PatchedUnit) {
-    const unitFields = patchNote.patchRecord.unitRecord.getFields();
-    const weapons = patchNote.patchRecord.unitRecord.weaponRecords;
+  private renderPatchNoteDiff(patchNote: PatchUnitRecord) {
+    const unitFields = patchNote.unitRecord.getFields();
+    const weapons = patchNote.unitRecord.weaponRecords;
 
     const outputHtml: TemplateResult[] = [];
 
-    const diffForTraits = patchNote.patchRecord.patch.diff.specialities;
+    const diffForTraits = patchNote.patch.diff.specialities;
 
     if (isAnyDiffElementArray(diffForTraits)) {
 
@@ -395,7 +384,6 @@ export class PatchNotesRoute extends LitElement {
         }
 
         if (isArrayDiffRemovedElement(traitDiff)) {
-          console.log(traitDiff[1]);
           outputHtml.push(
             html`<div>Removed: ${getIconForTrait(traitDiff[1])}</div>`
           );
@@ -404,7 +392,7 @@ export class PatchNotesRoute extends LitElement {
     }
 
     for (const field of unitFields) {
-      const diffForField = patchNote.patchRecord.patch.diff[field.id];
+      const diffForField = patchNote.patch.diff[field.id];
       if (isDiff(diffForField)) {
         outputHtml.push(
           html` <div>
@@ -427,7 +415,7 @@ export class PatchNotesRoute extends LitElement {
     }
 
     for (let i = 0; i < weapons.length; i++) {
-      const weaponDiffRecord = patchNote.patchRecord.patch.diff?.weapons?.[i];
+      const weaponDiffRecord = patchNote.patch.diff?.weapons?.[i];
       const weaponRecord = weapons[i];
 
       if (isDiffElement(weaponDiffRecord)) {
@@ -436,7 +424,7 @@ export class PatchNotesRoute extends LitElement {
           html` <h4>${weaponRecord.weaponName.getFieldValue()}</h4> `
         );
         for (const field of weaponFields) {
-          const diffForWeapon = patchNote.patchRecord.patch.diff?.weapons?.[i];
+          const diffForWeapon = patchNote.patch.diff?.weapons?.[i];
           const diffFields = diffForWeapon[1];
           const diff = diffFields[field.id];
           if (isDiff(diff)) {

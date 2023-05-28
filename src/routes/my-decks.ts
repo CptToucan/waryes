@@ -12,9 +12,7 @@ import {
 } from 'firebase/firestore';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {DivisionsDatabaseService} from '../services/divisions-db';
 import {FirebaseService} from '../services/firebase';
-import {UnitsDatabaseService} from '../services/units-db';
 import {DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import '../components/deck-library/deck-list-item';
@@ -23,6 +21,7 @@ import {Router} from '@vaadin/router';
 import '@vaadin/confirm-dialog';
 import {ConfirmDialogOpenedChangedEvent} from '@vaadin/confirm-dialog';
 import {notificationService} from '../services/notification';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 
 const TOTAL_ALLOWED_DECKS = 60;
 
@@ -212,7 +211,7 @@ export class MyDecksRoute extends LitElement {
    * @returns A map of unit descriptors to unit objects
    */
   async fetchUnitMap() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -229,7 +228,7 @@ export class MyDecksRoute extends LitElement {
    * @returns A map of division descriptors to division objects
    */
   async fetchDivisionMap() {
-    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {
