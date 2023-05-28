@@ -81,7 +81,6 @@ export class RegisterRoute extends LitElement {
       if (!FirebaseService.auth) {
         throw new Error('Auth service is not initialised');
       }
-      console.log(email, password, displayName);
 
       const userCredential = await createUserWithEmailAndPassword(
         FirebaseService.auth,

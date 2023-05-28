@@ -2,7 +2,6 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/multi-select-combo-box';
 import {Tag, tags} from '../../types/tags';
-import {DivisionsDatabaseService} from '../../services/divisions-db';
 import {Division} from '../../types/deck-builder';
 import type {ComboBoxLitRenderer} from '@vaadin/combo-box/lit.js';
 import {comboBoxRenderer} from '@vaadin/combo-box/lit.js';
@@ -12,6 +11,7 @@ import '@vaadin/form-layout';
 import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 import {ComboBoxValueChangedEvent} from '@vaadin/combo-box';
 import {CheckboxCheckedChangedEvent} from '@vaadin/checkbox';
+import { BucketFolder, BundleManagerService } from '../../services/bundle-manager';
 
 @customElement('deck-filters')
 export class DeckFilters extends LitElement {
@@ -61,7 +61,7 @@ export class DeckFilters extends LitElement {
   }
 
   async getDivisions() {
-    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
     return divisions;
   }
 

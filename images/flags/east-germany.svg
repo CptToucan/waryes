@@ -1,37 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    height="48"
    width="80"
-   version="1.1"
-   id="svg338"
-   sodipodi:docname="east-germany.svg"
-   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs342" />
-  <sodipodi:namedview
-     id="namedview340"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     showgrid="false"
-     inkscape:zoom="4"
-     inkscape:cx="174"
-     inkscape:cy="65.75"
-     inkscape:window-width="3840"
-     inkscape:window-height="2080"
-     inkscape:window-x="2869"
-     inkscape:window-y="-11"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg338" />
+   xmlns:svg="http://www.w3.org/2000/svg"
+   >
   <path
      d="M 0,0 H 79.998919 V 47.999351 H 0 Z"
      id="path2"

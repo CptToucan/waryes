@@ -2,9 +2,9 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
 import {
-  UNIT_SEARCH_IGNORED_CHARACTERS,
-  UnitsDatabaseService,
-} from '../services/units-db';
+  BundleManagerService,
+  UNIT_SEARCH_IGNORED_CHARACTERS
+} from '../services/bundle-manager';
 import {
   ComboBoxFilterChangedEvent,
   ComboBoxSelectedItemChangedEvent,
@@ -60,7 +60,9 @@ export class UnitSearch extends LitElement {
     const filter = e.detail.value.replace(UNIT_SEARCH_IGNORED_CHARACTERS, '');
     if (filter) {
       this.filteredUnits =
-        this.units?.filter((u) => u._searchNameHelper.toLowerCase().includes(filter.toLowerCase())) ?? [];
+        this.units?.filter((u) =>
+          u._searchNameHelper.toLowerCase().includes(filter.toLowerCase())
+        ) ?? [];
     }
   }
 
@@ -98,7 +100,7 @@ export class UnitSearch extends LitElement {
   }
 
   async firstUpdated() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnits();
 
     if (units != null) {
       const sortedUnits = units
@@ -139,16 +141,21 @@ export class UnitSearch extends LitElement {
    * @returns
    */
   private renderer: ComboBoxLitRenderer<Unit> = (unit) => html`
-    <div class="unit-search-result">
-      <div class="unit-graphics">
-        <country-flag .country=${unit.unitType.motherCountry}></country-flag>
-        <div class="unit-image-wrapper">
-          <unit-image .unit=${unit}></unit-image>
+    <div style="display: flex; flex-direction: row;">
+      <div class="unit-search-result">
+        <div class="unit-graphics">
+          <country-flag .country=${unit.unitType.motherCountry}></country-flag>
+          <div class="unit-image-wrapper">
+            <unit-image .unit=${unit}></unit-image>
+          </div>
+        </div>
+
+        <div class="unit-information">
+          <div class="unit-name">${unit.name}</div>
         </div>
       </div>
-
-      <div class="unit-information">
-        <div class="unit-name">${unit.name}</div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1 1 100%; padding-left: var(--lumo-space-xs);">
+        <mod-image style="height: 10px;" .mod=${unit.mod}></mod-image>
       </div>
     </div>
   `;

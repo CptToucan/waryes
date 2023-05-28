@@ -33,6 +33,7 @@ export class DeckTitle extends LitElement {
         display: flex;
         flex-direction: row;
         gap: var(--lumo-space-s);
+        align-items: center;
       }
 
       .flags > * {

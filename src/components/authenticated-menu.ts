@@ -43,20 +43,25 @@ type MenuDefinition = {
 const defaultMenu: MenuDefinition = {
   user: [
     {
-      name: 'Units',
+      name: 'Home',
+      icon: 'vaadin:home',
+      href: '/',
+    },
+    {
+      name: 'Database',
       items: [
         {
-          name: 'Search',
-          icon: 'vaadin:search',
-          href: '/',
-        },
-        {
-          name: 'Database',
-          icon: 'vaadin:table',
+          name: 'Units',
+          icon: 'waryes:soldier',
           href: '/units',
         },
         {
-          name: 'Comparison',
+          name: 'Weapons',
+          icon: 'waryes:gun',
+          href: '/weapons',
+        },
+        {
+          name: 'Unit Comparison',
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },
@@ -101,6 +106,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Information',
       items: [
         {
+          name: 'Warno Patch Notes',
+          icon: 'vaadin:info-circle',
+          href: '/patch-notes',
+        },
+        {
           name: 'Discord',
           icon: 'vaadin:comments',
           href: 'https://discord.gg/gqBgvgGj8H',
@@ -115,20 +125,25 @@ const defaultMenu: MenuDefinition = {
   ],
   guest: [
     {
-      name: 'Units',
+      name: 'Home',
+      icon: 'vaadin:home',
+      href: '/',
+    },
+    {
+      name: 'Database',
       items: [
         {
-          name: 'Search',
-          icon: 'vaadin:search',
-          href: '/',
-        },
-        {
-          name: 'Database',
-          icon: 'vaadin:table',
+          name: 'Units',
+          icon: 'waryes:soldier',
           href: '/units',
         },
         {
-          name: 'Comparison',
+          name: 'Weapons',
+          icon: 'waryes:gun',
+          href: '/weapons',
+        },
+        {
+          name: 'Unit Comparison',
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },
@@ -167,6 +182,11 @@ const defaultMenu: MenuDefinition = {
     {
       name: 'Information',
       items: [
+        {
+          name: 'Game Patch Notes',
+          icon: 'vaadin:info-circle',
+          href: '/patch-notes',
+        },
         {
           name: 'Login',
           icon: 'vaadin:sign-in',

@@ -1,6 +1,7 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
+import Belgium from '../../images/flags/belgium.svg';
 import EastGermany from '../../images/flags/east-germany.svg';
 import France from '../../images/flags/france.svg';
 import SovietUnion from '../../images/flags/soviet-union.svg';
@@ -18,10 +19,11 @@ export class CountryFlag extends LitElement {
         align-items: center;
         justify-content: center;
         width: 40px;
+        max-height: 24px;
       }
 
       img {
-        width: 100%
+        width: 100%;
       }
     `;
   }
@@ -32,6 +34,9 @@ export class CountryFlag extends LitElement {
   render(): TemplateResult {
     let image = '';
     switch (this.country) {
+      case Country.BEL:
+        image = Belgium;
+        break;
       case Country.DDR:
         image = EastGermany;
         break;

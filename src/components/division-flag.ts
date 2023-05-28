@@ -20,6 +20,7 @@ import ICON_RDA_KDA from '../../images/divisions/kda.png';
 import ICON_RFA_TKS from '../../images/divisions/tks.png';
 import ICON_DDR_UZ from '../../images/divisions/unt-zen.png';
 import { Division } from '../types/deck-builder';
+import { getDescriptorWithoutMod } from '../utils/get-descriptor-without-mod';
 
 const ICONS_DIVISION_MAP: {[key: string]: any} = {
     'Descriptor_Deck_Division_RDA_7_Panzer_multi': ICON_DDR_7_MOT,
@@ -62,9 +63,23 @@ export class DivisionFlag extends LitElement {
   @property()
   division?: Division
 
+  divisionId?: string
+
   render(): TemplateResult {
-    const icon = this.division?.descriptor ? ICONS_DIVISION_MAP[this.division.descriptor] : '';
-    const displayName = this.division?.name ?? this.division?.descriptor ?? 'invalid division'
+    let icon;
+    let displayName;
+    if (this.divisionId) {
+      const divisionId = getDescriptorWithoutMod(this.divisionId);
+      icon = ICONS_DIVISION_MAP[divisionId];
+      displayName = divisionId;
+    }
+
+    if(this.division) {
+      const divisionDescriptor = getDescriptorWithoutMod(this.division.descriptor);
+      icon = divisionDescriptor ? ICONS_DIVISION_MAP[divisionDescriptor] : '';
+      displayName = this.division?.name ?? this.division?.descriptor ?? 'invalid division'
+    }
+
     return html`<img src=${icon} alt=${ displayName } title=${displayName} />`;
   }
 }

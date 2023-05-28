@@ -15,6 +15,8 @@ import "./routes/index";
 import "./routes/register";
 import "./routes/login";
 import "./routes/units";
+import "./routes/weapons";
+import "./routes/weapon-view";
 import "./routes/unit-view";
 import "./routes/comparison"
 import "./routes/deck-builder"
@@ -26,6 +28,7 @@ import "./routes/privacy-policy";
 import "./routes/user-settings";
 import "./routes/my-decks";
 import "./routes/division-analysis";
+import "./routes/patch-notes";
 
 /** Components */
 import "./components/unit-card";

@@ -6,7 +6,9 @@ const router = new Router(document.getElementById('main'));
 const routes: Route[] = [
   {path: '/', component: 'index-route'},
   {path: '/units', component: 'units-route'},
+  {path: '/weapons', component: 'weapons-route'},
   {path: '/unit/:unitId', component: 'unit-view-route'},
+  {path: '/weapon/:weaponId', component: 'weapon-view-route'},
   {path: '/deck/:deckId', component: 'deck-view-route'},
   {path: '/comparison', component: 'comparison-route'},
   {path: '/deck-builder', component: 'deck-builder-route'},
@@ -18,6 +20,7 @@ const routes: Route[] = [
   {path: '/user-settings', component: 'user-settings-route'},
   {path: '/my-decks', component: 'my-decks-route'},
   {path: '/division-analysis', component: 'division-analysis-route'},
+  {path: '/patch-notes', component: 'patch-notes-route'},
 ];
 
 // Features.firebase_auth routes
