@@ -48,15 +48,20 @@ const defaultMenu: MenuDefinition = {
       href: '/',
     },
     {
-      name: 'Units',
+      name: 'Database',
       items: [
         {
-          name: 'Database',
-          icon: 'vaadin:table',
+          name: 'Units',
+          icon: 'waryes:soldier',
           href: '/units',
         },
         {
-          name: 'Comparison',
+          name: 'Weapons',
+          icon: 'waryes:gun',
+          href: '/weapons',
+        },
+        {
+          name: 'Unit Comparison',
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },
@@ -115,16 +120,20 @@ const defaultMenu: MenuDefinition = {
       href: '/',
     },
     {
-      name: 'Units',
+      name: 'Database',
       items: [
-
         {
-          name: 'Database',
-          icon: 'vaadin:table',
+          name: 'Units',
+          icon: 'waryes:soldier',
           href: '/units',
         },
         {
-          name: 'Comparison',
+          name: 'Weapons',
+          icon: 'waryes:gun',
+          href: '/weapons',
+        },
+        {
+          name: 'Unit Comparison',
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },

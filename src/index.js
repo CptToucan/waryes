@@ -15,6 +15,8 @@ import "./routes/index";
 import "./routes/register";
 import "./routes/login";
 import "./routes/units";
+import "./routes/weapons";
+import "./routes/weapon-view";
 import "./routes/unit-view";
 import "./routes/comparison"
 import "./routes/deck-builder"

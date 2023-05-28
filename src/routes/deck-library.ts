@@ -19,11 +19,10 @@ import {FirebaseService} from '../services/firebase';
 import {Country, Division, DivisionsMap} from '../types/deck-builder';
 import '../components/deck-library/deck-list-item';
 import {UnitMap} from '../types/unit';
-import {UnitsDatabaseService} from '../services/units-db';
-import {DivisionsDatabaseService} from '../services/divisions-db';
 import {dialogRenderer} from '@vaadin/dialog/lit.js';
 import '../components/deck-library/deck-filters';
 import '../components/pagination-controls';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 
 interface PageReference {
   first: DocumentData | null;
@@ -196,7 +195,7 @@ export class DeckLibraryRoute extends LitElement {
    * @returns A map of unit descriptors to unit objects
    */
   async fetchUnitMap() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -213,7 +212,7 @@ export class DeckLibraryRoute extends LitElement {
    * @returns A map of division descriptors to division objects
    */
   async fetchDivisionMap() {
-    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {

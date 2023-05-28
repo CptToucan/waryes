@@ -7,7 +7,7 @@ import {displaySpeed} from '../utils/unit-stats/display-speed';
 import {displayDistance} from '../utils/unit-stats/display-distance';
 import {displayFuel} from '../utils/unit-stats/display-fuel';
 import {displayTime} from '../utils/unit-stats/display-time';
-import { displayEcm } from '../utils/unit-stats/display-ecm';
+import {displayEcm} from '../utils/unit-stats/display-ecm';
 
 interface PanelItem {
   display: string;
@@ -45,6 +45,16 @@ export class UnitInfoPanelView extends LitElement {
 
       .stat:not(:last-child) {
         border-right: 1px dotted var(--lumo-contrast-30pct);
+      }
+
+      .divisions {
+        display: flex;
+        flex-direction: row;
+        padding-top: var(--lumo-space-xs);
+        gap: var(--lumo-space-xs);
+        justify-content: center;
+        width: 100%;
+
       }
     `;
   }
@@ -95,7 +105,9 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Speed', value: displaySpeed(unit.speed)},
         {
           display: 'Forest Spd.',
-          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed),
+          value: displaySpeed(
+            unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed
+          ),
         },
         {display: 'Road Speed', value: displaySpeed(unit.roadSpeed)},
       ],
@@ -133,17 +145,23 @@ export class UnitInfoPanelView extends LitElement {
       [
         {
           display: 'Forest Spd.',
-          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed),
+          value: displaySpeed(
+            unit.speedsForTerrains.find((t) => t.name === 'forest')?.speed
+          ),
         },
         {
           display: 'Building Spd.',
-          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'building')?.speed),
+          value: displaySpeed(
+            unit.speedsForTerrains.find((t) => t.name === 'building')?.speed
+          ),
         },
         {
           display: 'Ruins Spd.',
-          value: displaySpeed(unit.speedsForTerrains.find((t) => t.name === 'ruins')?.speed),
+          value: displaySpeed(
+            unit.speedsForTerrains.find((t) => t.name === 'ruins')?.speed
+          ),
         },
-      ]
+      ],
     ];
   }
 
@@ -194,9 +212,7 @@ export class UnitInfoPanelView extends LitElement {
         },
         {display: 'Supply', value: unit.supply},
       ],
-      [
-        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
-      ]
+      [{display: 'Turn Time', value: displayTime(unit.rotationTime)}],
     ];
   }
 
@@ -241,7 +257,7 @@ export class UnitInfoPanelView extends LitElement {
         {
           display: 'Bomb Strategy',
           value: unit.bombStrategy || 'None',
-        }
+        },
       ],
     ];
   }
@@ -260,9 +276,12 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Fuel', value: displayFuel(unit.fuel)},
-        {display: 'Adv. Deploy', value: displayDistance(unit.advancedDeployment)},
+        {
+          display: 'Adv. Deploy',
+          value: displayDistance(unit.advancedDeployment),
+        },
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
-      ]
+      ],
     ];
   }
 
@@ -287,7 +306,12 @@ export class UnitInfoPanelView extends LitElement {
           this.unit.infoPanelType,
           this.unit
         );
-        return this.renderPanelDisplay(panelLayout);
+        return html`${this.renderPanelDisplay(panelLayout)}
+        <div class="divisions">
+        ${this.unit?.divisions.map(
+          (divisionId: string) =>
+            html`<division-flag .divisionId=${divisionId}></division-flag>`
+        )}</div> `;
       }
 
       return html`?`;

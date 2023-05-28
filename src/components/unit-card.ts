@@ -55,6 +55,11 @@ export class UnitCard extends LitElement {
         display: flex;
         justify-content: center;
       }
+
+      .border-radius {
+        border-radius: var(--lumo-border-radius-m);
+        overflow: hidden;
+      }
     `;
   }
 
@@ -73,7 +78,7 @@ export class UnitCard extends LitElement {
   render(): TemplateResult {
     return html` <div class="unit-card">
       <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${this.changeMode}></unit-card-header-view>
-      ${this.showImage ? html`<div class="image-container"><unit-image .unit=${this.unit}></unit-image></div>` : html``}
+      ${this.showImage ? html`<div class="image-container"><div class="border-radius"><unit-image .unit=${this.unit}></unit-image></div></div>` : html``}
       <unit-armor-view .unit=${this.unit}></unit-armor-view>
       <unit-weapon-view
         style="max-width: 100%"

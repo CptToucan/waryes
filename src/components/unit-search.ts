@@ -2,9 +2,9 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
 import {
-  UNIT_SEARCH_IGNORED_CHARACTERS,
-  UnitsDatabaseService,
-} from '../services/units-db';
+  BundleManagerService,
+  UNIT_SEARCH_IGNORED_CHARACTERS
+} from '../services/bundle-manager';
 import {
   ComboBoxFilterChangedEvent,
   ComboBoxSelectedItemChangedEvent,
@@ -100,7 +100,7 @@ export class UnitSearch extends LitElement {
   }
 
   async firstUpdated() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnits();
 
     if (units != null) {
       const sortedUnits = units

@@ -10,7 +10,6 @@ import '@vaadin/icon';
 import '@vaadin/icons';
 import '@vaadin/tabs';
 import '../components/notification-manager';
-import { NotificationController } from '../controllers/notification';
 import '../components/authenticated-menu';
 
 @customElement('application-route')
@@ -18,10 +17,6 @@ export class Application extends LitElement {
 
   firebase: FirebaseServiceClass = FirebaseService;
   
-  registeredNotification(event: CustomEvent) {
-    const controller: NotificationController = event.detail.value;
-    console.log(controller);
-  }
 
   /**
    * loggedInUser states:
