@@ -11,6 +11,7 @@ enum UnitCategory {
 }
 
 enum Country {
+  BEL = "BEL",
   FR = "FR",
   UK = "UK",
   RFA = "RFA",

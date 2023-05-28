@@ -2,18 +2,26 @@ import {css, html, LitElement, TemplateResult /*, unsafeCSS*/} from 'lit';
 import {customElement} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
-// import BackgroundImage from '../../images/home-background.png';
+// @ts-ignore
+import WarnoImage from '../../images/warno.png';
+// @ts-ignore
+import FragoImage from '../../images/frago-transparent.png';
+// @ts-ignore
+import WarnoLetLooseImage from '../../images/warno-let-loose-transparent.png';
 import '@vaadin/multi-select-combo-box';
 import '@vaadin/combo-box';
+import '@vaadin/checkbox-group';
+import '@vaadin/checkbox';
+import '../components/mod-image';
+
 import '../components/unit-search';
 import {Unit} from '../types/unit';
 import {Router} from '@vaadin/router';
+import '../components/mod-selector';
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {
   static get styles() {
-    // const backgroundImage = unsafeCSS(`"url(${BackgroundImage})"`);
-
     return css`
       :host {
         height: 100%;
@@ -33,13 +41,12 @@ export class IndexRoute extends LitElement {
       }
 
       .search {
-        padding-top: var(--lumo-space-xl);
         align-self: stretch;
         display: flex;
         justify-content: center;
         align-items: center;
-        padding-left: var(--lumo-space-xl);
-        padding-right: var(--lumo-space-xl);
+        padding-left: var(--lumo-space-xs);
+        padding-right: var(--lumo-space-xs);
       }
 
       unit-search {
@@ -140,48 +147,68 @@ export class IndexRoute extends LitElement {
     }
   }
 
+  renderChoiceButton(
+    href: string,
+    icon: string,
+    headline: string,
+    description: string,
+    disabled = false
+  ) {
+    return html` <a
+      class="choice-button ${disabled ? 'disabled' : ''}"
+      href="${href}"
+    >
+      <div class="headline">
+        <vaadin-icon icon="${icon}"></vaadin-icon>
+        <h2>${headline}</h2>
+      </div>
+
+      <span>${description}</span>
+    </a>`;
+  }
+
   renderSelectOrImportChoice() {
+    const choices = [
+      this.renderChoiceButton(
+        '/deck-import',
+        'vaadin:code',
+        'Import',
+        'Got a deck code? Import it here and start editing.'
+      ),
+      this.renderChoiceButton(
+        '/deck-builder',
+        'vaadin:tools',
+        'Build',
+        'Build a deck from scratch.'
+      ),
+      this.renderChoiceButton(
+        '/deck-library',
+        'vaadin:book',
+        'Browse',
+        'Browse decks from the community.'
+      ),
+      this.renderChoiceButton(
+        '/units',
+        'vaadin:table',
+        'Explore',
+        'Inspect the armoury.'
+      ),
+      this.renderChoiceButton(
+        '/comparison',
+        'vaadin:pie-bar-chart',
+        'Compare',
+        'Compare units and analyse.'
+      ),
+      this.renderChoiceButton(
+        '/patch-notes',
+        'vaadin:clipboard-text',
+        'Patch Notes',
+        "See what's new in the latest patch."
+      ),
+    ];
+
     return html` <div class="container menu-buttons button-grid">
-      <a class="choice-button" href="/deck-import">
-        <div class="headline">
-          <vaadin-icon icon="vaadin:code"></vaadin-icon>
-          <h2>Import</h2>
-        </div>
-
-        <span>Got a deck code? Import it here and start editing.</span>
-      </a>
-
-      <a class="choice-button" href="/deck-builder">
-        <div class="headline">
-          <vaadin-icon icon="vaadin:tools"></vaadin-icon>
-          <h2>Build</h2>
-        </div>
-        <span>Build a deck from scratch.</span>
-      </a>
-
-      <a class="choice-button" href="/deck-library">
-        <div class="headline">
-          <vaadin-icon icon="vaadin:book"></vaadin-icon>
-          <h2>Browse</h2>
-        </div>
-        <span>Have a look around the deck library.</span>
-      </a>
-
-      <a class="choice-button" href="/units">
-        <div class="headline">
-          <vaadin-icon icon="vaadin:table"></vaadin-icon>
-          <h2>Explore</h2>
-        </div>
-        <span>Inspect the armoury.</span>
-      </a>
-
-      <a class="choice-button" href="/comparison">
-        <div class="headline">
-          <vaadin-icon icon="vaadin:pie-bar-chart"></vaadin-icon>
-          <h2>Compare</h2>
-        </div>
-        <span>Compare units and analyse.</span>
-      </a>
+      ${choices}
     </div>`;
   }
 
@@ -191,8 +218,13 @@ export class IndexRoute extends LitElement {
         <div class="container">
           <div class="splash">
             <img height="86" src=${WaryesImage} />
-            <div class="search">
-              <unit-search @unit-selected=${this.unitSelected}></unit-search>
+
+            <div>
+              <mod-selector></mod-selector>
+
+              <div class="search">
+                <unit-search @unit-selected=${this.unitSelected}></unit-search>
+              </div>
             </div>
           </div>
         </div>

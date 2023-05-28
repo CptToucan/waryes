@@ -90,6 +90,12 @@ export class IndividualWeaponView extends LitElement {
         margin-top: var(--lumo-space-xs);
         text-decoration: underline;
       }
+
+      .weapon-image-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     `;
   }
 
@@ -299,7 +305,7 @@ export class IndividualWeaponView extends LitElement {
 
       return html`
         ${this.renderWeaponTraits(weapon.traits)}
-        ${this.renderWeaponLayout(layout)}
+        ${this.renderWeaponImage(weapon)} ${this.renderWeaponLayout(layout)}
       `;
     }
 
@@ -315,6 +321,12 @@ export class IndividualWeaponView extends LitElement {
           </div>`
       )}
     </div>`;
+  }
+
+  renderWeaponImage(weapon: Weapon) {
+    return html` <a class="weapon-image-container" href="/weapon/${weapon.ammoDescriptorName}">
+      <weapon-image .weapon=${weapon}></weapon-image>
+  </a>`;
   }
 
   renderWeaponStat(stat: WeaponStat) {
@@ -436,6 +448,16 @@ export class IndividualWeaponView extends LitElement {
 
       const option = {
         legend: {show: true, data: legend, right: 0},
+        tooltip: {
+          trigger: 'axis',
+          formatter: (params: Object | Array<unknown>) => {
+            const param = params as Array<{value: Array<number>, seriesName: string}>;
+            const distance = param[0].value[0];
+            const accuracy = param[0].value[1];
+            return `${param[0].seriesName}: ${accuracy}% at ${distance}m`;
+          }
+
+        },
         xAxis: {
           type: 'value',
           axisLine: {

@@ -37,7 +37,7 @@ module.exports = {
   plugins: [
     new NodePolyfillPlugin(),
     new HtmlWebpackPlugin({template: './src/index.html', hash: true, publicPath: '/'}),
-    new CopyPlugin({patterns: [{from: "site-meta", to: "."}, {from: "images/units", to: "images/units/"}]}),
+    new CopyPlugin({patterns: [{from: "site-meta", to: "."}, {from: "images/units", to: "images/units/"}, {from: "images/weapons", to: "images/weapons/"}]}),
 
   ],
 };

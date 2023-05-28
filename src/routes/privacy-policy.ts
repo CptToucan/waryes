@@ -58,7 +58,7 @@ export class PrivacyPolicyRoute extends LitElement {
         <p>We don't collect any non-personal identification information.</p>
         <h2>Web browser cookies</h2>
 
-        <p>WarYes does not use cookies.</p>
+        <p>WarYes uses your browser's local storage to save the mod databases that you are browsing the site with.</p>
         <h2>How we use collected information</h2>
 
         WarYes may collect and use Users' personal information for the following
@@ -154,7 +154,7 @@ export class PrivacyPolicyRoute extends LitElement {
           this site, or your dealings with this site, please contact us at
           support@war-yes.com.
         </p>
-        <p>This document was last updated on April 10, 2023.</p>
+        <p>This document was last updated on May 20, 2023.</p>
       </div>
     `;
   }

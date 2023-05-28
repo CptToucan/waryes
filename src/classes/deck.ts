@@ -513,7 +513,8 @@ export class Deck {
     // Convert decoded cards into this objects internal structure
     for (const card of deckStringDeck.cards) {
       if (!card.unit.descriptor) {
-        throw new Error('Decoded invalid unit card descriptor');
+        break;
+        // throw new Error('Decoded invalid unit card descriptor');
       }
       const pack = builtDeck.division.packs.find((divisionPack) => {
         return divisionPack.unitDescriptor === card.unit.descriptor;
@@ -523,9 +524,13 @@ export class Deck {
       // that we would rather error out than have an incomplete deck that does not
       // represent the deck code.
       if (!pack) {
-        throw new Error(
+        break;
+        
+        /*throw new Error(
           'Decoded pack could not find pack for: ' + card.unit.descriptor
         );
+        */
+        
       }
 
       const transport = pack.availableTransportList?.find((transport) => {

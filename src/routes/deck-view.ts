@@ -1,8 +1,6 @@
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {UnitsDatabaseService} from '../services/units-db';
-import {DivisionsDatabaseService} from '../services/divisions-db';
 import {DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {
@@ -26,6 +24,7 @@ import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
 import '../components/intel-report';
 import '@vaadin/tabs';
 import {TabsSelectedChangedEvent} from '@vaadin/tabs';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 
 @customElement('deck-view-route')
 export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
@@ -238,7 +237,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async fetchUnitMap() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -251,7 +250,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async fetchDivisionMap() {
-    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {

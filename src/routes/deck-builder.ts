@@ -2,18 +2,17 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import '../components/deck/edit-deck';
 import '@vaadin/scroller';
-import {UnitsDatabaseService} from '../services/units-db';
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
 // import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
 import {getAllianceNameFromDescriptor} from '../utils/get-alliance-name-from-descriptor';
 import {Division, DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
-import {DivisionsDatabaseService} from '../services/divisions-db';
 import '../components/country-flag';
 import '../components/division-flag';
 import '../components/deck/summary-view';
 import {notificationService} from '../services/notification';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
@@ -219,7 +218,7 @@ export class DeckBuilderRoute
   }
 
   async fetchUnitMap() {
-    const units = await UnitsDatabaseService.fetchUnits();
+    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -232,7 +231,7 @@ export class DeckBuilderRoute
   }
 
   async fetchDivisionMap() {
-    const divisions = await DivisionsDatabaseService.fetchDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {
