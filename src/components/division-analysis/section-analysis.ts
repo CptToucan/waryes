@@ -6,9 +6,10 @@ import {
   property,
   state,
 } from 'lit-element';
-import {UnitAnalysisGroup} from './division-analysis';
 import './progress-bar';
 import {humanize} from '../../utils/humanize';
+import '@vaadin/icon';
+import {DivisionCategoryAnalysis} from './division-analysis';
 
 @customElement('section-analysis')
 export class SectionAnalysis extends LitElement {
@@ -26,11 +27,19 @@ export class SectionAnalysis extends LitElement {
         gap: var(--lumo-space-s);
       }
 
+      .analysis-title-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .analysis-sub-section {
+        align-items: flex-end;
+      }
+
       .analysis-title-section,
       .analysis-sub-section {
         display: flex;
         gap: var(--lumo-space-m);
-        align-items: flex-end;
       }
 
       .expandable {
@@ -52,8 +61,8 @@ export class SectionAnalysis extends LitElement {
       }
 
       .analysis-section vaadin-icon {
-        width: 48px;
-        height: 48px;
+        width: 32px;
+        height: 32px;
       }
 
       .analysis-section .progress-bar-container {
@@ -106,7 +115,7 @@ export class SectionAnalysis extends LitElement {
   }
 
   @property()
-  analysis?: UnitAnalysisGroup;
+  analysis?: DivisionCategoryAnalysis;
 
   @property()
   icon?: string;
@@ -117,6 +126,9 @@ export class SectionAnalysis extends LitElement {
   @property()
   sectionTitle?: string;
 
+  @property()
+  average?: number;
+
   render() {
     if (!this.analysis) {
       return html``;
@@ -124,12 +136,15 @@ export class SectionAnalysis extends LitElement {
 
     let averageValue = 0;
 
-    for (const [, value] of Object.entries(this.analysis)) {
-      averageValue += value;
+    if (this.average !== undefined) {
+      averageValue = this.average;
+    } else {
+      for (const [, value] of Object.entries(this.analysis)) {
+        averageValue += Number(value);
+      }
+
+      averageValue = averageValue / Object.keys(this.analysis).length;
     }
-
-    averageValue = averageValue / Object.keys(this.analysis).length;
-
     // fix average value to 0.5 increments and show with 1 decimal place
 
     const averageDisplay = (Math.round(averageValue * 2) / 2).toFixed(1);
@@ -141,7 +156,7 @@ export class SectionAnalysis extends LitElement {
           class="${this.opened ? 'open' : ''}"
           @click=${() => (this.opened = !this.opened)}
         >
-          <vaadin-icon icon="${this.icon}"></vaadin-icon>
+          <vaadin-icon .icon="${this.icon}"></vaadin-icon>
         </button>
 
         <div class="progress-bar-container">

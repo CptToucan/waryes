@@ -33,7 +33,7 @@ export class IndexRoute extends LitElement {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin-bottom: var(--lumo-space-xl);
+        margin-bottom: var(--lumo-space-m);
       }
 
       h2 {
@@ -82,9 +82,23 @@ export class IndexRoute extends LitElement {
 
       .button-grid {
         display: grid;
-        padding: var(--lumo-space-s);
+        padding-left: var(--lumo-space-l);
+        padding-right: var(--lumo-space-l);
+        padding-top: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-s);
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: var(--lumo-space-xs);
+        // align grid in center
+        justify-content: center;
+        max-width: 900px;
+        overflow: hidden;
+        width: 100%;
+      }
+
+      .button-category {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
       a.choice-button {
@@ -97,8 +111,7 @@ export class IndexRoute extends LitElement {
         flex-direction: column;
         color: var(--lumo-contrast-80pct);
         border: 2px solid transparent;
-        flex: 1 1 0;
-        font-size: var(--lumo-font-size-l);
+        font-size: var(--lumo-font-size-m);
         height: var(--lumo-size-xxl);
         text-align: center;
         text-decoration: none;
@@ -138,6 +151,10 @@ export class IndexRoute extends LitElement {
       a:focus {
         border: 2px solid var(--lumo-primary-color-50pct);
       }
+
+      h3 {
+        margin: 0;
+      }
     `;
   }
 
@@ -168,7 +185,28 @@ export class IndexRoute extends LitElement {
   }
 
   renderSelectOrImportChoice() {
-    const choices = [
+    const browseChoices = [
+      this.renderChoiceButton(
+        '/units',
+        'waryes:soldier',
+        'Units',
+        'Look around the barracks.'
+      ),
+      this.renderChoiceButton(
+        '/weapons',
+        'waryes:gun',
+        'Weapons',
+        "Lock'n'load."
+      ),
+      this.renderChoiceButton(
+        '/comparison',
+        'vaadin:pie-bar-chart',
+        'Compare',
+        'Compare units and analyse.'
+      ),
+    ];
+
+    const deckChoices = [
       this.renderChoiceButton(
         '/deck-import',
         'vaadin:code',
@@ -187,29 +225,37 @@ export class IndexRoute extends LitElement {
         'Browse',
         'Browse decks from the community.'
       ),
-      this.renderChoiceButton(
-        '/units',
-        'vaadin:table',
-        'Explore',
-        'Inspect the armoury.'
-      ),
-      this.renderChoiceButton(
-        '/comparison',
-        'vaadin:pie-bar-chart',
-        'Compare',
-        'Compare units and analyse.'
-      ),
+    ];
+
+    const inspectChoices = [
       this.renderChoiceButton(
         '/patch-notes',
         'vaadin:clipboard-text',
         'Patch Notes',
         "See what's new in the latest patch."
       ),
+      this.renderChoiceButton(
+        '/division-analysis',
+        'vaadin:chart',
+        'Division Analysis',
+        'How do the Pros rate the divisions?'
+      ),
     ];
 
-    return html` <div class="container menu-buttons button-grid">
-      ${choices}
-    </div>`;
+    return html`
+      <div class="button-category">
+        <h3>Browse</h3>
+        <div class="container menu-buttons button-grid">${browseChoices}</div>
+      </div>
+      <div class="button-category">
+        <h3>Deck</h3>
+        <div class="container menu-buttons button-grid">${deckChoices}</div>
+      </div>
+      <div class="button-category">
+        <h3>Inspect</h3>
+        <div class="container menu-buttons button-grid">${inspectChoices}</div>
+      </div>
+    `;
   }
 
   render(): TemplateResult {
