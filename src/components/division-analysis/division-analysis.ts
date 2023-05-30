@@ -4,251 +4,257 @@ import {
   css,
   customElement,
   TemplateResult,
+  property,
 } from 'lit-element';
 
 import './section-analysis';
 import './division-trait';
-import "../division-flag";
+import '../division-flag';
 
-export type UnitAnalysisGroup =
-  | LogisticalAnalysis
-  | ReconAnalysis
-  | InfantryAnalysis
-  | ATAnalysis
-  | TankAnalysis
-  | ArtilleryAnalysis
-  | AntiAirAnalysis
-  | AirAnalysis
-  | HelicopterAnalysis;
-
-interface LogisticalAnalysis {
-  slotAvailabilityAndPrice: number;
-  CMD: number;
-  Supply: number;
+export interface DivisionAnalysis {
+  descriptor: string;
+  aa_antiHelicopter: number;
+  aa_antiPlane: number;
+  aa_spaag: number;
+  air_armouredCAS: number;
+  air_asf: number;
+  air_bomber: number;
+  air_rocket: number;
+  air_sead: number;
+  artillery_heavy: number;
+  artillery_mortar: number;
+  artillery_rocket: number;
+  atgm: number;
+  general_field: number;
+  general_forest: number;
+  general_opener: number;
+  general_urban: number;
+  helicopter_antiAir: number;
+  helicopter_antiPersonnel: number;
+  helicopter_antiTank: number;
+  infantry_antiPersonnel: number;
+  infantry_antiTank: number;
+  infantry_cost: number;
+  infantry_transport: number;
+  logistics_cmd: number;
+  logistics_slotAvailability: number;
+  logistics_supply: number;
+  recon_helicopter: number;
+  recon_optics: number;
+  recon_stealth: number;
+  tank_heavy: number;
+  tank_light: number;
+  tank_medium: number;
 }
 
-interface GeneralAnalysis {
-  opener: number;
-  forest: number;
-  urban: number;
-  field: number;
+export interface DivisionCategoryAnalysis {
+  [key: string]: number;
 }
 
-interface ReconAnalysis {
-  optics: number;
-  stealth: number;
-  helicopter: number;
-}
-
-interface InfantryAnalysis {
-  antiPersonnel: number;
-  antiTank: number;
-  transport: number;
-  cost: number;
-}
-
-interface ATAnalysis {
-  AT_Rocket: number;
-  range: number;
-}
-
-interface TankAnalysis {
-  light: number;
-  medium: number;
-  heavy: number;
-}
-
-interface ArtilleryAnalysis {
-  mortar: number;
-  heavy: number;
-  rocket: number;
-}
-
-interface AntiAirAnalysis {
-  antiHelicopter: number;
-  antiPlane: number;
-  spaag: number;
-}
-
-interface AirAnalysis {
-  armoredCAS: number;
-  AT: number;
-  ASF: number;
-  SEAD: number;
-  bomber: number;
-  rocket: number;
-}
-
-interface HelicopterAnalysis {
-  antiPersonnel: number;
-  antiTank: number;
-  antiAir: number;
-}
-
-interface AllDivisionAnalysis {
-  general: GeneralAnalysis;
-  logistical: LogisticalAnalysis;
-  recon: ReconAnalysis;
-  infantry: InfantryAnalysis;
-  at: ATAnalysis;
-  tank: TankAnalysis;
-  artillery: ArtilleryAnalysis;
-  antiAir: AntiAirAnalysis;
-  air: AirAnalysis;
-  helicopter: HelicopterAnalysis;
-}
-
-@customElement('division-analysis')
-export class DivisionAnalysis extends LitElement {
+@customElement('division-analysis-display')
+export class DivisionAnalysisDisplay extends LitElement {
   static get styles() {
     return css`
       .division-analysis {
         display: flex;
+        display: flex;
+        flex-direction: column;
       }
 
       .division-traits {
         display: flex;
         flex-direction: column;
       }
+
+      .division-sections {
+      }
+
+      .title {
+        display: flex;
+        flex-direction: row;
+        gap: var(--lumo-space-s);
+        align-items: center;
+      }
+
+      division-flag {
+        height: 96px;
+        width: 96px;
+      }
+
+      .title > h3 {
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: var(--lumo-font-size-l);
+      }
     `;
   }
 
-  render(): TemplateResult {
-    // using a random number between 0 and 10 in increments of 0.5 to simulate the data
+  @property()
+  divisionName: string | null = null;
 
-    const divisionAnalysis: AllDivisionAnalysis = {
-      general: {
-        opener: 6.5,
-        forest: 5,
-        urban: 4,
-        field: 7,
-      },
-      logistical: {
-        slotAvailabilityAndPrice: 6,
-        CMD: 5,
-        Supply: 4,
-      },
-      recon: {
-        optics: 6,
-        stealth: 5,
-        helicopter: 4,
-      },
-      infantry: {
-        antiPersonnel: 6,
-        antiTank: 5,
-        transport: 4,
-        cost: 3,
-      },
-      at: {
-        AT_Rocket: 4,
-        range: 2,
-      },
-      tank: {
-        light: 5,
-        medium: 6,
-        heavy: 8,
-      },
-      artillery: {
-        mortar: 6,
-        heavy: 7,
-        rocket: 8,
-      },
-      antiAir: {
-        antiHelicopter: 6,
-        antiPlane: 7,
-        spaag: 8,
-      },
-      air: {
-        armoredCAS: 6,
-        AT: 2,
-        ASF: 5,
-        SEAD: 0,
-        bomber: 5,
-        rocket: 0,
-      },
-      helicopter: {
-        antiPersonnel: 6,
-        antiTank: 7,
-        antiAir: 8,
-      },
+  @property()
+  divisionAnalysis: DivisionAnalysis | null = null;
+
+  render(): TemplateResult {
+    const divisionAnalysis = this.divisionAnalysis;
+
+    if (!divisionAnalysis) {
+      return html``;
+    }
+
+    const aaCategoryAnalysis: DivisionCategoryAnalysis = {
+      'Anti-Helicopter': divisionAnalysis.aa_antiHelicopter,
+      'Anti-Plane': divisionAnalysis.aa_antiPlane,
+      SPAAG: divisionAnalysis.aa_spaag,
     };
 
-    return html`
-      <div class="division-analysis">
-        <division-flag></division-flag>
-        <div class="division-traits">
-          <division-trait
-            .traitTitle=${'Opener'}
-            .analysis=${divisionAnalysis.general.opener}
-          ></division-trait>
-          <division-trait
-            .traitTitle=${'Forest'}
-            .analysis=${divisionAnalysis.general.forest}
-          ></division-trait>
-          <division-trait
-            .traitTitle=${'Urban'}
-            .analysis=${divisionAnalysis.general.urban}
-          ></division-trait>
-          <division-trait
-            .traitTitle=${'Field'}
-            .analysis=${divisionAnalysis.general.field}
-          ></division-trait>
-        </div>
-        <div>
-          <section-analysis
-            .icon=${'waryes:supply'}
-            sectionTitle="Logistics"
-            .analysis=${divisionAnalysis.logistical}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:recon'}
-            sectionTitle="Recon"
-            .analysis=${divisionAnalysis.recon}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:infantry'}
-            sectionTitle="Infantry"
-            .analysis=${divisionAnalysis.infantry}
-          ></section-analysis>
+    const airCategoryAnalysis: DivisionCategoryAnalysis = {
+      'Armoured CAS': divisionAnalysis.air_armouredCAS,
+      ASF: divisionAnalysis.air_asf,
+      Bomber: divisionAnalysis.air_bomber,
+      Rocket: divisionAnalysis.air_rocket,
+      SEAD: divisionAnalysis.air_sead,
+    };
 
-          <section-analysis
-            .icon=${'waryes:at'}
-            sectionTitle="ATGM"
-            .analysis=${divisionAnalysis.at}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:tank'}
-            sectionTitle="Tank"
-            .analysis=${divisionAnalysis.tank}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:artillery'}
-            sectionTitle="Artillery"
-            .analysis=${divisionAnalysis.artillery}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:aa'}
-            sectionTitle="Anti-Air"
-            .analysis=${divisionAnalysis.antiAir}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:jet'}
-            sectionTitle="Air"
-            .analysis=${divisionAnalysis.air}
-          ></section-analysis>
-          <section-analysis
-            .icon=${'waryes:helicopter'}
-            sectionTitle="Helicopter"
-            .analysis=${divisionAnalysis.helicopter}
-          ></section-analysis>
-        </div>
+    let airAverage = 0;
+    let usedAirCategories = 0;
+
+    for (const key in airCategoryAnalysis) {
+      
+      if (Number(airCategoryAnalysis[key]) !== 0) {
+        airAverage += Number(airCategoryAnalysis[key]);
+        usedAirCategories++;
+      }
+    }
+
+    airAverage /= usedAirCategories;
+
+    const artilleryCategoryAnalysis: DivisionCategoryAnalysis = {
+      Heavy: divisionAnalysis.artillery_heavy,
+      Mortar: divisionAnalysis.artillery_mortar,
+      Rocket: divisionAnalysis.artillery_rocket,
+    };
+
+    const atgmCategoryAnalysis: DivisionCategoryAnalysis = {
+      ATGM: divisionAnalysis.atgm,
+    };
+
+    const helicopterCategoryAnalysis: DivisionCategoryAnalysis = {
+      'Anti-Air': divisionAnalysis.helicopter_antiAir,
+      'Anti-Personnel': divisionAnalysis.helicopter_antiPersonnel,
+      'Anti-Tank': divisionAnalysis.helicopter_antiTank,
+    };
+
+    const infantryCategoryAnalysis: DivisionCategoryAnalysis = {
+      'Anti-Personnel': divisionAnalysis.infantry_antiPersonnel,
+      'Anti-Tank': divisionAnalysis.infantry_antiTank,
+      Cost: divisionAnalysis.infantry_cost,
+      Transport: divisionAnalysis.infantry_transport,
+    };
+
+    const logisticsCategoryAnalysis: DivisionCategoryAnalysis = {
+      Command: divisionAnalysis.logistics_cmd,
+      'Slot Availability': divisionAnalysis.logistics_slotAvailability,
+      Supply: divisionAnalysis.logistics_supply,
+    };
+
+    const reconCategoryAnalysis: DivisionCategoryAnalysis = {
+      Helicopter: divisionAnalysis.recon_helicopter,
+      Optics: divisionAnalysis.recon_optics,
+      Stealth: divisionAnalysis.recon_stealth,
+    };
+
+    const heavyTankCategoryAnalysis: DivisionCategoryAnalysis = {
+      Heavy: divisionAnalysis.tank_heavy,
+    };
+
+    const lightTankCategoryAnalysis: DivisionCategoryAnalysis = {
+      Light: divisionAnalysis.tank_light,
+    };
+
+    const mediumTankCategoryAnalysis: DivisionCategoryAnalysis = {
+      Medium: divisionAnalysis.tank_medium,
+    };
+
+    return html` <div class="division-analysis">
+      <div class="title">
+        <division-flag
+          .divisionId=${this.divisionAnalysis?.descriptor}
+        ></division-flag>
+        <h3>
+          ${this.divisionName
+            ? this.divisionName
+            : this.divisionAnalysis?.descriptor}
+        </h3>
       </div>
-    `;
+      <div class="division-traits"></div>
+      <div class="division-sections">
+        <section-analysis
+          .icon=${'waryes:supply'}
+          .sectionTitle=${'Logistics'}
+          .analysis=${logisticsCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:recon'}
+          .sectionTitle=${'Recon'}
+          .analysis=${reconCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:infantry'}
+          .sectionTitle=${'Infantry'}
+          .analysis=${infantryCategoryAnalysis}
+        ></section-analysis>
+
+        <section-analysis
+          .icon=${'waryes:at'}
+          .sectionTitle=${'ATGM'}
+          .analysis=${atgmCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:tank'}
+          .sectionTitle=${'Light Tank'}
+          .analysis=${lightTankCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:tank'}
+          .sectionTitle=${'Medium Tank'}
+          .analysis=${mediumTankCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:tank'}
+          .sectionTitle=${'Heavy Tank'}
+          .analysis=${heavyTankCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:artillery'}
+          .sectionTitle=${'Artillery'}
+          .analysis=${artilleryCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:aa'}
+          .sectionTitle=${'Anti-Air'}
+          .analysis=${aaCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:helicopter'}
+          .sectionTitle=${'Helicopter'}
+          .analysis=${helicopterCategoryAnalysis}
+        ></section-analysis>
+        <section-analysis
+          .icon=${'waryes:jet'}
+          .sectionTitle=${'Air'}
+          .average=${airAverage}
+          .analysis=${airCategoryAnalysis}
+        ></section-analysis>
+      </div>
+    </div>`;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    'division-analysis': AllDivisionAnalysis;
+    'division-analysis-display': DivisionAnalysisDisplay;
   }
 }
