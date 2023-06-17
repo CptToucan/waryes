@@ -19,6 +19,10 @@ import ICON_NATO_BER_CMD from '../../images/divisions/berlin-cmd.png';
 import ICON_RDA_KDA from '../../images/divisions/kda.png';
 import ICON_RFA_TKS from '../../images/divisions/tks.png';
 import ICON_DDR_UZ from '../../images/divisions/unt-zen.png';
+import ICON_SOV_119 from '../../images/divisions/119-ya.png';
+import ICON_US_11ACR from '../../images/divisions/11-acr.png';
+
+
 import { Division } from '../types/deck-builder';
 import { getDescriptorWithoutMod } from '../utils/get-descriptor-without-mod';
 
@@ -40,7 +44,10 @@ const ICONS_DIVISION_MAP: {[key: string]: any} = {
     'Descriptor_Deck_Division_RFA_TerrKdo_Sud_multi': ICON_RFA_TKS,
     'Descriptor_Deck_Division_UK_1st_Armoured_multi': ICON_UK_1_ARM,
     'Descriptor_Deck_Division_UK_2nd_Infantry_multi': ICON_UK_2_INF,
-    'Descriptor_Deck_Division_WP_Unternehmen_Zentrum_multi': ICON_DDR_UZ
+    'Descriptor_Deck_Division_WP_Unternehmen_Zentrum_multi': ICON_DDR_UZ,
+    'Descriptor_Deck_Division_SOV_119IndTkBrig_multi': ICON_SOV_119,
+    'Descriptor_Deck_Division_US_11ACR_multi': ICON_US_11ACR,
+
 }
 
 @customElement('division-flag')
