@@ -7,6 +7,7 @@ import {FirebaseService} from '../services/firebase';
 import {DivisionAnalysis} from '../components/division-analysis/division-analysis';
 import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 import {Division} from '../types/deck-builder';
+import '../components/filter/division-filter';
 
 @customElement('division-analysis-route')
 export class DivisionAnalysisRoute
@@ -20,6 +21,7 @@ export class DivisionAnalysisRoute
         flex-direction: column;
         padding: var(--lumo-space-s);
         gap: var(--lumo-space-m);
+        position: relative;
       }
 
       .header {
@@ -47,6 +49,18 @@ export class DivisionAnalysisRoute
         text-decoration: underline;
         color: var(--lumo-primary-text-color);
       }
+
+      .filter-container {
+        display: flex;
+        position: sticky;
+        top: 0px;
+        background-color: var(--lumo-base-color);
+        padding: var(--lumo-space-s);
+        z-index: 1;
+      }
+      division-filter {
+        width: 100%;
+      }
     `;
   }
 
@@ -55,6 +69,9 @@ export class DivisionAnalysisRoute
 
   @state()
   divisions: Division[] | null = null;
+
+  @state()
+  selectedDivisions: Division[] = [];
 
   async onBeforeEnter(): Promise<void> {
     // fetch divisionAnalysis from firebase
@@ -81,11 +98,11 @@ export class DivisionAnalysisRoute
     return html`
       <div class="header">
         <div class="card">
-          This division analysis feature is designed to help you understand the strengths and weaknesses of each division.
-          The numbers were calculated by taking the feedback of many of the top players in the community.
-          The numbers are not perfect, but they are a good starting point for understanding the divisions.
-
-          Thank you for your contributions:
+          This division analysis feature is designed to help you understand the
+          strengths and weaknesses of each division. The numbers were calculated
+          by taking the feedback of many of the top players in the community.
+          The numbers are not perfect, but they are a good starting point for
+          understanding the divisions. Thank you for your contributions:
           <ul>
             <li>Tiberius-Rancor</li>
             <li>Sotek</li>
@@ -93,26 +110,51 @@ export class DivisionAnalysisRoute
             <li>P.Uri.Tanner</li>
             <li>Nalyd</li>
             <li><a href="https://www.twitch.tv/awoodenbox96">awoodenbox</a></li>
-            <li><a href="https://www.youtube.com/@tmanplays69">tmanplays</a></li>
+            <li>
+              <a href="https://www.youtube.com/@tmanplays69">tmanplays</a>
+            </li>
             <li>Darkneutron</li>
-            <li><a href="https://www.youtube.com/@onoez2k/videos">Integer</a></li>
+            <li>
+              <a href="https://www.youtube.com/@onoez2k/videos">Integer</a>
+            </li>
             <li><a href="https://www.twitch.tv/xlathans">Lathans</a></li>
-           </ul>
+          </ul>
         </div>
       </div>
+      <div class="filter-container">
+        ${(this.divisions?.length || 0) > 0
+          ? html`<division-filter
+              @division-filter-changed=${(e: CustomEvent) =>
+                (this.selectedDivisions = e.detail?.divisions)}
+              .divisions=${this.divisions}
+            ></division-filter>`
+          : html``}
+      </div>
       <div class="grid">
-        ${this.divisionAnalysis?.map((divisionAnalysis) => {
-          const division = this.divisions?.find(
-            (division) => division.descriptor === divisionAnalysis.descriptor
+        ${this.divisions?.map((division) => {
+          const divisionAnalysis = this.divisionAnalysis?.find(
+            (divisionAnalysis) =>
+              divisionAnalysis.descriptor === division.descriptor
           );
-          return html`
+
+          const isSelected = this.selectedDivisions.find(
+            (selectedDivision) => selectedDivision.descriptor ===
+            division.descriptor);
+          if(
+            isSelected || this.selectedDivisions.length === 0
+          ) {
+            return html`
             <div class="card">
               <division-analysis-display
-                .divisionName=${division?.name}
+                .divisionName=${division.name}
                 .divisionAnalysis=${divisionAnalysis}
               ></division-analysis-display>
             </div>
           `;
+          }
+
+          return html``;
+
         })}
       </div>
     `;

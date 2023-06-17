@@ -77,8 +77,10 @@ export class DivisionAnalysisDisplay extends LitElement {
       }
 
       division-flag {
-        height: 96px;
-        width: 96px;
+        height: 82px;
+        width: 82px;
+        min-width: 82px;
+        min-height: 82px;
       }
 
       .title > h3 {
