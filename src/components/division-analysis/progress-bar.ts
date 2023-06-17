@@ -8,9 +8,9 @@ export class ProgressBar extends LitElement {
 
   banding = [
     { class: "exceptional", percent: 80 },
-    { class: "good", percent: 60 },
-    { class: "average", percent: 40 },
-    { class: "bad", percent: 20 },
+    { class: "good", percent: 70 },
+    { class: "average", percent: 50 },
+    { class: "bad", percent: 30 },
     { class: "very-bad", percent: 0 },
   ];
 
