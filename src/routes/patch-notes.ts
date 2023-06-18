@@ -18,9 +18,9 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import {FirebaseService} from '../services/firebase';
-import "@vaadin/combo-box";
-import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import '@vaadin/combo-box';
+import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
+import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 
 interface Diff {
   __old: unknown;
@@ -41,7 +41,6 @@ type AnyDiffArrayElement =
   | ArrayDiffAddedElement
   | ArrayDiffRemovedElement;
 
-
 type FirebasePatchRecord = {
   data: string;
   created: Timestamp;
@@ -54,7 +53,6 @@ export class PatchNotesRoute extends LitElement {
     return css`
       .page {
         padding: var(--lumo-space-m);
-        
       }
 
       .card {
@@ -70,7 +68,7 @@ export class PatchNotesRoute extends LitElement {
       .header-bar {
         display: flex;
         flex-direction: row;
-        justify-content: space-between
+        justify-content: space-between;
       }
 
       .arrow-icon {
@@ -204,13 +202,14 @@ export class PatchNotesRoute extends LitElement {
     this.patches = patches;
 
     await this.setupPatch(patches[0]);
-
   }
 
   async setupPatch(firebasePatchRecord: FirebasePatchRecord) {
     const patchNotesJson = JSON.parse(firebasePatchRecord.data);
 
-    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
+    const units = await BundleManagerService.getUnitsForBucket(
+      BucketFolder.WARNO
+    );
 
     if (!units) {
       return;
@@ -232,7 +231,6 @@ export class PatchNotesRoute extends LitElement {
       removed: [],
     };
 
-    
     for (const patchNote of patchNotesJson) {
       const unit = unitMap[patchNote.descriptorName];
 
@@ -245,16 +243,11 @@ export class PatchNotesRoute extends LitElement {
         patchNotes.changed.push(patchUnitRecord);
       }
     }
-    
+
     // sort by patchNote.unit alliance
     patchNotes.added.sort((a) => {
-      return a.unitRecord.unit?.unitType.nationality ===
-        Alliance.NATO
-        ? -1
-        : 1;
+      return a.unitRecord.unit?.unitType.nationality === Alliance.NATO ? -1 : 1;
     });
-
-
 
     patchNotes.changed.sort((a, b) => {
       const allianceComparison = (alliance: Alliance) => {
@@ -264,26 +257,28 @@ export class PatchNotesRoute extends LitElement {
           return 1;
         }
       };
-    
-      const allianceComparisonResult = allianceComparison(a.unitRecord.unit?.unitType.nationality) - allianceComparison(b.unitRecord.unit?.unitType.nationality);
+
+      const allianceComparisonResult =
+        allianceComparison(a.unitRecord.unit?.unitType.nationality) -
+        allianceComparison(b.unitRecord.unit?.unitType.nationality);
       if (allianceComparisonResult !== 0) {
         return allianceComparisonResult;
       }
-    
+
       const motherCountryA = a.unitRecord.unit?.unitType?.motherCountry;
       const motherCountryB = b.unitRecord.unit?.unitType?.motherCountry;
-    
+
       if (motherCountryA === motherCountryB) {
         return 0;
       }
-    
+
       if (motherCountryA > motherCountryB) {
         return 1;
       }
-    
+
       return -1;
     });
-    
+
     this.selectedPatch = firebasePatchRecord;
     this.patchNotes = patchNotes;
   }
@@ -297,12 +292,13 @@ export class PatchNotesRoute extends LitElement {
             <vaadin-combo-box
               .items=${this.patches}
               .selectedItem=${this.selectedPatch}
-              @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>) => {
+              @selected-item-changed=${(
+                e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
+              ) => {
                 if (e.detail.value) {
                   this.setupPatch(e.detail.value);
                 }
               }}
-
               item-label-path="name"
             >
             </vaadin-combo-box>
@@ -335,21 +331,16 @@ export class PatchNotesRoute extends LitElement {
   private renderPatchNote(patchNote: PatchUnitRecord) {
     return html` <div class="card">
       <div class="card-header">
-        <a
-          href="/unit/${patchNote.unitRecord.descriptorName.getFieldValue()}"
-        >
+        <a href="/unit/${patchNote.unitRecord.descriptorName.getFieldValue()}">
           <h4>${patchNote.unitRecord.name.getFieldValue()}</h4>
         </a>
-        ${patchNote.patch.new
-          ? html`<simple-chip>New</simple-chip>`
-          : ''}
+        ${patchNote.patch.new ? html`<simple-chip>New</simple-chip>` : ''}
       </div>
       <div class="unit-images">
         <unit-image .unit=${patchNote.unitRecord.unit}></unit-image>
         <div class="flags">
           <country-flag
-            .country=${patchNote.unitRecord.unit?.unitType
-              .motherCountry}
+            .country=${patchNote.unitRecord.unit?.unitType.motherCountry}
           ></country-flag>
           <div class="division-flags">
             ${patchNote.unitRecord.unit.divisions?.map((division) => {
@@ -372,10 +363,33 @@ export class PatchNotesRoute extends LitElement {
 
     const outputHtml: TemplateResult[] = [];
 
+    const diffForDivisions = patchNote.patch.diff.divisions;
+
+    if (isAnyDiffElementArray(diffForDivisions)) {
+      for (const divisionDiff of diffForDivisions) {
+        if (isArrayDiffAddedElement(divisionDiff)) {
+          outputHtml.push(
+            html`<div>
+              Added to:
+              <division-flag .divisionId=${divisionDiff[1]}></division-flag>
+            </div>`
+          );
+        }
+
+        if (isArrayDiffRemovedElement(divisionDiff)) {
+          outputHtml.push(
+            html`<div>
+              Removed from:
+              <division-flag .divisionId=${divisionDiff[1]}></division-flag>
+            </div>`
+          );
+        }
+      }
+    }
+
     const diffForTraits = patchNote.patch.diff.specialities;
 
     if (isAnyDiffElementArray(diffForTraits)) {
-
       for (const traitDiff of diffForTraits) {
         if (isArrayDiffAddedElement(traitDiff)) {
           outputHtml.push(
@@ -423,6 +437,22 @@ export class PatchNotesRoute extends LitElement {
         outputHtml.push(
           html` <h4>${weaponRecord.weaponName.getFieldValue()}</h4> `
         );
+
+        if (
+          weaponDiffRecord[1]?.imageTexture?.__old ||
+          weaponDiffRecord[1]?.imageTexture?.__new
+        )
+          outputHtml.push(
+            html` <div>
+              Image Texture: ${weaponDiffRecord[1].imageTexture.__old}
+              <vaadin-icon
+                class="arrow-icon"
+                .icon=${'vaadin:arrow-right'}
+              ></vaadin-icon>
+              ${weaponDiffRecord[1].imageTexture.__new}
+            </div>`
+          );
+
         for (const field of weaponFields) {
           const diffForWeapon = patchNote.patch.diff?.weapons?.[i];
           const diffFields = diffForWeapon[1];
@@ -533,3 +563,17 @@ function isArrayDiffAddedElement(diff: unknown): diff is ArrayDiffAddedElement {
   const [key] = diff;
   return key === '+';
 }
+
+/*
+function isKeyPresent(
+  obj: {[key: string]: unknown},
+  keys: string[]
+) {
+  for (const key of keys) {
+    if (key in obj) {
+      return true;
+    }
+  }
+  return false;
+}
+*/
