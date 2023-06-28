@@ -21,6 +21,7 @@
   "dependencies": {
     "@izohek/warno-deck-utils": "^1.0.0",
     "@lit-labs/motion": "^1.0.2",
+    "@types/showdown": "^2.0.1",
     "@vaadin/accordion": "23.3.12",
     "@vaadin/app-layout": "23.3.12",
     "@vaadin/avatar": "23.3.12",
@@ -68,6 +69,7 @@
     "echarts": "^5.4.0",
     "firebase": "^9.9.4",
     "lit": "^2.1.0",
+    "showdown": "^2.1.0",
     "side-drawer": "^3.1.0"
   },
   "devDependencies": {

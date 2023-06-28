@@ -22,6 +22,7 @@ import '@vaadin/confirm-dialog';
 import {ConfirmDialogOpenedChangedEvent} from '@vaadin/confirm-dialog';
 import {notificationService} from '../services/notification';
 import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import "../components/display/content-panel";
 
 const TOTAL_ALLOWED_DECKS = 60;
 
@@ -36,14 +37,6 @@ export class MyDecksRoute extends LitElement {
       }
 
       .page {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        // margin: 0 auto; /* Center the container horizontally */
-        background-color: var(--lumo-contrast-5pct);
-        border-radius: var(--lumo-border-radius);
-        padding: var(--lumo-space-s);
-
         width: 100%;
       }
 
@@ -330,6 +323,7 @@ export class MyDecksRoute extends LitElement {
 
     return html`
       <div class="page">
+        <content-panel>
         <h2>My Decks ${this.numberOfDecks}/${TOTAL_ALLOWED_DECKS}</h2>
         <span
           >Changed deck names will only be visible to you for organisation
@@ -438,6 +432,7 @@ export class MyDecksRoute extends LitElement {
           `;
           })}
         </div>
+        </content-panel>
       </div>
 
       <vaadin-confirm-dialog

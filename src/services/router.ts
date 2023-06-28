@@ -21,6 +21,7 @@ const routes: Route[] = [
   {path: '/my-decks', component: 'my-decks-route'},
   {path: '/division-analysis', component: 'division-analysis-route'},
   {path: '/patch-notes', component: 'patch-notes-route'},
+  {path: '/game-guides', component: 'game-guides-route'},
 ];
 
 // Features.firebase_auth routes

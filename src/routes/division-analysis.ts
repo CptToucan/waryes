@@ -8,6 +8,7 @@ import {DivisionAnalysis} from '../components/division-analysis/division-analysi
 import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 import {Division} from '../types/deck-builder';
 import '../components/filter/division-filter';
+import '../components/display/content-panel';
 
 @customElement('division-analysis-route')
 export class DivisionAnalysisRoute
@@ -36,15 +37,6 @@ export class DivisionAnalysisRoute
         gap: var(--lumo-space-m);
       }
 
-      .card {
-        display: flex;
-        background-color: var(--lumo-contrast-5pct);
-        font-size: var(--lumo-font-size-s);
-        border-radius: var(--lumo-border-radius);
-        padding: var(--lumo-space-s);
-        flex-direction: column;
-      }
-
       a {
         text-decoration: underline;
         color: var(--lumo-primary-text-color);
@@ -55,7 +47,6 @@ export class DivisionAnalysisRoute
         position: sticky;
         top: 0px;
         background-color: var(--lumo-base-color);
-        padding: var(--lumo-space-s);
         z-index: 1;
       }
       division-filter {
@@ -97,7 +88,7 @@ export class DivisionAnalysisRoute
   render(): TemplateResult {
     return html`
       <div class="header">
-        <div class="card">
+        <content-panel>
           This division analysis feature is designed to help you understand the
           strengths and weaknesses of each division. The numbers were calculated
           by taking the feedback of many of the top players in the community.
@@ -119,7 +110,7 @@ export class DivisionAnalysisRoute
             </li>
             <li><a href="https://www.twitch.tv/xlathans">Lathans</a></li>
           </ul>
-        </div>
+        </content-panel>
       </div>
       <div class="filter-container">
         ${(this.divisions?.length || 0) > 0
@@ -138,23 +129,21 @@ export class DivisionAnalysisRoute
           );
 
           const isSelected = this.selectedDivisions.find(
-            (selectedDivision) => selectedDivision.descriptor ===
-            division.descriptor);
-          if(
-            isSelected || this.selectedDivisions.length === 0
-          ) {
+            (selectedDivision) =>
+              selectedDivision.descriptor === division.descriptor
+          );
+          if (isSelected || this.selectedDivisions.length === 0) {
             return html`
-            <div class="card">
-              <division-analysis-display
-                .divisionName=${division.name}
-                .divisionAnalysis=${divisionAnalysis}
-              ></division-analysis-display>
-            </div>
-          `;
+              <content-panel>
+                <division-analysis-display
+                  .divisionName=${division.name}
+                  .divisionAnalysis=${divisionAnalysis}
+                ></division-analysis-display>
+              </content-panel>
+            `;
           }
 
           return html``;
-
         })}
       </div>
     `;
