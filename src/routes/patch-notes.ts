@@ -465,7 +465,7 @@ export class PatchNotesRoute extends LitElement {
           return this.renderPatchNote(patchNote);
         })}
       </div>
-      <h3>Changed ${patchNotes.changed.length} Units</h3>
+      <h3>${patchNotes.changed.length} Changed Units</h3>
       <div class="grid">
         ${patchNotes.changed.map((patchNote) => {
           return this.renderPatchNote(patchNote);
