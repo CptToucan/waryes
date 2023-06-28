@@ -58,7 +58,10 @@ export class PrivacyPolicyRoute extends LitElement {
         <p>We don't collect any non-personal identification information.</p>
         <h2>Web browser cookies</h2>
 
-        <p>WarYes uses your browser's local storage to save the mod databases that you are browsing the site with.</p>
+        <p>
+          WarYes uses your browser's local storage to save the mod databases
+          that you are browsing the site with.
+        </p>
         <h2>How we use collected information</h2>
 
         WarYes may collect and use Users' personal information for the following
@@ -79,6 +82,21 @@ export class PrivacyPolicyRoute extends LitElement {
             inquiries, questions, and/or other requests.
           </li>
         </ul>
+
+        <h2>Plausible Analytics</h2>
+        <p>
+          At war-yes.com, we use Plausible Analytics, a privacy-first web
+          analytics tool, to analyze overall trends in website traffic.
+          Plausible Analytics does not track individuals across devices or
+          websites, ensuring user privacy. Plausible Analytics does not use
+          cookies, generate persistent identifiers, or collect any personal or
+          identifiable data. The data collected is limited to a single day, a
+          single website, and a single device. It is completely anonymous and
+          aggregated, containing no personal information. Our use of Plausible
+          Analytics is focused on measuring essential data points to improve our
+          services. We do not track individual visitors or collect any
+          personally identifiable information.
+        </p>
 
         <h2>Data Retention</h2>
         <p>
@@ -154,7 +172,7 @@ export class PrivacyPolicyRoute extends LitElement {
           this site, or your dealings with this site, please contact us at
           support@war-yes.com.
         </p>
-        <p>This document was last updated on May 20, 2023.</p>
+        <p>This document was last updated on June 28, 2023.</p>
       </div>
     `;
   }
