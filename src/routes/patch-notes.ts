@@ -6,6 +6,7 @@ import '../components/country-flag';
 import '../components/division-flag';
 import '../components/simple-chip';
 import '@vaadin/icon';
+import '@vaadin/button';
 import {PatchUnitRecord} from '../types/PatchUnitRecord';
 import {RecordField} from '../types/RecordField';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
@@ -21,6 +22,7 @@ import {FirebaseService} from '../services/firebase';
 import '@vaadin/combo-box';
 import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
 import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
+import {DivisionsMap} from '../types/deck-builder';
 
 interface Diff {
   __old: unknown;
@@ -46,6 +48,17 @@ type FirebasePatchRecord = {
   created: Timestamp;
   name: string;
 };
+
+type PatchNoteTypes = {
+  added: PatchUnitRecord[];
+  changed: PatchUnitRecord[];
+  removed: PatchUnitRecord[];
+};
+
+enum ViewMode {
+  DIVISION = 'division',
+  UNIT = 'unit',
+}
 
 @customElement('patch-notes-route')
 export class PatchNotesRoute extends LitElement {
@@ -128,7 +141,7 @@ export class PatchNotesRoute extends LitElement {
         border: 1px solid var(--lumo-contrast-20pct);
       }
 
-      division-flag {
+      division-flag.unit-division {
         width: 30px;
       }
 
@@ -167,18 +180,36 @@ export class PatchNotesRoute extends LitElement {
         gap: var(--lumo-space-s);
         flex-wrap: wrap;
       }
+
+      .division-header {
+        display: flex;
+        flex-direction: row;
+        gap: var(--lumo-space-s);
+      }
+
+      .division-container {
+        background-color: var(--lumo-contrast-5pct);
+        padding: var(--lumo-space-s);
+        margin-bottom: var(--lumo-space-m);
+        border-radius: var(--lumo-border-radius);
+      }
     `;
   }
 
   @state()
-  patchNotes?: {
-    added: PatchUnitRecord[];
-    changed: PatchUnitRecord[];
-    removed: PatchUnitRecord[];
-  };
+  patchNotes?: PatchNoteTypes;
 
   @state()
   patches?: FirebasePatchRecord[];
+
+  @state()
+  divisionsMap?: DivisionsMap;
+
+  @state()
+  patchNotesByDivision?: {[key: string]: PatchNoteTypes};
+
+  @state()
+  viewMode: ViewMode = ViewMode.DIVISION;
 
   @state()
   selectedPatch?: FirebasePatchRecord;
@@ -211,7 +242,39 @@ export class PatchNotesRoute extends LitElement {
       BucketFolder.WARNO
     );
 
-    if (!units) {
+    const divisions = await BundleManagerService.getDivisionsForBucket(
+      BucketFolder.WARNO
+    );
+
+    const divisionMap: DivisionsMap = {};
+
+    // sort divisions by alliance
+     
+    const sortedDivisions = divisions?.sort((a, b) => {
+      if (a.alliance === b.alliance) {
+        return 0;
+      }
+
+      if (a.alliance === Alliance.NATO) {
+        return -1;
+      }
+
+      if (a.alliance === Alliance.PACT) {
+        return 1;
+      }
+      return 0;
+    });
+
+
+    if (sortedDivisions) {
+      for (const division of sortedDivisions) {
+        divisionMap[division.descriptor] = division;
+      }
+    }
+
+    this.divisionsMap = divisionMap;
+
+    if (!units || !sortedDivisions) {
       return;
     }
 
@@ -221,11 +284,7 @@ export class PatchNotesRoute extends LitElement {
       unitMap[unit.descriptorName] = unit;
     }
 
-    const patchNotes: {
-      added: PatchUnitRecord[];
-      changed: PatchUnitRecord[];
-      removed: PatchUnitRecord[];
-    } = {
+    const patchNotes: PatchNoteTypes = {
       added: [],
       changed: [],
       removed: [],
@@ -235,6 +294,7 @@ export class PatchNotesRoute extends LitElement {
       const unit = unitMap[patchNote.descriptorName];
 
       const patchUnitRecord = new PatchUnitRecord(patchNote, unit);
+
       if (patchNote.new) {
         patchNotes.added.push(patchUnitRecord);
       } else if (patchNote.removed) {
@@ -244,6 +304,40 @@ export class PatchNotesRoute extends LitElement {
       }
     }
 
+    const divisionUnitMap: {[key: string]: PatchNoteTypes} = {};
+    for (const division of sortedDivisions) {
+      // create map of arrays of units in divisions
+
+      if (!divisionUnitMap[division.descriptor]) {
+        divisionUnitMap[division.descriptor] = {
+          added: [],
+          changed: [],
+          removed: [],
+        };
+      }
+
+      // add all the patch units for units in this division to the array
+
+      for (const patchUnit of patchNotes.added) {
+        if (
+          patchUnit.unitRecord.unit?.divisions.find(
+            (_div) => division.descriptor === _div
+          )
+        ) {
+          divisionUnitMap[division.descriptor].added.push(patchUnit);
+        }
+      }
+
+      for (const patchUnit of patchNotes.changed) {
+        if (
+          patchUnit.unitRecord.unit?.divisions.find(
+            (_div) => division.descriptor === _div
+          )
+        ) {
+          divisionUnitMap[division.descriptor].changed.push(patchUnit);
+        }
+      }
+    }
     // sort by patchNote.unit alliance
     patchNotes.added.sort((a) => {
       return a.unitRecord.unit?.unitType.nationality === Alliance.NATO ? -1 : 1;
@@ -281,51 +375,102 @@ export class PatchNotesRoute extends LitElement {
 
     this.selectedPatch = firebasePatchRecord;
     this.patchNotes = patchNotes;
+    this.patchNotesByDivision = divisionUnitMap;
+  }
+
+  async fetchDivisionMap() {
+    const divisions = await BundleManagerService.getDivisionsForBucket(
+      BucketFolder.WARNO
+    );
+    const divisionMap: DivisionsMap = {};
+
+    if (divisions) {
+      for (const division of divisions) {
+        divisionMap[division.descriptor] = division;
+      }
+    }
+
+    return divisionMap;
   }
 
   render(): TemplateResult {
-    if (this.patchNotes) {
+    if (this.patchNotes && this.patchNotesByDivision) {
       return html`
         <div class="page">
           <div class="header-bar">
             <h1>Patch Notes</h1>
-            <vaadin-combo-box
-              .items=${this.patches}
-              .selectedItem=${this.selectedPatch}
-              @selected-item-changed=${(
-                e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
-              ) => {
-                if (e.detail.value) {
-                  this.setupPatch(e.detail.value);
-                }
-              }}
-              item-label-path="name"
-            >
-            </vaadin-combo-box>
+            <div>
+              <vaadin-combo-box
+                .items=${this.patches}
+                .selectedItem=${this.selectedPatch}
+                @selected-item-changed=${(
+                  e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
+                ) => {
+                  if (e.detail.value) {
+                    this.setupPatch(e.detail.value);
+                  }
+                }}
+                item-label-path="name"
+              >
+              </vaadin-combo-box>
+
+              <vaadin-button
+                @click=${() => {
+                  if (this.viewMode === ViewMode.DIVISION) {
+                    this.viewMode = ViewMode.UNIT;
+                  } else {
+                    this.viewMode = ViewMode.DIVISION;
+                  }
+                }}
+              >
+                ${this.viewMode === ViewMode.DIVISION
+                  ? 'Division View'
+                  : 'Unit View'}
+              </vaadin-button>
+            </div>
           </div>
-          <h3>Added ${this.patchNotes.added.length} Units</h3>
-          <div class="grid">
-            ${this.patchNotes.added.map((patchNote) => {
-              return this.renderPatchNote(patchNote);
-            })}
-          </div>
-          <h3>Changed ${this.patchNotes.changed.length} Units</h3>
-          <div class="grid">
-            ${this.patchNotes.changed.map((patchNote) => {
-              return this.renderPatchNote(patchNote);
-            })}
-          </div>
-          <h3>Removed ${this.patchNotes.removed.length} Units</h3>
-          <div class="grid">
-            ${this.patchNotes.removed.map((patchNote) => {
-              return this.renderPatchNote(patchNote);
-            })}
-          </div>
+
+          ${this.viewMode === ViewMode.DIVISION
+            ? this.renderDivisionView(this.patchNotesByDivision)
+            : this.renderUnitView(this.patchNotes)}
         </div>
       `;
     }
 
     return html``;
+  }
+
+  renderDivisionView(patchNotes: {[key: string]: PatchNoteTypes}) {
+    return html`
+      ${Object.keys(patchNotes).map((division) => {
+        return html` <div class="division-container">
+          <div class="division-header">
+            <division-flag
+              .division=${this.divisionsMap?.[division]}
+              .divisionId=${division}
+            >
+            </division-flag>
+            <h3>${this.divisionsMap?.[division]?.name || division}</h3>
+          </div>
+          ${this.renderUnitView(patchNotes[division])}
+        </div>`;
+      })}
+    `;
+  }
+
+  renderUnitView(patchNotes: PatchNoteTypes) {
+    return html` <h3>${patchNotes.added.length} New Units</h3>
+      <div class="grid">
+        ${patchNotes.added.map((patchNote) => {
+          return this.renderPatchNote(patchNote);
+        })}
+      </div>
+      <h3>Changed ${patchNotes.changed.length} Units</h3>
+      <div class="grid">
+        ${patchNotes.changed.map((patchNote) => {
+          return this.renderPatchNote(patchNote);
+        })}
+      </div>`;
   }
 
   private renderPatchNote(patchNote: PatchUnitRecord) {
@@ -345,6 +490,7 @@ export class PatchNotesRoute extends LitElement {
           <div class="division-flags">
             ${patchNote.unitRecord.unit.divisions?.map((division) => {
               return html`<division-flag
+                class="unit-division"
                 .divisionId=${division}
               ></division-flag>`;
             })}
@@ -371,7 +517,10 @@ export class PatchNotesRoute extends LitElement {
           outputHtml.push(
             html`<div>
               Added to:
-              <division-flag .divisionId=${divisionDiff[1]}></division-flag>
+              <division-flag
+                class="unit-division"
+                .divisionId=${divisionDiff[1]}
+              ></division-flag>
             </div>`
           );
         }
@@ -563,17 +712,3 @@ function isArrayDiffAddedElement(diff: unknown): diff is ArrayDiffAddedElement {
   const [key] = diff;
   return key === '+';
 }
-
-/*
-function isKeyPresent(
-  obj: {[key: string]: unknown},
-  keys: string[]
-) {
-  for (const key of keys) {
-    if (key in obj) {
-      return true;
-    }
-  }
-  return false;
-}
-*/
