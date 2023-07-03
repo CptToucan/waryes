@@ -1,6 +1,6 @@
 import {css, html, LitElement} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
+import {unsafeHTML} from 'lit/directives/unsafe-html.js';
 import showdown from 'showdown';
 
 @customElement('markdown-renderer')
@@ -19,7 +19,12 @@ export class MarkdownRenderer extends LitElement {
         width: 100%;
       }
 
-      h1,h2,h3,h4,h5,h6 {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
         margin: 0;
         margin-bottom: var(--lumo-space-s);
         font-weight: bold;
@@ -48,9 +53,6 @@ export class MarkdownRenderer extends LitElement {
         margin: 0;
         margin-bottom: var(--lumo-space-m);
       }
-
-
-
     `;
   }
 
@@ -58,7 +60,21 @@ export class MarkdownRenderer extends LitElement {
   markdown: string = '';
 
   render() {
-    const converter = new showdown.Converter();
+    const extension = {
+      type: 'lang',
+      filter: (text: string) => {
+        const pattern = /\^\^tooltip\s+(\S+)/g;
+        const replacement = '<span id="test">Test</span><vaadin-tooltip text=$1 for="test" position="top">$1</vaadin-tooltip>';
+        const replacedString = text.replace(pattern, replacement);
+        console.log(replacedString);
+        return replacedString;
+      },
+    };
+
+    showdown.extension('myext', extension);
+    const converter = new showdown.Converter({
+      extensions: ['myext'],
+    });
     const text = this.markdown;
     const mdHtml = converter.makeHtml(text);
     return html`${unsafeHTML(mdHtml)}`;
