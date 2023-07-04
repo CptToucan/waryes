@@ -1,7 +1,7 @@
 import {BeforeEnterObserver} from '@vaadin/router';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import {BundleManagerService} from '../services/bundle-manager';
+import {BundleManagerService, BucketFolder} from '../services/bundle-manager';
 import {Division} from '../types/deck-builder';
 import {Unit} from '../types/unit';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
@@ -152,7 +152,8 @@ export class UnitsRoute extends LitElement implements BeforeEnterObserver {
 
   async onBeforeEnter() {
     let units = await BundleManagerService.getUnits();
-    const divisions = await BundleManagerService.getDivisions();
+    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO) || [];
+
     // sort by motherCountry
 
     units = units.sort((a, b) => {
