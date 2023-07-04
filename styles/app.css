@@ -58,6 +58,11 @@ vaadin-dialog-overlay::part(header-content) {
   width: 100%;
 }
 
+vaadin-dialog-overlay::part(overlay) {
+  width: 100vw;
+  max-width: 600px;
+}
+
 vaadin-dialog-overlay::part(content) {
   max-width: 600px;
 }
