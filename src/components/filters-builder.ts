@@ -19,8 +19,6 @@ export class FiltersBuilder extends LitElement {
       }
 
       .filter-builder > div {
-        padding-left: var(--lumo-space-xs);
-        padding-right: var(--lumo-space-xs);
         flex: 1 0 0;
         display: flex;
       }
