@@ -20,7 +20,14 @@ export function getIconForTrait(trait: string): TemplateResult {
   const speciality = getIconForSpecialty(trait);
 
   const icon = speciality;
-  let tooltip = humanize(speciality);
+  let tooltip: string;
+  try {
+    tooltip = humanize(speciality);
+  }
+  catch(err) {
+    tooltip = speciality;
+  }
+
 
   if (speciality === 'parachute') {
     tooltip = "Airbourne"
