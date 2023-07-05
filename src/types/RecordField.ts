@@ -28,6 +28,7 @@ const numberOperators: FilterOperator[] = [
 export enum FieldType {
   DISTANCE = "distance",
   PERCENTAGE = "percentage",
+  DECIMAL_PERCENTAGE = "decimal_percentage",
   TIME = "time",
   SPEED = "speed",
   PROJECTILE_SPEED = "projectileSpeed",
@@ -54,6 +55,12 @@ const fieldTypes: {
     unit: "m"
   },
   [FieldType.PERCENTAGE]: {
+    operators: [
+      ...numberOperators
+    ],
+    unit: "%"
+  },
+  [FieldType.DECIMAL_PERCENTAGE]: {
     operators: [
       ...numberOperators
     ],
@@ -163,12 +170,20 @@ export class RecordField<T> {
       return `${value} ${fieldTypes[fieldType].unit}`;
     }
 
+    if(fieldType === FieldType.TIME) {
+      return `${value} ${fieldTypes[fieldType].unit}`;
+    }
+
     if(fieldType === FieldType.ANGULAR_SPEED) {
       return `${(value / Math.PI) * 90} ${fieldTypes[fieldType].unit}`;
     }
 
-    if(fieldType === FieldType.PERCENTAGE) {
+    if(fieldType === FieldType.DECIMAL_PERCENTAGE) {
       return `${value * 100} ${fieldTypes[fieldType].unit}`;
+    }
+
+    if(fieldType === FieldType.PERCENTAGE) {
+      return `${value} ${fieldTypes[fieldType].unit}`;
     }
 
     return value;

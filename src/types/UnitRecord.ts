@@ -29,7 +29,7 @@ export class UnitRecord {
     this.fuel = new RecordField("fuel", "Fuel", unit.fuel, FieldType.LIQUID);
     this.fuelMove = new RecordField("fuelMove", "Fuel Move", unit.fuelMove, FieldType.TIME);
     this.supply = new RecordField("supply", "Supply", unit.supply, FieldType.LIQUID);
-    this.ecm = new RecordField("ecm", "Ecm", unit.ecm, FieldType.PERCENTAGE);
+    this.ecm = new RecordField("ecm", "Ecm", unit.ecm, FieldType.DECIMAL_PERCENTAGE);
     this.agility = new RecordField("agility", "Agility", unit.agility, FieldType.DISTANCE);
     this.travelTime = new RecordField("travelTime", "Travel Time", unit.travelTime, FieldType.TIME);
     this.hasDefensiveSmoke = new RecordField("hasDefensiveSmoke", "Has Defensive Smoke", unit.hasDefensiveSmoke, FieldType.BOOLEAN);

@@ -47,6 +47,7 @@ type FirebasePatchRecord = {
   data: string;
   created: Timestamp;
   name: string;
+  hidden: boolean;
 };
 
 type PatchNoteTypes = {
@@ -108,10 +109,16 @@ export class PatchNotesRoute extends LitElement {
       }
       h4 {
         margin: 0;
+        margin-top: var(--lumo-space-xs);
         margin-bottom: var(--lumo-space-s);
         text-overflow: ellipsis;
         white-space: nowrap;
         flex: 1 1 0px;
+   
+      }
+
+      h4.weapon-name {
+        border-top: 1px solid var(--lumo-contrast-20pct);
       }
 
       a h4 {
@@ -153,6 +160,7 @@ export class PatchNotesRoute extends LitElement {
         display: flex;
         flex-direction: row;
         gap: var(--lumo-space-s);
+        margin-bottom: var(--lumo-space-xs);
       }
 
       .nato {
@@ -226,9 +234,9 @@ export class PatchNotesRoute extends LitElement {
 
     const querySnapshot = await getDocs(q);
 
-    const patches = querySnapshot.docs.map((doc) =>
+    const patches = (querySnapshot.docs.map((doc) =>
       doc.data()
-    ) as FirebasePatchRecord[];
+    ) as FirebasePatchRecord[]).filter((patch) => patch.hidden !== true);
 
     this.patches = patches;
 
@@ -274,7 +282,8 @@ export class PatchNotesRoute extends LitElement {
 
     this.divisionsMap = divisionMap;
 
-    if (!units || !sortedDivisions) {
+
+    if (!units || !sortedDivisions || !divisions) {
       return;
     }
 
@@ -584,7 +593,7 @@ export class PatchNotesRoute extends LitElement {
       if (isDiffElement(weaponDiffRecord)) {
         const weaponFields = weaponRecord.getFields();
         outputHtml.push(
-          html` <h4>${weaponRecord.weaponName.getFieldValue()}</h4> `
+          html` <h4 class="weapon-name">${weaponRecord.weaponName.getFieldValue()}</h4> `
         );
 
         if (
