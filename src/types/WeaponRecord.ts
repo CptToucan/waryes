@@ -138,7 +138,7 @@ export class WeaponRecord {
     
     this.timeBetweenSalvos = new RecordField(
       'timeBetweenSalvos',
-      'Time between salvos',
+      'Time between shots',
       weapon.timeBetweenSalvos,
       FieldType.TIME
     );
