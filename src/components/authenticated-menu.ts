@@ -65,6 +65,11 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },
+        {
+          name: 'Maps',
+          icon: 'vaadin:map-marker',
+          href: '/maps',
+        }
       ],
     },
     {
@@ -147,6 +152,11 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:pie-bar-chart',
           href: '/comparison',
         },
+        {
+          name: 'Maps',
+          icon: 'vaadin:map-marker',
+          href: '/maps',
+        }
       ],
     },
     {

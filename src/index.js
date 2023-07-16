@@ -29,6 +29,7 @@ import "./routes/user-settings";
 import "./routes/my-decks";
 import "./routes/division-analysis";
 import "./routes/patch-notes";
+import "./routes/maps";
 
 /** Components */
 import "./components/unit-card";
