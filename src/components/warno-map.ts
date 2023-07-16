@@ -73,16 +73,3 @@ declare global {
     'warno-map': WarnoMap;
   }
 }
-
-/*
-
-images/maps/twolakes_destruction_4.png
-images/maps/twolates_conquest_4.png
-images/maps/twoways_conquest_4.png
-images/maps/twoways_conquest_6.png
-images/maps/twoways_destruction_4.png
-images/maps/vertigo_conquest_4.png
-images/maps/vertigo_destruction_4.png
-images/maps/volcano_conquest_6.png
-images/maps/volcano_destruction_6.png
-*/
