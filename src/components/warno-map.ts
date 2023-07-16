@@ -61,7 +61,7 @@ export class WarnoMap extends LitElement {
           <h3>${this.map?.size}</h3>
         </div>
         <div class="image">
-          <img src="${this.map?.image}" />
+          <img loading="lazy" src="${this.map?.image}" />
         </div>
       </div>
     `;
