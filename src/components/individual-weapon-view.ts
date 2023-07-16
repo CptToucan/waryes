@@ -119,6 +119,12 @@ export class IndividualWeaponView extends LitElement {
     });
 
     layout.push({
+      name: 'True Ammunition',
+      expert: true,
+      value: weapon.ammunitionPerSalvo * weapon.numberOfSalvos * weapon.salvoLength,
+    });
+
+    layout.push({
       name: 'Turret',
       expert: true,
       stats: [
