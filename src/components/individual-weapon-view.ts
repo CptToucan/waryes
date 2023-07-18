@@ -121,7 +121,7 @@ export class IndividualWeaponView extends LitElement {
     layout.push({
       name: 'True Ammunition',
       expert: true,
-      value: weapon.ammunitionPerSalvo * weapon.numberOfSalvos * weapon.salvoLength,
+      value: weapon.numberOfSalvos * weapon.salvoLength,
     });
 
     layout.push({
