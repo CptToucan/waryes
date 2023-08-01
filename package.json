@@ -65,6 +65,7 @@
     "@vaadin/time-picker": "23.3.12",
     "@vaadin/upload": "23.3.12",
     "@vaadin/virtual-list": "23.3.12",
+    "animejs": "^3.2.1",
     "echarts": "^5.4.0",
     "firebase": "^9.9.4",
     "lit": "^2.1.0",

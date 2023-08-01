@@ -30,6 +30,8 @@ import "./routes/my-decks";
 import "./routes/division-analysis";
 import "./routes/patch-notes";
 import "./routes/maps";
+import "./routes/deck-drafter";
+import "./routes/deck-draft";
 
 /** Components */
 import "./components/unit-card";

@@ -12,3 +12,7 @@ export function getIconForVeterancy(veterancy: number): TemplateResult {
     ></vaadin-icon
     ><vaadin-tooltip for=${elementId} text=${veterancies[veterancy]} position="top"></vaadin-tooltip>`;
 }
+
+export function getVeterancyName(veterancy: number): string {
+  return veterancies[veterancy];
+}

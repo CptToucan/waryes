@@ -3,7 +3,6 @@ import {customElement, property} from 'lit/decorators.js';
 import {Deck} from '../../classes/deck';
 import {UnitCategory} from '../../types/deck-builder';
 import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
-import './display-armoury-with-transport-card';
 import './compact-armoury-card';
 import './deck-header';
 
