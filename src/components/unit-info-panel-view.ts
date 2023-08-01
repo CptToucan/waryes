@@ -9,7 +9,7 @@ import {displayFuel} from '../utils/unit-stats/display-fuel';
 import {displayTime} from '../utils/unit-stats/display-time';
 import {displayEcm} from '../utils/unit-stats/display-ecm';
 
-interface PanelItem {
+export interface PanelItem {
   display: string;
   value?: string | boolean | number | null | TemplateResult;
 }
@@ -54,7 +54,6 @@ export class UnitInfoPanelView extends LitElement {
         gap: var(--lumo-space-xs);
         justify-content: center;
         width: 100%;
-
       }
     `;
   }
@@ -121,7 +120,7 @@ export class UnitInfoPanelView extends LitElement {
           display: 'Adv. Deploy',
           value: displayDistance(unit.advancedDeployment),
         },
-        {display: 'Smoke', value: unit.hasDefensiveSmoke},
+        {display: 'Smoke', value: unit.hasDefensiveSmoke ? 'Yes' : 'No'},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
     ];
@@ -307,11 +306,12 @@ export class UnitInfoPanelView extends LitElement {
           this.unit
         );
         return html`${this.renderPanelDisplay(panelLayout)}
-        <div class="divisions">
-        ${this.unit?.divisions.map(
-          (divisionId: string) =>
-            html`<division-flag .divisionId=${divisionId}></division-flag>`
-        )}</div> `;
+          <div class="divisions">
+            ${this.unit?.divisions.map(
+              (divisionId: string) =>
+                html`<division-flag .divisionId=${divisionId}></division-flag>`
+            )}
+          </div> `;
       }
 
       return html`?`;

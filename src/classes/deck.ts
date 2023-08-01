@@ -322,6 +322,10 @@ export class Deck {
     return this.getUnitForDescriptor(unitDescriptor);
   }
 
+  public getPackForUnitDescriptor(descriptor: string): Pack | undefined {
+    return this.division.packs.find((pack) => pack.unitDescriptor === descriptor);
+  }
+
   public getTransportsForPack(pack: Pack): Unit[] | undefined {
     if (pack.availableTransportList && pack.availableTransportList.length > 0) {
       return pack.availableTransportList.map((transportDescriptor) =>

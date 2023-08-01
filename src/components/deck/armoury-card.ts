@@ -103,7 +103,9 @@ export class ArmouryCard extends LitElement {
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
       <div class="traits">
-        ${unit.specialities.length > 1 ? unit.specialities.slice(1).map((trait) => getIconForTrait(trait)) : "No Traits"} 
+        ${unit.specialities.length > 1
+          ? unit.specialities.slice(1).map((trait) => getIconForTrait(trait))
+          : 'No Traits'}
       </div>
       <div class="body">
         <div class="top-section">
@@ -148,19 +150,31 @@ export class ArmouryCard extends LitElement {
     return html` <div class="points">${unit?.commandPoints}</div>`;
   }
 
-  renderInfoIcon(_unit: Unit, _pack: Pack, _deck: Deck) {
+  renderInfoIcon(
+    _unit: Unit,
+    _pack: Pack,
+    _deck: Deck,
+    openCallback?: () => void
+  ) {
     return html`
       <vaadin-button
         theme="primary small icon"
         class="info-icon-button"
-        @click=${() => this.open()}
+        @click=${() => {
+          console.log(openCallback)
+          if (openCallback) {
+            openCallback();
+          } else {
+            this.open();
+          }
+        }}
         aria-label="Show unit info"
         style="padding: 0;"
       >
         <vaadin-icon icon="vaadin:info-circle-o"></vaadin-icon
       ></vaadin-button>
 
-      ${this.renderUnitModal(_unit)}
+      ${openCallback ? `` : this.renderUnitModal(_unit)}
     `;
   }
 
@@ -189,8 +203,8 @@ export class ArmouryCard extends LitElement {
         []
       )}
       ${dialogRenderer(
-        () => html` <unit-card .unit=${_unit}></unit-card> `,
-        []
+        () => html`<unit-card .unit=${_unit}></unit-card> `,
+        [_unit]
       )}
     ></vaadin-dialog>`;
   }

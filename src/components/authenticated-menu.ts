@@ -31,7 +31,10 @@ interface MenuItemGroup {
 }
 
 /// Create a single menu item
-type MenuItemRenderer = (menuItem: MenuItem | MenuItemGroup, selected?: boolean) => TemplateResult;
+type MenuItemRenderer = (
+  menuItem: MenuItem | MenuItemGroup,
+  selected?: boolean
+) => TemplateResult;
 
 /// Menu definition indicating an ordered list of items per user authentication type
 type MenuDefinition = {
@@ -69,7 +72,7 @@ const defaultMenu: MenuDefinition = {
           name: 'Maps',
           icon: 'vaadin:map-marker',
           href: '/maps',
-        }
+        },
       ],
     },
     {
@@ -94,6 +97,11 @@ const defaultMenu: MenuDefinition = {
           name: 'My Decks',
           icon: 'vaadin:folder',
           href: '/my-decks',
+        },
+        {
+          name: 'Draft',
+          icon: 'vaadin:clipboard-text',
+          href: '/deck-drafter',
         },
       ],
     },
@@ -156,7 +164,7 @@ const defaultMenu: MenuDefinition = {
           name: 'Maps',
           icon: 'vaadin:map-marker',
           href: '/maps',
-        }
+        },
       ],
     },
     {
@@ -176,6 +184,11 @@ const defaultMenu: MenuDefinition = {
           name: 'Library',
           icon: 'vaadin:book',
           href: '/deck-library',
+        },
+        {
+          name: 'Draft',
+          icon: 'vaadin:clipboard-text',
+          href: '/deck-drafter',
         },
       ],
     },
@@ -334,9 +347,7 @@ export class AuthenticatedMenu extends LitElement {
   selectedMenuItemIndex?: number;
 
   @state()
-  activeUrl = "/";
-
-
+  activeUrl = '/';
 
   unitSelected(event: CustomEvent) {
     if (event.detail.value as Unit) {
@@ -351,7 +362,10 @@ export class AuthenticatedMenu extends LitElement {
     } else {
       const activePath = this.activeUrl;
       const selected = activePath === menuItem.href;
-      return html` <a class="tab ${selected ? "selected" : "" }" href=${menuItem.href}>
+      return html` <a
+        class="tab ${selected ? 'selected' : ''}"
+        href=${menuItem.href}
+      >
         <vaadin-icon class="drawer-icon" icon=${menuItem.icon}> </vaadin-icon>
         <div class="menu-item">${menuItem.name}</div>
       </a>`;
@@ -372,7 +386,7 @@ export class AuthenticatedMenu extends LitElement {
 
   handlePopState() {
     const activePath = router.location?.route?.path;
-    this.activeUrl = activePath || "/";
+    this.activeUrl = activePath || '/';
   }
 
   items(): (MenuItem | MenuItemGroup)[] {
@@ -464,8 +478,8 @@ export class AuthenticatedMenu extends LitElement {
         selected = true;
       }
 
-      return this.renderMenuItem(item, selected);}
-    );
+      return this.renderMenuItem(item, selected);
+    });
 
     const shouldMakeUserVerify =
       this.user && this.user?.emailVerified === false;

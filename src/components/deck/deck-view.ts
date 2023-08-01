@@ -1,7 +1,7 @@
-import {css, html, LitElement, TemplateResult} from 'lit';
+import {css, CSSResultGroup, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import './deck-card';
-import {Deck} from '../../classes/deck';
+import {Deck, DeckUnit} from '../../classes/deck';
 import {UnitCategory} from '../../types/deck-builder';
 import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
 import {notificationService} from '../../services/notification';
@@ -15,8 +15,8 @@ import {exportDeckToCode} from '../../utils/export-deck-to-code';
 import {Router} from '@vaadin/router';
 import {updateDeckToFirebase} from '../../utils/update-deck-to-firebase';
 import {DetailsOpenedChangedEvent} from '@vaadin/details';
-import { FirebaseService } from '../../services/firebase';
-import { User } from 'firebase/auth';
+import {FirebaseService} from '../../services/firebase';
+import {User} from 'firebase/auth';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -138,7 +138,7 @@ export class DeckView extends LitElement {
         margin-left: var(--lumo-space-s);
         margin-right: var(--lumo-space-s);
       }
-    `;
+    ` as CSSResultGroup;
   }
 
   @property({
@@ -170,7 +170,6 @@ export class DeckView extends LitElement {
       this.loggedInUser = user;
     });
   }
-
 
   resetDeck() {
     this.deck?.clearDeck();
@@ -259,7 +258,13 @@ export class DeckView extends LitElement {
     }
   }
 
-  createItem(iconName: string, text: string, id: string, isChild = false, disabled = false) {
+  createItem(
+    iconName: string,
+    text: string,
+    id: string,
+    isChild = false,
+    disabled = false
+  ) {
     const item = document.createElement('vaadin-context-menu-item');
     const span = document.createElement('span');
     const icon = document.createElement('vaadin-icon');
@@ -275,8 +280,6 @@ export class DeckView extends LitElement {
       item.style.alignItems = 'center';
       item.style.justifyContent = 'center';
     }
-
-
 
     item.style.display = 'flex';
     item.style.alignItems = 'center';
@@ -346,12 +349,7 @@ export class DeckView extends LitElement {
                 ${this.deck.totalSpentActivationPoints} /
                 ${this.deck.division.maxActivationPoints} Activation Points
               </span>
-
-              <vaadin-menu-bar
-                theme="primary icon"
-                @item-selected=${this.menuItemSelected}
-                .items="${this.generateTooltipItems(this.loggedInUser)}"
-              ></vaadin-menu-bar>
+              ${this.renderActionsMenu()}
             </div>
           </div>
           <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
@@ -379,6 +377,14 @@ export class DeckView extends LitElement {
     }
   }
 
+  renderActionsMenu(): TemplateResult {
+    return html` <vaadin-menu-bar
+      theme="primary icon"
+      @item-selected=${this.menuItemSelected}
+      .items="${this.generateTooltipItems(this.loggedInUser)}"
+    ></vaadin-menu-bar>`;
+  }
+
   generateTooltipItems(user?: User | undefined | null) {
     const childTooltipItems = [];
 
@@ -391,10 +397,15 @@ export class DeckView extends LitElement {
       childTooltipItems.push({
         component: this.createItem('harddrive', 'Save', 'save', true),
       });
-    }
-    else {
+    } else {
       childTooltipItems.push({
-        component: this.createItem('harddrive', 'Log in to save', 'save', true, true),
+        component: this.createItem(
+          'harddrive',
+          'Log in to save',
+          'save',
+          true,
+          true
+        ),
       });
     }
     childTooltipItems.push({
@@ -473,6 +484,10 @@ export class DeckView extends LitElement {
     </div> `;
   }
 
+  protected renderDeckCard(deckUnit: DeckUnit, deck: Deck) {
+    return html`<deck-card .deckUnit=${deckUnit} .deck=${deck}></deck-card>`;
+  }
+
   renderDeckCategory(category: UnitCategory, deck: Deck) {
     const deckUnitsInCategory =
       deck.unitsInDeckGroupedUnitsByCategory[category];
@@ -481,9 +496,7 @@ export class DeckView extends LitElement {
     const numberOfCardsInCategory = deckUnitsInCategory.length;
 
     for (const deckUnit of deckUnitsInCategory) {
-      deckUnitsInCategoryToRender.push(
-        html`<deck-card .deckUnit=${deckUnit} .deck=${deck}></deck-card>`
-      );
+      deckUnitsInCategoryToRender.push(this.renderDeckCard(deckUnit, deck));
     }
 
     return html`<vaadin-details
