@@ -295,9 +295,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
       `;
     }
 
-    html``;
-
-    return html` <div class="card">Loading</div> `;
+    return html``;
   }
 }
 

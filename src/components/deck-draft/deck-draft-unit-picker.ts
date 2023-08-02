@@ -1,87 +1,32 @@
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {css, html, LitElement, PropertyValues, TemplateResult} from 'lit';
+import {customElement, property, queryAll} from 'lit/decorators.js';
 import {Deck} from '../../classes/deck';
 import {PackChoice} from '../../routes/deck-draft';
 import {Unit} from '../../types/unit';
 import './deck-draft-button';
 import './deck-draft-unit-select-card';
+import anime from 'animejs/lib/anime.es.js';
 
 @customElement('deck-draft-unit-picker')
 export class DeckDraftUnitPicker extends LitElement {
   static get styles() {
     return css`
-      @keyframes typing {
-        from {
-          width: 0;
-        }
-        to {
-          width: 100%;
-        }
+      .instruction {
+        margin-bottom: var(--lumo-space-l);
       }
-
-      /* The typewriter cursor effect */
 
       .instruction > * {
         overflow: hidden; /* Ensures the content is not revealed until the animation */
         white-space: nowrap; /* Keeps the content on a single line */
         margin: 0 auto; /* Gives that scrolling effect as the typing happens */
         letter-spacing: 0.15em; /* Adjust as needed */
-        animation: typing 3.5s steps(40, end),
-          blink-caret 0.75s step-end infinite;
-        max-width: 320px;
         text-align: center;
-        font-size: var(--lumo-font-size-xl);
+        font-size: var(--lumo-font-size-xxl);
+        font-weight: bold;
         padding: var(--lumo-space-m);
-        border: 1px solid var(--lumo-primary-color-50pct);
-        background-color: var(--lumo-contrast-5pct);
-        margin-bottom: var(--lumo-space-m);
-      }
-
-            /* fade in and when they are done fading in, give them a little bounce and wiggle */
-
-            @keyframes fadeAndZoom {
-        0% {
-          opacity: 0;
-          transform: scale(0.5);
-        }
-        80% {
-          transform: scale(1.05);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      @keyframes highlight {
-        0% {
-          border-color: var(--lumo-primary-color-50pct);
-        }
-        50% {
-          border-color: var(--lumo-primary-color-100pct);
-        }
-
-        100% {
-          border-color: var(--lumo-primary-color-50pct);
-        }
-      }
-
-      /* Fade in, then bounce and wiggle */
-      /* Each division happens slightly after the other */
-      .division-1 {
-        animation: fadeAndZoom 0.25s ease-in-out 1;
-      }
-
-      .division-2 {
-        animation: fadeAndZoom 0.25s ease-in-out 0.25s 1;
-      }
-
-      .division-3 {
-        animation: fadeAndZoom 0.25s ease-in-out 0.5s 1;
       }
 
       .division {
-        opacity: 0;
         animation-fill-mode: forwards;
         flex: 1 1 100%;
       }
@@ -92,8 +37,6 @@ export class DeckDraftUnitPicker extends LitElement {
         justify-content: center;
         gap: var(--lumo-space-m);
       }
-
-
 
       img {
         width: 300px;
@@ -118,6 +61,56 @@ export class DeckDraftUnitPicker extends LitElement {
         margin-top: var(--lumo-space-s);
       }
     `;
+  }
+
+  @queryAll('.division')
+  divs?: HTMLDivElement[];
+
+  firstUpdated() {
+    this.playAnimation();
+  }
+
+  playAnimation() {
+    anime({
+      targets: this.divs,
+      translateX: [-50, 0],
+      duration: 1000,
+      delay: anime.stagger(250),
+      opacity: [0, 1],
+      update: (anim) => {
+        const sound = this.shadowRoot?.getElementById(
+          'sound'
+        ) as HTMLAudioElement;
+        sound.volume = 0.1;
+
+        // 3 sounds should be played
+        // 1. When the first card is shown
+        if (anim.progress > 10 && anim.progress < 11) {
+          sound.currentTime = 0; // Reset the audio to the beginning before each play
+          sound.play();
+        }
+
+        // 2. When the second card is shown
+        if (anim.progress > 35 && anim.progress < 36) {
+          sound.currentTime = 0; // Reset the audio to the beginning before each play
+          sound.play();
+        }
+
+        // 3. When the third card is shown
+        if (anim.progress > 60 && anim.progress < 61) {
+          sound.currentTime = 0; // Reset the audio to the beginning before each play
+          sound.play();
+        }
+      },
+    });
+  }
+
+  updated(changedProperties: PropertyValues<this>) {
+    // only need to check changed properties for an expensive computation.
+    console.log(changedProperties);
+    if (changedProperties.has('disable') && this.disable === false) {
+      this.playAnimation();
+    }
   }
 
   @property({type: Array})
@@ -151,13 +144,9 @@ export class DeckDraftUnitPicker extends LitElement {
         <!-- Add additional <source> elements for other audio formats (e.g., OGG, WAV) -->
       </audio>
       <div class="divisions">
-        ${this.disable
-          ? html`<deck-draft-button ?disabled=${true}></deck-draft-button
-              ><deck-draft-button ?disabled=${true}></deck-draft-button
-              ><deck-draft-button ?disabled=${true}></deck-draft-button>`
-          : html`${this.choices.map((choice, index) =>
-              this.renderUnitButton(choice, index)
-            )}`}
+        ${this.choices.map((choice, index) =>
+          this.renderUnitButton(choice, index)
+        )}
       </div>
     `;
   }
@@ -193,6 +182,7 @@ export class DeckDraftUnitPicker extends LitElement {
         </deck-draft-unit-select-card>
         <vaadin-button
           theme="primary large"
+          ?disabled=${this.disable}
           @click=${() => this.choosePack(index)}
         >
           Add
@@ -214,5 +204,11 @@ declare global {
 }
 
 /*
-       
+        ${this.disable
+          ? html`<deck-draft-button ?disabled=${true}></deck-draft-button
+              ><deck-draft-button ?disabled=${true}></deck-draft-button
+              ><deck-draft-button ?disabled=${true}></deck-draft-button>`
+          : html`${this.choices.map((choice, index) =>
+              this.renderUnitButton(choice, index)
+            )}`}       
         */

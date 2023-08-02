@@ -8,6 +8,8 @@ import {displayDistance} from '../utils/unit-stats/display-distance';
 import {displayFuel} from '../utils/unit-stats/display-fuel';
 import {displayTime} from '../utils/unit-stats/display-time';
 import {displayEcm} from '../utils/unit-stats/display-ecm';
+import { displayStealth } from '../utils/unit-stats/display-stealth';
+import { displayOptics } from '../utils/unit-stats/display-optics';
 
 export interface PanelItem {
   display: string;
@@ -97,8 +99,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Damage', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {display: 'Speed', value: displaySpeed(unit.speed)},
@@ -130,8 +132,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Strength', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {
@@ -168,8 +170,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Dmg', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {display: 'ECM', value: displayEcm(unit.ecm)},
@@ -195,8 +197,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Dmg', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {display: 'ECM', value: displayEcm(unit.ecm)},
@@ -219,8 +221,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Dmg', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {display: 'Amphibious', value: displayAmphibious(unit)},
@@ -265,8 +267,8 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Dmg', value: unit.maxDamage},
-        {display: 'Optics', value: unit.optics},
-        {display: 'Stealth', value: unit.stealth},
+        {display: 'Optics', value: displayOptics(unit.optics)},
+        {display: 'Stealth', value: displayStealth(unit.stealth)},
       ],
       [
         {display: 'ECM', value: displayEcm(unit.ecm)},
