@@ -44,7 +44,11 @@ export class UnitImage extends LitElement {
     `;
   }
 
-  @property()
+  @property({
+    hasChanged() {
+      return true;
+    }
+  })
   unit?: Unit;
 
   @state()
