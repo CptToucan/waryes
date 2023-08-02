@@ -3,7 +3,6 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
 import {FirebaseService} from '../services/firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
-// import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 import {doc, getDoc, onSnapshot} from 'firebase/firestore';
 import '../components/deck-draft/deck-draft-division-picker';
 import '../components/deck-draft/deck-draft-unit-picker';
@@ -12,6 +11,7 @@ import {Division} from '../types/deck-builder';
 import {Unit, UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
 import '../components/deck-draft/deck-draft-deck-display';
+import {exportDeckToCode} from '../utils/export-deck-to-code';
 
 export interface DeckDraftStateResponse {
   sessionId: string;
@@ -61,7 +61,10 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
 
       .content {
         flex: 1 1 80%;
-        margin-top: var(--lumo-space-l);
+      }
+
+      summary-view {
+        width: 100%;
       }
 
       .complete {
@@ -78,6 +81,24 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
         flex-direction: column;
         background-color: var(--lumo-contrast-5pct);
         padding: var(--lumo-space-m);
+      }
+
+      .deck-summary-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: var(--lumo-space-m);
+      }
+
+      .deck-title {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .button-bar {
+        display: flex;
+        gap: var(--lumo-space-s);
       }
     `;
   }
@@ -187,7 +208,6 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   async chooseOption(sessionId: string, choice: number) {
     try {
       this.disableButtons = true;
-      console.log(this.disableButtons);
       const user = FirebaseService.auth.currentUser;
       const response = await fetch(
         `https://europe-west1-catur-11410.cloudfunctions.net/deckDraftChoose`,
@@ -237,7 +257,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
       if (response.ok) {
         console.log(response);
 
-        const responseContent = await response.json();
+        const responseContent = await response.json();      
         viewDeckCode(responseContent.deckCode);
 
         console.log('Finished');
@@ -266,32 +286,52 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
 
     if (this.state?.phase === 'UNIT_PICK') {
       return html`
-        ${this.activeDeck === null
-          ? ''
-          : html`
-              <deck-draft-deck-display
-                .deck=${this.activeDeck}
-              ></deck-draft-deck-display>
-            `}
         ${this.state.data.choices.length === 0
           ? html` <div class="content complete">
-              <vaadin-button
-                theme="primary large"
-                @click=${() => this.completeDraft(this.sessionId!)}
-                .disabled=${this.completing}
-              >
-                Complete Draft
-              </vaadin-button>
+              <div class="deck-summary-container">
+                <deck-header .deck=${this.activeDeck}>
+                  <div class="deck-title" slot="title">
+                    <deck-title
+                      .deck=${this.activeDeck}
+                      .name=${this.activeDeck?.division?.name}
+                    >
+                    </deck-title>
+                    <div class="button-bar">
+                      <vaadin-button
+                        theme="large"
+                        @click=${() => exportDeckToCode(this.activeDeck!)}
+                      >
+                        Copy Code
+                      </vaadin-button>
+                      <vaadin-button
+                        theme="primary large"
+                        @click=${() => this.completeDraft(this.sessionId!)}
+                        .disabled=${this.completing}
+                      >
+                        Complete Draft
+                      </vaadin-button>
+                    </div>
+                  </div>
+                </deck-header>
+                <summary-view .deck=${this.activeDeck}></summary-view>
+              </div>
             </div>`
-          : html` <deck-draft-unit-picker
-              class="content"
-              .choices=${this.state.data.choices}
-              .units=${this.units}
-              .disable=${this.disableButtons}
-              .deck=${this.activeDeck}
-              @unit-chosen=${(e: CustomEvent) =>
-                this.chooseOption(this.sessionId!, e.detail.choice)}
-            ></deck-draft-unit-picker>`}
+          : html` ${this.activeDeck === null
+                ? ''
+                : html`
+                    <deck-draft-deck-display
+                      .deck=${this.activeDeck}
+                    ></deck-draft-deck-display>
+                  `}
+              <deck-draft-unit-picker
+                class="content"
+                .choices=${this.state.data.choices}
+                .units=${this.units}
+                .disable=${this.disableButtons}
+                .deck=${this.activeDeck}
+                @unit-chosen=${(e: CustomEvent) =>
+                  this.chooseOption(this.sessionId!, e.detail.choice)}
+              ></deck-draft-unit-picker>`}
       `;
     }
 
