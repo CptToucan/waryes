@@ -5,10 +5,13 @@ import {FirebaseService} from '../services/firebase';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
 import {BeforeEnterObserver} from '@vaadin/router';
-import { User } from 'firebase/auth';
+import {User} from 'firebase/auth';
 
 @customElement('deck-drafter-route')
-export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver {
+export class DeckDrafterRoute
+  extends LitElement
+  implements BeforeEnterObserver
+{
   static get styles() {
     return css`
       :host {
@@ -143,7 +146,6 @@ export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver 
   disableDraftButton = false;
 
   async onBeforeEnter() {
-    
     FirebaseService.auth?.onAuthStateChanged(async (user) => {
       this.loggedInUser = user;
     });
@@ -211,14 +213,14 @@ export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver 
   }
 
   render(): TemplateResult {
-    const disabledButton = this.disableDraftButton || !this.loggedInUser;   
-    let buttonText  = 'Marshal Your Forces';
+    const disabledButton = this.disableDraftButton || !this.loggedInUser;
+    let buttonText = 'Marshal Your Forces';
 
-    if(this.disableDraftButton) {
+    if (this.disableDraftButton) {
       buttonText = 'Starting Draft...';
     }
 
-    if(!this.loggedInUser) {
+    if (!this.loggedInUser) {
       buttonText = 'Please Login';
     }
 
@@ -230,7 +232,7 @@ export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver 
       <div class="card center">
         <div class="header">
           <img src=${WaryesImage} alt="WarYes Logo" />
-          <span>Deck Draft <simple-chip>BETA</simple-chip></span> 
+          <span>Deck Draft <simple-chip>BETA</simple-chip></span>
         </div>
         <div>
           <p>
@@ -247,6 +249,11 @@ export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver 
             Once you are done, you will be given the deck code which you can
             import in to the game.
           </p>
+          <p>
+            The draft is run on a server, this will enable more advanced
+            features in the future. To prevent abuse of the server, you will
+            unfortunately need to hae a WarYes account to use the draft.
+          </p>
         </div>
         <div class="button-container">
           <vaadin-button
@@ -255,10 +262,9 @@ export class DeckDrafterRoute extends LitElement implements BeforeEnterObserver 
             @click="${() => {
               this.startDraft();
             }}"
-            >
-              ${buttonText}
-            </vaadin-button
           >
+            ${buttonText}
+          </vaadin-button>
         </div>
       </div>
     `;
