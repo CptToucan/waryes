@@ -252,7 +252,7 @@ export class DeckDrafterRoute
           <p>
             The draft is run on a server, this will enable more advanced
             features in the future. To prevent abuse of the server, you will
-            unfortunately need to hae a WarYes account to use the draft.
+            unfortunately need to have a WarYes account to use the draft.
           </p>
         </div>
         <div class="button-container">
