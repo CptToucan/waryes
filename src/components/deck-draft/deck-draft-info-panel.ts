@@ -114,7 +114,7 @@ export default class DeckDraftInfoPanel extends UnitInfoPanelView {
   }
 
   planePanel(unit: Unit): PanelItem[][] {
-    const layoutTokensToExtract: string[][] = [["Max Dmg", "Speed", "Travel Time", "Turn Radius"], ["Bomb Strategy", "ECM"] ];
+    const layoutTokensToExtract: string[][] = [["Max Dmg", "Speed", "Travel Time", "Turn Radius"], ["Bomb Strategy", "Altitude", "ECM"] ];
     const oldLayout = super.planePanel(unit);
     const newLayout: PanelItem[][] = this.mapLayout(layoutTokensToExtract, oldLayout);
     return newLayout;
