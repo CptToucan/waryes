@@ -81,6 +81,10 @@ interface Weapon {
   numberOfSalvos: number;
   imageTexture: string;
   mod: BucketFolder;
+  flyingAltitude?: number;
+  maxRefuelTime?: number;
+  maxRearmTime?: number;
+  maxRepairTime?: number;
 }
 
 interface UnitType {
@@ -139,6 +143,10 @@ interface Unit {
   _display: boolean;
   mod: BucketFolder;
   divisions: string[];
+  flyingAltitude?: number;
+  maxRefuelTime?: number;
+  maxRearmTime?: number;
+  maxRepairTime?: number;
 }
 
 enum UnitFieldType {

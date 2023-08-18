@@ -8,8 +8,8 @@ import {displayDistance} from '../utils/unit-stats/display-distance';
 import {displayFuel} from '../utils/unit-stats/display-fuel';
 import {displayTime} from '../utils/unit-stats/display-time';
 import {displayEcm} from '../utils/unit-stats/display-ecm';
-import { displayStealth } from '../utils/unit-stats/display-stealth';
-import { displayOptics } from '../utils/unit-stats/display-optics';
+import {displayStealth} from '../utils/unit-stats/display-stealth';
+import {displayOptics} from '../utils/unit-stats/display-optics';
 
 export interface PanelItem {
   display: string;
@@ -255,6 +255,27 @@ export class UnitInfoPanelView extends LitElement {
       [
         {display: 'Move Time', value: displayTime(unit.fuelMove)},
         {display: 'Fuel', value: displayFuel(unit.fuel)},
+        {
+          display: 'Altitude',
+          value: displayDistance(unit.flyingAltitude || 0),
+        },
+      ],
+
+      [
+        {
+          display: 'Max Refuel Time',
+          value: displayTime(unit.maxRefuelTime),
+        },
+        {
+          display: 'Max Repair Time',
+          value: displayTime(unit.maxRepairTime),
+        },
+        {
+          display: 'Max Rearm Time',
+          value: displayTime(unit.maxRearmTime),
+        },
+      ],
+      [
         {
           display: 'Bomb Strategy',
           value: unit.bombStrategy || 'None',
