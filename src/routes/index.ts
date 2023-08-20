@@ -65,15 +65,6 @@ export class IndexRoute extends LitElement {
         cursor: pointer;
       }
 
-      .menu-buttons {
-        display: flex;
-        flex-direction: row;
-        flex: 1 1 100%;
-        align-items: stretch;
-        padding: var(--lumo-space-s);
-        flex-wrap: wrap;
-      }
-
       .container {
         // height: 100%;
         display: flex;
@@ -88,7 +79,6 @@ export class IndexRoute extends LitElement {
         padding-bottom: var(--lumo-space-s);
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: var(--lumo-space-xs);
-        // align grid in center
         justify-content: center;
         max-width: 900px;
         overflow: hidden;
@@ -208,6 +198,12 @@ export class IndexRoute extends LitElement {
 
     const deckChoices = [
       this.renderChoiceButton(
+        '/deck-drafter',
+        'vaadin:random',
+        'Draft',
+        'Draft a randomised deck.'
+      ),
+      this.renderChoiceButton(
         '/deck-import',
         'vaadin:code',
         'Import',
@@ -245,15 +241,15 @@ export class IndexRoute extends LitElement {
     return html`
       <div class="button-category">
         <h3>Browse</h3>
-        <div class="container menu-buttons button-grid">${browseChoices}</div>
+        <div class="button-grid">${browseChoices}</div>
       </div>
       <div class="button-category">
         <h3>Deck</h3>
-        <div class="container menu-buttons button-grid">${deckChoices}</div>
+        <div class="button-grid">${deckChoices}</div>
       </div>
       <div class="button-category">
         <h3>Inspect</h3>
-        <div class="container menu-buttons button-grid">${inspectChoices}</div>
+        <div class="button-grid">${inspectChoices}</div>
       </div>
     `;
   }
