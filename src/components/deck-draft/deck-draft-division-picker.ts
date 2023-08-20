@@ -42,7 +42,7 @@ export class DeckDraftDivisionPicker extends LitElement {
         text-align: center;
         font-size: var(--lumo-font-size-xxl);
         font-weight: bold;
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-xs);
       }
 
       .divisions {
@@ -135,6 +135,7 @@ export class DeckDraftDivisionPicker extends LitElement {
         })
       );
     }, 500);
+    
   }
 
   playAnimation(index: number) {
@@ -151,17 +152,22 @@ export class DeckDraftDivisionPicker extends LitElement {
 
     // get the division that was clicked
     const division = divisions[index];
-    const directions = [1, 0, -1];
+    //const directions = [1, 0, -1];
 
     anime({
       targets: division,
       duration: 1000,
+      /*
       translateX: {
         value: `${directions[index] * 100}%`,
       },
       translateY: {
         value: "20%",
       },
+      */
+
+      translateX: '0%', // Center horizontally
+      translateY: '0%',
       scale: {value: 1.5},
       rotate: '1turn',
     });
@@ -227,21 +233,3 @@ declare global {
     'deck-draft-division-picker': DeckDraftDivisionPicker;
   }
 }
-
-/*
-
-      @keyframes fadeAndZoom {
-        0% {
-          opacity: 0;
-          transform: scale(0.5);
-        }
-        80% {
-          transform: scale(1.05);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-      }
-
-      */
