@@ -11,8 +11,12 @@ import anime from 'animejs/lib/anime.es.js';
 export class DeckDraftUnitPicker extends LitElement {
   static get styles() {
     return css`
+      :host {
+        width: 100%;
+        overflow: hidden;
+      }
       .instruction {
-        margin-bottom: var(--lumo-space-l);
+        margin-bottom: var(--lumo-space-s);
       }
 
       .instruction > * {
@@ -23,19 +27,25 @@ export class DeckDraftUnitPicker extends LitElement {
         text-align: center;
         font-size: var(--lumo-font-size-xxl);
         font-weight: bold;
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-xs);
       }
 
       .division {
         animation-fill-mode: forwards;
-        flex: 1 1 100%;
+        flex: 1 0 100%;
+        margin: 0 auto;
       }
 
       .divisions {
         display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+        overflow-x: auto; 
+        justify-content: flex-start;
         gap: var(--lumo-space-m);
+        width: 100%;
+        padding-left: var(--lumo-space-m);
+        padding-right: var(--lumo-space-m);
+        padding-bottom: var(--lumo-space-m);
       }
 
       img {
@@ -52,6 +62,13 @@ export class DeckDraftUnitPicker extends LitElement {
         max-width: 400px;
         flex-direction: column;
       }
+
+      @media (max-width: 1000px) {
+        .deck-draft-card {
+          max-width: 300px;
+        }
+      }
+
 
       deck-draft-button {
         max-width: 400px;

@@ -16,8 +16,11 @@ export class DeckDrafterRoute
     return css`
       :host {
         display: flex;
-        align-items: stretch;
+        align-items: flex-start;
+        justify-content: center;
         flex: 1 1 100%;
+        position: relative;
+        height: calc(100vh - 44px);
       }
 
       simple-chip {
@@ -32,7 +35,7 @@ export class DeckDrafterRoute
       }
 
       section {
-        height: calc(100vh - 44px);
+        height: 100%;
         width: 100%;
         perspective: 50vmax;
         overflow: hidden;
@@ -77,29 +80,38 @@ export class DeckDrafterRoute
         flex-direction: column;
 
         border-radius: var(--lumo-border-radius);
-        padding: var(--lumo-space-l);
+        padding: var(--lumo-space-m);
+        overflow-y: auto;
+        max-height: 100%;
+        background-color: var(--lumo-base-color);
+        margin-top: var(--lumo-space-m);
+      }
+
+      @media (max-width: 500px) {
+        .card {
+          margin-top: 0;
+        }
       }
 
       .card::before {
         opacity: 0.9;
-        background-color: var(--lumo-base-color);
+
         content: '';
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
+        height: 100%;
         border-radius: inherit;
       }
 
       .center {
         position: absolute;
-        top: 20%; /* Move the element 50% down from the top of its parent */
-        left: 50%; /* Move the element 50% from the left of its parent */
-        transform: translate(-50%, -20%); /* Center the element precisely */
         z-index: 1;
         max-width: 600px;
       }
+
 
       .card img {
         max-width: 320px;

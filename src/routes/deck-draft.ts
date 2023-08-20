@@ -1,6 +1,6 @@
 import {BeforeEnterObserver, RouterLocation} from '@vaadin/router';
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, state} from 'lit/decorators.js';
+import {customElement, query, state} from 'lit/decorators.js';
 import {FirebaseService} from '../services/firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
 import {doc, getDoc, onSnapshot} from 'firebase/firestore';
@@ -12,6 +12,7 @@ import {Unit, UnitMap} from '../types/unit';
 import {Deck} from '../classes/deck';
 import '../components/deck-draft/deck-draft-deck-display';
 import {exportDeckToCode} from '../utils/export-deck-to-code';
+import {SideDrawer} from 'side-drawer';
 
 export interface DeckDraftStateResponse {
   sessionId: string;
@@ -55,12 +56,18 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   static get styles() {
     return css`
       :host {
-        display: flex;
         height: 100%;
+      }
+
+      .container {
+        display: flex;
+        max-height: 100%;
       }
 
       .content {
         flex: 1 1 80%;
+        padding-bottom: 60px;
+        overflow-y: auto;
       }
 
       summary-view {
@@ -100,6 +107,46 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
         display: flex;
         gap: var(--lumo-space-s);
       }
+
+      @media (max-width: 1000px) {
+        .hide-on-mobile {
+          display: none;
+        }
+      }
+
+      @media (min-width: 1001px) {
+        .hide-on-desktop {
+          display: none !important;
+        }
+
+        .content {
+          padding-bottom: 0;
+        }
+      }
+
+      side-drawer {
+        background-color: var(--lumo-base-color);
+        max-width: 95vw;
+      }
+
+      .button-drawer {
+        position: fixed;
+        bottom: 0;
+        height: 60px;
+        width: 100%;
+        background-color: var(--lumo-base-color);
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid var(--lumo-contrast-20pct);
+      }
+
+      .button-drawer > vaadin-button {
+        flex: 1 1 100%;
+        margin-left: var(--lumo-space-s);
+        margin-right: var(--lumo-space-s);
+      }
     `;
   }
 
@@ -114,6 +161,22 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
 
   @state()
   private unitMap?: UnitMap;
+
+  @state()
+  private showDeckDrawer = false;
+
+  @query('side-drawer')
+  drawer!: SideDrawer;
+
+  openDeckDrawer() {
+    this.showDeckDrawer = true;
+    this.drawer.open = true;
+  }
+
+  closeDeckDrawer() {
+    this.showDeckDrawer = false;
+    this.drawer.open = false;
+  }
 
   @state()
   completing = false;
@@ -257,7 +320,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
       if (response.ok) {
         console.log(response);
 
-        const responseContent = await response.json();      
+        const responseContent = await response.json();
         viewDeckCode(responseContent.deckCode);
 
         console.log('Finished');
@@ -316,22 +379,45 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
                 <summary-view .deck=${this.activeDeck}></summary-view>
               </div>
             </div>`
-          : html` ${this.activeDeck === null
-                ? ''
-                : html`
-                    <deck-draft-deck-display
-                      .deck=${this.activeDeck}
-                    ></deck-draft-deck-display>
-                  `}
-              <deck-draft-unit-picker
-                class="content"
-                .choices=${this.state.data.choices}
-                .units=${this.units}
-                .disable=${this.disableButtons}
-                .deck=${this.activeDeck}
-                @unit-chosen=${(e: CustomEvent) =>
-                  this.chooseOption(this.sessionId!, e.detail.choice)}
-              ></deck-draft-unit-picker>`}
+          : html`
+              <side-drawer
+                @open=${() => this.openDeckDrawer()}
+                @close=${() => this.closeDeckDrawer()}
+                ?open=${this.showDeckDrawer}
+              >
+                <deck-draft-deck-display
+                  class=""
+                  .deck=${this.activeDeck}
+                ></deck-draft-deck-display>
+              </side-drawer>
+              <div class="button-drawer hide-on-desktop">
+                <vaadin-button
+                  @click=${() => this.openDeckDrawer()}
+                  theme="large primary"
+                  >View Deck</vaadin-button
+                >
+              </div>
+              <div class="container">
+                ${this.activeDeck === null
+                  ? ''
+                  : html`
+                      <deck-draft-deck-display
+                        class="hide-on-mobile"
+                        .deck=${this.activeDeck}
+                      ></deck-draft-deck-display>
+                    `}
+
+                <deck-draft-unit-picker
+                  class="content"
+                  .choices=${this.state.data.choices}
+                  .units=${this.units}
+                  .disable=${this.disableButtons}
+                  .deck=${this.activeDeck}
+                  @unit-chosen=${(e: CustomEvent) =>
+                    this.chooseOption(this.sessionId!, e.detail.choice)}
+                ></deck-draft-unit-picker>
+              </div>
+            `}
       `;
     }
 
@@ -344,9 +430,3 @@ declare global {
     'deck-draft-route': DeckDraftRoute;
   }
 }
-
-/*
-        <vaadin-button @click=${() => this.completeDraft(this.sessionId!)}>
-          Complete Draft
-        </vaadin-button>
-          */

@@ -1,19 +1,17 @@
-import {customElement /*, property*/, state} from 'lit/decorators.js';
+import {customElement, state} from 'lit/decorators.js';
 import {html, css, TemplateResult} from 'lit';
 import {ArmouryWithTransportCard} from '../deck/armoury-with-transport-card';
 import {Unit} from '../../types/unit';
 import {getVeterancyName} from '../../utils/get-icon-for-veterancy';
 import {getIconForTrait} from '../../utils/get-icon-for-trait';
-// import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
-// import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../../utils/convert-unit-factory-descriptor-to-category-descriptor';
-import {Pack /*, UnitCategory*/, UnitCategory} from '../../types/deck-builder';
+import {Pack, UnitCategory} from '../../types/deck-builder';
 import {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import {Deck} from '../../classes/deck';
 import {getIconsWithFallback} from '../../utils/get-icons-with-fallback';
 import './deck-draft-info-panel';
 import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../../utils/convert-unit-factory-descriptor-to-category-descriptor';
-import { getCodeForFactoryDescriptor } from '../../utils/get-code-for-factory-descriptor';
+import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
 
 @customElement('deck-draft-unit-select-card')
 export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
@@ -163,6 +161,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
 
       .transport-container {
         display: flex;
+        font-size: var(--lumo-font-size-m);
       }
 
       .transport-container > * {
@@ -195,6 +194,22 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
         --lumo-primary-color: hsla(240, 7%, 11%, 0.8);
         padding: 0;
       }
+
+      @media (max-width: 1000px) {
+        :host {
+          --lumo-font-size-xxs: 0.5625rem;
+          --lumo-font-size-xs: 0.6094rem;
+          --lumo-font-size-s: 0.6563rem;
+          --lumo-font-size-m: 0.75rem;
+          --lumo-font-size-l: 0.8438rem;
+          --lumo-font-size-xl: 1.0313rem;
+          --lumo-font-size-xxl: 1.3125rem;
+          --lumo-font-size-xxxl: 1.875rem;
+          --lumo-line-height-xs: 0.9375;
+          --lumo-line-height-s: 1.0313;
+          --lumo-line-height-m: 1.2188;
+        }
+      }
     `,
   ];
 
@@ -212,9 +227,9 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
           cmdPoints += this.transport.commandPoints;
         }
 
-        const category =               convertUnitFactoryDescriptorToCategoryDescriptor(
+        const category = convertUnitFactoryDescriptorToCategoryDescriptor(
           unit.factoryDescriptor
-        ) as UnitCategory
+        ) as UnitCategory;
 
         return html`
           ${this.transport ? this.renderTransportModal(this.transport) : ''}
@@ -245,15 +260,11 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
             </div>
           </div>
           <div class="slot-cost">
-            <div class="stat-name">
-            Slot Cost
-            </div>
+            <div class="stat-name">Slot Cost</div>
 
             <div class="cost">
               ${getCodeForFactoryDescriptor(category)}
-            ${this.deck.getNextSlotCostForCategory(
-              category
-            )}
+              ${this.deck.getNextSlotCostForCategory(category)}
             </div>
           </div>
         `;
