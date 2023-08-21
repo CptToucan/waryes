@@ -20,7 +20,7 @@ export class DeckDraftDeckDisplay extends DeckView {
 
   renderDeckCard(deckUnit: DeckUnit, deck: Deck): TemplateResult<1> {
     return html`
-      <compact-armoury-card .pack=${deckUnit.pack} .transport=${deckUnit.transport}  .deck=${deck}></compact-armoury-card>
+      <compact-armoury-card .pack=${deckUnit.pack} .transport=${deckUnit.transport} .selectedVeterancy=${deckUnit.veterancy}  .deck=${deck}></compact-armoury-card>
     `;
   }
 

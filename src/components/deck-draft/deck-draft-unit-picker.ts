@@ -195,6 +195,7 @@ export class DeckDraftUnitPicker extends LitElement {
           .pack=${pack}
           .transport=${transport}
           .deck=${this.deck}
+          .selectedVeterancy=${choice.veterancy}
         >
         </deck-draft-unit-select-card>
         <vaadin-button
