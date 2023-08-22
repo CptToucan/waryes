@@ -88,6 +88,18 @@ export class Deck {
     }
 
     this.slotCosts = slotCosts;
+
+    const maxAvailabilityOfUnit: {
+      [key: string]: number;
+    } = {};
+
+    for (const pack of this.division.packs) {
+      const unitDescriptor = pack.unitDescriptor;
+      const availability = pack.numberOfCards;
+      maxAvailabilityOfUnit[unitDescriptor] = availability;
+    }
+
+    this._maxAvailabilityOfUnitCard = maxAvailabilityOfUnit;
   }
 
   division: Division;
@@ -106,8 +118,26 @@ export class Deck {
     this._units = value;
     this._unitsInDeckGroupedUnitsByCategory =
       this._groupUnitsByDeckCategory(value);
-    this._unitInDeckGroupedUnitsByDescriptor =
-      this._groupUnitsByDescriptor(value);
+    this._unitInDeckGroupedUnitsByPackDescriptor =
+      this._groupUnitsByPackDescriptor(value);
+
+      const unitsGroupedUnitsByDescriptor = {} as {
+        [key: string]: DeckUnit[];
+      };
+  
+      for (const unit of this._units) {
+        if (!unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor]) {
+          unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor] = [];
+        }
+  
+        unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor].push(unit);
+      }
+
+    this._unitsInDeckGroupedByDescriptor = unitsGroupedUnitsByDescriptor;
+  }
+
+  private _maxAvailabilityOfUnitCard!: {
+    [key: string]: number;
   }
 
   private _unitsInDeckGroupedUnitsByCategory: GroupedDeckUnits = {
@@ -121,15 +151,19 @@ export class Deck {
     [UnitCategory.AIR]: [],
   };
 
+  private _unitsInDeckGroupedByDescriptor!: {
+    [key: string]: DeckUnit[];
+  };
+
   public get unitsInDeckGroupedUnitsByCategory(): GroupedDeckUnits {
     return this._unitsInDeckGroupedUnitsByCategory;
   }
 
-  private _unitInDeckGroupedUnitsByDescriptor: GroupedDeckUnitsByDescriptor =
+  private _unitInDeckGroupedUnitsByPackDescriptor: GroupedDeckUnitsByDescriptor =
     {};
 
   public get unitsInDeckGroupedUnitsByDescriptor(): GroupedDeckUnitsByDescriptor {
-    return this._unitInDeckGroupedUnitsByDescriptor;
+    return this._unitInDeckGroupedUnitsByPackDescriptor;
   }
 
   private _groupedAvailableUnits: GroupedPacksByCategory;
@@ -187,7 +221,7 @@ export class Deck {
     return groupedUnits;
   }
 
-  private _groupUnitsByDescriptor(
+  private _groupUnitsByPackDescriptor(
     units: DeckUnit[]
   ): GroupedDeckUnitsByDescriptor {
     const groupedUnits: GroupedDeckUnitsByDescriptor = {};
@@ -366,9 +400,22 @@ export class Deck {
     return remainingCards;
   }
 
+  public getAvailableQuantityOfUnit(unitDescriptor: string): number {
+    const numberOfUsedCards =
+      this._unitsInDeckGroupedByDescriptor[unitDescriptor]?.length ||
+      0;
+
+   
+    const maximumNumberOfCards = this._maxAvailabilityOfUnitCard[unitDescriptor];
+
+    const remainingCards = maximumNumberOfCards - numberOfUsedCards;
+    return remainingCards;
+  }
+
   public getNextSlotCostForCategory(
     category: UnitCategory
   ): number | undefined {
+
     const unitsInDeckCategory =
       this.unitsInDeckGroupedUnitsByCategory[category];
     const numberOfUnitsInCategory = unitsInDeckCategory.length;

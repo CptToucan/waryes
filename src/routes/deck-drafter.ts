@@ -6,6 +6,7 @@ import {FirebaseService} from '../services/firebase';
 import WaryesImage from '../../images/waryes-transparent.png';
 import {BeforeEnterObserver} from '@vaadin/router';
 import {User} from 'firebase/auth';
+import {DeckDraftFactory} from '../classes/deck-drafter/DeckDraftFactory';
 
 @customElement('deck-drafter-route')
 export class DeckDrafterRoute
@@ -112,7 +113,6 @@ export class DeckDrafterRoute
         max-width: 600px;
       }
 
-
       .card img {
         max-width: 320px;
       }
@@ -140,7 +140,27 @@ export class DeckDrafterRoute
       .button-container {
         padding-top: var(--lumo-space-l);
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
+        align-items: flex-end;
+        
+      }
+
+      .button-with-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content:space-between;
+
+      }
+
+      .label > simple-chip {
+        height: 16px;
+        font-size: var(--lumo-font-size-xs);
+      }
+
+      .label {
+        display: flex;
+        align-items: center;
       }
 
       @keyframes crawlingWall {
@@ -163,77 +183,53 @@ export class DeckDrafterRoute
     });
   }
 
-  async startDraft() {
+  async startServerDraft() {
     try {
-      this.disableDraftButton = true;
       const user = FirebaseService.auth.currentUser;
-      const response = await fetch(
-        `https://europe-west1-catur-11410.cloudfunctions.net/startDeckDraft`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${await user?.getIdToken()}`,
-          },
-        }
-      );
 
-      if (response.ok) {
-        console.log(response);
-        console.log('Draft session created successfully.');
-        // navigate to the draft session
-        Router.go(
-          `/deck-drafter/${encodeURIComponent(
-            (await response.json()).sessionId
-          )}`
-        );
-      } else {
-        console.error('Failed to create draft session.');
+      if (!user) {
+        throw new Error('User not logged in.');
       }
+
+      this.disableDraftButton = true;
+
+      const deckDraftServerEngine = await DeckDraftFactory.createServerEngine(
+        user
+      );
+      const sessionId = `${deckDraftServerEngine.sessionId}`;
+
+      Router.go(`/deck-drafter/${encodeURIComponent(sessionId)}`);
     } catch (error) {
       console.error('Error creating draft session:', error);
       this.disableDraftButton = false;
     }
   }
 
-  async chooseDivision(sessionId: string, choice: number) {
+  async startClientDraft() {
     try {
-      const user = FirebaseService.auth.currentUser;
-      const response = await fetch(
-        `https://europe-west1-catur-11410.cloudfunctions.net/deckDraftChoose`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${await user?.getIdToken()}`,
-          },
-          body: JSON.stringify({
-            sessionId,
-            choice,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        console.log(response);
-        console.log('Division chosen successfully.');
-        // Perform any additional steps or navigation after choosing the division
-      } else {
-        console.error('Failed to choose division.');
-      }
+      await DeckDraftFactory.createClientEngine();
+      const sessionId = `local`;
+      Router.go(`/deck-drafter/${encodeURIComponent(sessionId)}`);
     } catch (error) {
-      console.error('Error choosing division:', error);
+      console.error('Error creating draft session:', error);
     }
   }
 
   render(): TemplateResult {
-    const disabledButton = this.disableDraftButton || !this.loggedInUser;
-    let buttonText = 'Marshal Your Forces';
+    const serverSideDisabledButton =
+      this.disableDraftButton || !this.loggedInUser;
+    const clientSideDisabledButton = this.disableDraftButton;
+
+    let serverButtonText = 'Marshal Your Forces';
+    let clientButtonText = serverButtonText;
 
     if (this.disableDraftButton) {
-      buttonText = 'Starting Draft...';
+      serverButtonText = 'Starting Draft...';
+      clientButtonText = serverButtonText;
     }
 
     if (!this.loggedInUser) {
-      buttonText = 'Please Login';
+      serverButtonText = 'Please Login';
     }
 
     return html`
@@ -262,21 +258,39 @@ export class DeckDrafterRoute
             import in to the game.
           </p>
           <p>
-            The draft is run on a server, this will enable more advanced
-            features in the future. To prevent abuse of the server, you will
-            unfortunately need to have a WarYes account to use the draft.
+            There are now 2 ways to run your draft, one is locally on your
+            computer (client side), the other is on a server (server side). The
+            client side mode is much faster than the server side mode, and you
+            do not need to be logged in to use it. There currently isn't really
+            any reason to use the server side mode, but it is there if you want
+            to.
           </p>
         </div>
         <div class="button-container">
-          <vaadin-button
-            theme="primary large"
-            ?disabled="${disabledButton}"
-            @click="${() => {
-              this.startDraft();
-            }}"
-          >
-            ${buttonText}
-          </vaadin-button>
+          <div class="button-with-label">
+            <div class="label">Client Side <simple-chip>NEW</simple-chip></div>
+            <vaadin-button
+              theme="primary large"
+              ?disabled="${clientSideDisabledButton}"
+              @click="${() => {
+                this.startClientDraft();
+              }}"
+            >
+              ${clientButtonText}
+            </vaadin-button>
+          </div>
+          <div class="button-with-label">
+            Server Side
+            <vaadin-button
+              theme="large"
+              ?disabled="${serverSideDisabledButton}"
+              @click="${() => {
+                this.startServerDraft();
+              }}"
+            >
+              ${serverButtonText}
+            </vaadin-button>
+          </div>
         </div>
       </div>
     `;

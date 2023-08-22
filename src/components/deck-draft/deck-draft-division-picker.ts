@@ -76,6 +76,9 @@ export class DeckDraftDivisionPicker extends LitElement {
   @query('.division')
   div?: HTMLDivElement;
 
+  @query('.instruction')
+  instructionDiv?: HTMLDivElement;
+
   firstUpdated() {
     anime({
       targets: this.divs,
@@ -134,7 +137,7 @@ export class DeckDraftDivisionPicker extends LitElement {
           },
         })
       );
-    }, 500);
+    }, 1500);
     
   }
 
@@ -157,15 +160,6 @@ export class DeckDraftDivisionPicker extends LitElement {
     anime({
       targets: division,
       duration: 1000,
-      /*
-      translateX: {
-        value: `${directions[index] * 100}%`,
-      },
-      translateY: {
-        value: "20%",
-      },
-      */
-
       translateX: '0%', // Center horizontally
       translateY: '0%',
       scale: {value: 1.5},
@@ -174,6 +168,12 @@ export class DeckDraftDivisionPicker extends LitElement {
 
     anime({
       targets: otherDivisions,
+      duration: 1000,
+      opacity: 0,
+    });
+
+    anime({
+      targets: this.instructionDiv,
       duration: 1000,
       opacity: 0,
     });
