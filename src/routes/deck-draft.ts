@@ -1,5 +1,5 @@
 import {BeforeEnterObserver, RouterLocation} from '@vaadin/router';
-import {css, html, LitElement, TemplateResult} from 'lit';
+import {css, html, LitElement,TemplateResult} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {FirebaseService} from '../services/firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
@@ -13,6 +13,10 @@ import {Deck} from '../classes/deck';
 import '../components/deck-draft/deck-draft-deck-display';
 import {exportDeckToCode} from '../utils/export-deck-to-code';
 import {SideDrawer} from 'side-drawer';
+import {DeckDraftFactory} from '../classes/deck-drafter/DeckDraftFactory';
+import {onAuthStateChanged, User} from 'firebase/auth';
+import {DeckDraftEngine} from '../classes/deck-drafter/DeckDraftEngineInterface';
+import {DeckDraftController} from '../classes/deck-drafter/DeckDraftController';
 
 export interface DeckDraftStateResponse {
   sessionId: string;
@@ -189,11 +193,17 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   private activeDeck: Deck | null = null;
 
   @state({
-    hasChanged: () => {
+    hasChanged: (newValue) => {
+      console.log(newValue);
       return true;
     },
   })
   private state?: DeckDraftState;
+
+  user: User | null = null;
+
+  engine?: DeckDraftEngine;
+  engineController?: DeckDraftController;
 
   @state()
   private disableButtons = false;
@@ -217,115 +227,133 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
     this.sessionId = `${location.params.sessionId}`;
 
     if (this.sessionId) {
-      await this.getDraftSession(this.sessionId);
+      onAuthStateChanged(FirebaseService.auth, async (user) => {
+        this.user = user;
+
+        if (!user) {
+          return;
+        }
+
+        if (!this.sessionId) {
+          return;
+        }
+
+        let engine;
+        if (this.sessionId === 'local') {
+          engine = await DeckDraftFactory.createEngineFromLocalStorage();
+        } else {
+          engine = await DeckDraftFactory.createServerEngineForSessionId(
+            user,
+            this.sessionId
+          );
+        }
+
+        const engineController = new DeckDraftController(engine);
+        await this.setupDraftCallbacks(`${this.sessionId}`, engineController);
+
+        this.engine = engine;
+        this.engineController = engineController;
+      });
+    }
+  }
+
+  async firstUpdated() {
+    if(!this.engineController) {
+      return;
     }
   }
 
   /**
    * Gets the existing session from firebase
    */
-  async getDraftSession(sessionId: string) {
-    const sessionDoc = doc(FirebaseService.db, 'deck_draft_state', sessionId);
-    const session = await getDoc(sessionDoc);
-    if (!session.exists()) {
-      return;
-    }
-    // const sessionData = session.data() as DeckDraftStateResponse;
-    /* const unsubscribe = */ onSnapshot(sessionDoc, (doc) => {
-      if (doc.exists()) {
-        this.state = (doc.data() as DeckDraftStateResponse).state;
-        if (
-          isUnitPickState(this.state) &&
-          this.unitMap &&
-          this.divisions &&
-          this.state.data.deckCode !== undefined
-        ) {
-          if (this.state.data.deckCode !== '') {
-            const deck = Deck.fromDeckCode(this.state.data.deckCode, {
-              unitMap: this.unitMap,
-              divisions: this.divisions,
-            });
+  async setupDraftCallbacks(
+    sessionId: string,
+    engineController: DeckDraftController
+  ) {
+    if (sessionId === 'local') {
+      engineController?.registerCallback(() => {
+        // @ts-ignore
+        this.handleState(engineController.engine.state as DeckDraftState);
+      });
+      // @ts-ignore
 
-            this.activeDeck = deck;
-          } else {
-            const division = this.divisions.find(
-              (division) =>
-                division.descriptor ===
-                (this.state as UnitPickState).data.division
-            ) as Division;
+      setTimeout(() => {
+        // @ts-ignore
+        this.handleState(engineController.engine.state as DeckDraftState);
+        this.requestUpdate();
+      }, 500);
 
-            const deck: Deck = new Deck({
-              unitMap: this.unitMap,
-              division: division,
-            });
-
-            this.activeDeck = deck;
-          }
-        }
+    } else {
+      const sessionDoc = doc(FirebaseService.db, 'deck_draft_state', sessionId);
+      const session = await getDoc(sessionDoc);
+      if (!session.exists()) {
+        return;
       }
-    });
-    // 404
-    console.log('No session found');
+      // const sessionData = session.data() as DeckDraftStateResponse;
+      /* const unsubscribe = */ onSnapshot(sessionDoc, (doc) => {
+        if (doc.exists()) {
+          const state = (doc.data() as DeckDraftStateResponse).state;
+          this.handleState(state);
+        }
+      });
+    }
   }
 
-  async chooseOption(sessionId: string, choice: number) {
-    try {
-      this.disableButtons = true;
-      const user = FirebaseService.auth.currentUser;
-      const response = await fetch(
-        `https://europe-west1-catur-11410.cloudfunctions.net/deckDraftChoose`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${await user?.getIdToken()}`,
-          },
-          body: JSON.stringify({
-            sessionId,
-            choice,
-          }),
-        }
-      );
+  private handleState(state: UnitPickState | DivisionPickState) {
+    this.state = state;
+    if (
+      isUnitPickState(state) &&
+      this.unitMap &&
+      this.divisions &&
+      state.data.deckCode !== undefined
+    ) {
+      if (state.data.deckCode !== '') {
+        const deck = Deck.fromDeckCode(state.data.deckCode, {
+          unitMap: this.unitMap,
+          divisions: this.divisions,
+        });
 
-      if (response.ok) {
-        console.log(response);
-        console.log('Division chosen successfully.');
-        // Perform any additional steps or navigation after choosing the division
+        this.activeDeck = deck;
       } else {
-        console.error('Failed to choose division.');
+        const division = this.divisions.find(
+          (division) =>
+            division.descriptor ===
+            (this.state as UnitPickState).data.division
+        ) as Division;
+
+        const deck: Deck = new Deck({
+          unitMap: this.unitMap,
+          division: division,
+        });
+
+        this.activeDeck = deck;
       }
-      this.disableButtons = false;
+    }
+  }
+
+  async chooseOption(choice: number) {
+    try {
+      if (!this.engineController) {
+        return;
+      }
+
+      this.disableButtons = true;
+      await this.engineController.chooseOption(choice);
     } catch (error) {
       console.error('Error choosing division:', error);
+    } finally {
       this.disableButtons = false;
     }
   }
 
-  async completeDraft(sessionId: string) {
+  async completeDraft() {
     try {
-      this.completing = true;
-      const user = FirebaseService.auth.currentUser;
-      const response = await fetch(
-        `https://europe-west1-catur-11410.cloudfunctions.net/deckDraftComplete`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${await user?.getIdToken()}`,
-          },
-          body: JSON.stringify({
-            sessionId,
-          }),
-        }
-      );
-
-      if (response.ok) {
-        console.log(response);
-
-        const responseContent = await response.json();
-        viewDeckCode(responseContent.deckCode);
-
-        console.log('Finished');
-        // Perform any additional steps or navigation after choosing the division
+      if (!this.engineController) {
+        return;
       }
+      this.completing = true;
+      const deckCode = await this.engineController.completeDraft();
+      viewDeckCode(deckCode);
     } catch (error) {
       console.error('Error completing draft:', error);
     } finally {
@@ -342,7 +370,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
           .divisions=${this.divisions}
           .disable=${this.disableButtons}
           @division-chosen=${(e: CustomEvent) =>
-            this.chooseOption(this.sessionId!, e.detail.choice)}
+            this.chooseOption(e.detail.choice)}
         ></deck-draft-division-picker>
       `;
     }
@@ -368,7 +396,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
                       </vaadin-button>
                       <vaadin-button
                         theme="primary large"
-                        @click=${() => this.completeDraft(this.sessionId!)}
+                        @click=${() => this.completeDraft()}
                         .disabled=${this.completing}
                       >
                         Complete Draft
@@ -414,7 +442,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
                   .disable=${this.disableButtons}
                   .deck=${this.activeDeck}
                   @unit-chosen=${(e: CustomEvent) =>
-                    this.chooseOption(this.sessionId!, e.detail.choice)}
+                    this.chooseOption(e.detail.choice)}
                 ></deck-draft-unit-picker>
               </div>
             `}

@@ -43,7 +43,11 @@ export class ArmouryCard extends LitElement {
     );
   }
 
-  @property()
+  @property({
+    hasChanged() {
+      return true;
+    },
+  })
   pack?: Pack;
 
   @property({
@@ -161,7 +165,7 @@ export class ArmouryCard extends LitElement {
         theme="primary small icon"
         class="info-icon-button"
         @click=${() => {
-          console.log(openCallback)
+          console.log(openCallback);
           if (openCallback) {
             openCallback();
           } else {

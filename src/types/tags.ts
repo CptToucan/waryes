@@ -28,6 +28,8 @@ export enum Tag {
   Mid = 'Mid',
   Late = 'Late',
   SlowGrind = "Slow Grind",
+  Helo = "Helo",
+  PlayForKD = "Play for K/D",
 }
 
 const tags = Object.values(Tag);

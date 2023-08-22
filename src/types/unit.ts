@@ -147,6 +147,7 @@ interface Unit {
   maxRefuelTime?: number;
   maxRearmTime?: number;
   maxRepairTime?: number;
+  isCommand?: boolean;
 }
 
 enum UnitFieldType {

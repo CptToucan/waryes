@@ -190,7 +190,6 @@ export class UnitsRoute extends LitElement implements BeforeEnterObserver {
   }
 
   filter() {
-    console.log('filtering');
     const filteredDivisions = this.divisionsToFilterBy;
     const filteredName = this.nameFilter;
 
