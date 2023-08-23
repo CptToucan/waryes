@@ -275,7 +275,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
     sessionId: string,
     engineController: DeckDraftController
   ) {
-    console.log(sessionId);
+
     if (sessionId === 'local') {
       engineController?.registerCallback(() => {
         // @ts-ignore
@@ -366,7 +366,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   }
 
   render(): TemplateResult {
-    console.log('rendering', this.state);
+
     if (this.state?.phase === 'DIVISION_PICK') {
       return html`
         <deck-draft-division-picker
