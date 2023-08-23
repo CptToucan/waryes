@@ -133,6 +133,11 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:file-text',
           href: '/privacy-policy',
         },
+        {
+          name: 'Support the Site',
+          icon: 'vaadin:heart',
+          href: 'https://www.patreon.com/WarYes',
+        }
       ],
     },
   ],
@@ -225,6 +230,11 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:file-text',
           href: '/privacy-policy',
         },
+        {
+          name: 'Support the Site',
+          icon: 'vaadin:heart',
+          href: 'https://www.patreon.com/WarYes',
+        }
       ],
     },
   ],
