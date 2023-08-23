@@ -1,5 +1,5 @@
 import {BeforeEnterObserver, RouterLocation} from '@vaadin/router';
-import {css, html, LitElement,TemplateResult} from 'lit';
+import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, query, state} from 'lit/decorators.js';
 import {FirebaseService} from '../services/firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
@@ -227,38 +227,43 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
     this.sessionId = `${location.params.sessionId}`;
 
     if (this.sessionId) {
-      onAuthStateChanged(FirebaseService.auth, async (user) => {
-        this.user = user;
+      if (this.sessionId === 'local') {
+        const engine = await DeckDraftFactory.createEngineFromLocalStorage();
+        const engineController = new DeckDraftController(engine);
 
-        if (!user) {
-          return;
-        }
+        await this.setupDraftCallbacks(`${this.sessionId}`, engineController);
+        this.engine = engine;
+        this.engineController = engineController;
+      } else {
+        onAuthStateChanged(FirebaseService.auth, async (user) => {
+          this.user = user;
 
-        if (!this.sessionId) {
-          return;
-        }
+          if (!user) {
+            return;
+          }
 
-        let engine;
-        if (this.sessionId === 'local') {
-          engine = await DeckDraftFactory.createEngineFromLocalStorage();
-        } else {
-          engine = await DeckDraftFactory.createServerEngineForSessionId(
+          if (!this.sessionId) {
+            return;
+          }
+
+          const engine = await DeckDraftFactory.createServerEngineForSessionId(
             user,
             this.sessionId
           );
-        }
 
-        const engineController = new DeckDraftController(engine);
-        await this.setupDraftCallbacks(`${this.sessionId}`, engineController);
+          const engineController = new DeckDraftController(engine);
 
-        this.engine = engine;
-        this.engineController = engineController;
-      });
+          this.engine = engine;
+          this.engineController = engineController;
+
+          await this.setupDraftCallbacks(`${this.sessionId}`, engineController);
+        });
+      }
     }
   }
 
   async firstUpdated() {
-    if(!this.engineController) {
+    if (!this.engineController) {
       return;
     }
   }
@@ -270,6 +275,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
     sessionId: string,
     engineController: DeckDraftController
   ) {
+    console.log(sessionId);
     if (sessionId === 'local') {
       engineController?.registerCallback(() => {
         // @ts-ignore
@@ -282,7 +288,6 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
         this.handleState(engineController.engine.state as DeckDraftState);
         this.requestUpdate();
       }, 500);
-
     } else {
       const sessionDoc = doc(FirebaseService.db, 'deck_draft_state', sessionId);
       const session = await getDoc(sessionDoc);
@@ -317,8 +322,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
       } else {
         const division = this.divisions.find(
           (division) =>
-            division.descriptor ===
-            (this.state as UnitPickState).data.division
+            division.descriptor === (this.state as UnitPickState).data.division
         ) as Division;
 
         const deck: Deck = new Deck({
@@ -362,6 +366,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   }
 
   render(): TemplateResult {
+    console.log('rendering', this.state);
     if (this.state?.phase === 'DIVISION_PICK') {
       return html`
         <deck-draft-division-picker
