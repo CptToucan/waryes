@@ -242,7 +242,7 @@ export class IndividualWeaponView extends LitElement {
     });
 
     layout.push({
-      name: 'Accuracy',
+      name: 'Accuracy per Shot',
       stats: [
         {
           name: 'Static',
