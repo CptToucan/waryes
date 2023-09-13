@@ -110,7 +110,7 @@ export class IntelReport extends LitElement {
 
     for (const deckUnit of deck.units) {
       const unit = deck.getUnitForPack(deckUnit.pack);
-      const veterancyQuantities = deck.getVeterancyQuantitiesForPack(
+      const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(
         deckUnit.pack
       );
       if (unit) {

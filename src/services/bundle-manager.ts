@@ -240,6 +240,14 @@ class BundleManager {
     return jsonData;
   }
 
+  async getJsonFromStoragePath<T>(path: string): Promise<T> {
+    const storage = getStorage(FirebaseService.app);
+    const jsonBlob = await getBlob(ref(storage, path));
+    const jsonBlobStr = await jsonBlob.text();
+    const jsonData = JSON.parse(jsonBlobStr);
+    return jsonData;
+  }
+
   parseUnit(unit: Unit, mod: BucketFolder) {
     const isCommand = isSpecialtyCommand(unit.specialities[0]);
     const isRecon = isSpecialtyRecon(unit.specialities[0]);

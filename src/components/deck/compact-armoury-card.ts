@@ -2,6 +2,7 @@ import {customElement /*, property*/} from 'lit/decorators.js';
 import {html, css, TemplateResult} from 'lit';
 import {ArmouryWithTransportCard} from './armoury-with-transport-card';
 import {getIconForVeterancy} from '../../utils/get-icon-for-veterancy';
+import { Deck } from '../../classes/deck';
 
 @customElement('compact-armoury-card')
 export class CompactArmouryCard extends ArmouryWithTransportCard {
@@ -96,7 +97,7 @@ export class CompactArmouryCard extends ArmouryWithTransportCard {
   render(): TemplateResult {
     if (this.pack && this.deck) {
       const unit = this.deck.getUnitForPack(this.pack);
-      const veterancyQuantities = this.deck.getVeterancyQuantitiesForPack(
+      const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(
         this.pack
       );
 

@@ -7,6 +7,7 @@ import '../components/division-flag';
 import '../components/simple-chip';
 import '@vaadin/icon';
 import '@vaadin/button';
+import '@vaadin/details';
 import {PatchUnitRecord} from '../types/PatchUnitRecord';
 import {RecordField} from '../types/RecordField';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
@@ -22,7 +23,10 @@ import {FirebaseService} from '../services/firebase';
 import '@vaadin/combo-box';
 import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
 import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
-import {DivisionsMap} from '../types/deck-builder';
+import {Division, DivisionsMap} from '../types/deck-builder';
+import {UnitRecord} from '../types/UnitRecord';
+import {Deck} from '../classes/deck';
+
 
 interface Diff {
   __old: unknown;
@@ -44,10 +48,11 @@ type AnyDiffArrayElement =
   | ArrayDiffRemovedElement;
 
 type FirebasePatchRecord = {
-  data: string;
+  data?: string;
   created: Timestamp;
   name: string;
   hidden: boolean;
+  path?: string;
 };
 
 type PatchNoteTypes = {
@@ -114,7 +119,6 @@ export class PatchNotesRoute extends LitElement {
         text-overflow: ellipsis;
         white-space: nowrap;
         flex: 1 1 0px;
-   
       }
 
       h4.weapon-name {
@@ -234,9 +238,9 @@ export class PatchNotesRoute extends LitElement {
 
     const querySnapshot = await getDocs(q);
 
-    const patches = (querySnapshot.docs.map((doc) =>
-      doc.data()
-    ) as FirebasePatchRecord[]).filter((patch) => patch.hidden !== true);
+    const patches = (
+      querySnapshot.docs.map((doc) => doc.data()) as FirebasePatchRecord[]
+    ).filter((patch) => patch.hidden !== true);
 
     this.patches = patches;
 
@@ -244,7 +248,18 @@ export class PatchNotesRoute extends LitElement {
   }
 
   async setupPatch(firebasePatchRecord: FirebasePatchRecord) {
-    const patchNotesJson = JSON.parse(firebasePatchRecord.data);
+    let patchNotesUnitJson;
+    let patchNotesDivisionJson;
+
+    if (firebasePatchRecord.path) {
+      const result = await BundleManagerService.getJsonFromStoragePath<any>(
+        firebasePatchRecord.path
+      );
+      patchNotesUnitJson = result.unitStats;
+      patchNotesDivisionJson = result.unitAvailability;
+    } else if (firebasePatchRecord.data) {
+      patchNotesUnitJson = JSON.parse(firebasePatchRecord.data);
+    }
 
     const units = await BundleManagerService.getUnitsForBucket(
       BucketFolder.WARNO
@@ -257,7 +272,7 @@ export class PatchNotesRoute extends LitElement {
     const divisionMap: DivisionsMap = {};
 
     // sort divisions by alliance
-     
+
     const sortedDivisions = divisions?.sort((a, b) => {
       if (a.alliance === b.alliance) {
         return 0;
@@ -273,7 +288,6 @@ export class PatchNotesRoute extends LitElement {
       return 0;
     });
 
-
     if (sortedDivisions) {
       for (const division of sortedDivisions) {
         divisionMap[division.descriptor] = division;
@@ -281,7 +295,6 @@ export class PatchNotesRoute extends LitElement {
     }
 
     this.divisionsMap = divisionMap;
-
 
     if (!units || !sortedDivisions || !divisions) {
       return;
@@ -299,10 +312,14 @@ export class PatchNotesRoute extends LitElement {
       removed: [],
     };
 
-    for (const patchNote of patchNotesJson) {
+    for (const patchNote of patchNotesUnitJson) {
       const unit = unitMap[patchNote.descriptorName];
 
-      const patchUnitRecord = new PatchUnitRecord(patchNote, unit);
+      const patchUnitRecord = new PatchUnitRecord(
+        patchNote,
+        patchNotesDivisionJson,
+        unit
+      );
 
       if (patchNote.new) {
         patchNotes.added.push(patchUnitRecord);
@@ -314,6 +331,7 @@ export class PatchNotesRoute extends LitElement {
     }
 
     const divisionUnitMap: {[key: string]: PatchNoteTypes} = {};
+
     for (const division of sortedDivisions) {
       // create map of arrays of units in divisions
 
@@ -347,6 +365,31 @@ export class PatchNotesRoute extends LitElement {
         }
       }
     }
+
+    divisionUnitMap['Misc'] = {
+      added: [],
+      changed: [],
+      removed: [],
+    };
+
+    for (const patchUnit of patchNotes.added) {
+      if (
+        patchUnit.unitRecord.unit?.divisions === undefined ||
+        patchUnit.unitRecord.unit?.divisions?.length === 0
+      ) {
+        divisionUnitMap['Misc'].added.push(patchUnit);
+      }
+    }
+
+    for (const patchUnit of patchNotes.changed) {
+      if (
+        patchUnit.unitRecord.unit?.divisions === undefined ||
+        patchUnit.unitRecord.unit?.divisions?.length === 0
+      ) {
+        divisionUnitMap['Misc'].changed.push(patchUnit);
+      }
+    }
+
     // sort by patchNote.unit alliance
     patchNotes.added.sort((a) => {
       return a.unitRecord.unit?.unitType.nationality === Alliance.NATO ? -1 : 1;
@@ -461,28 +504,36 @@ export class PatchNotesRoute extends LitElement {
             </division-flag>
             <h3>${this.divisionsMap?.[division]?.name || division}</h3>
           </div>
-          ${this.renderUnitView(patchNotes[division])}
+          ${this.renderUnitView(patchNotes[division], division)}
         </div>`;
       })}
     `;
   }
 
-  renderUnitView(patchNotes: PatchNoteTypes) {
-    return html` <h3>${patchNotes.added.length} New Units</h3>
-      <div class="grid">
-        ${patchNotes.added.map((patchNote) => {
-          return this.renderPatchNote(patchNote);
-        })}
-      </div>
-      <h3>${patchNotes.changed.length} Changed Units</h3>
+  renderUnitView(patchNotes: PatchNoteTypes, divisionDescriptor?: string) {
+    return html` <vaadin-details>
+        <h3 slot="summary">${patchNotes.added.length} New Units</h3>
+        <div class="grid">
+          ${patchNotes.added.map((patchNote) => {
+            return this.renderPatchNote(patchNote, divisionDescriptor);
+          })}
+        </div>
+      </vaadin-details>
+      <vaadin-details>
+      <h3 slot="summary">${patchNotes.changed.length} Changed Units</h3>
       <div class="grid">
         ${patchNotes.changed.map((patchNote) => {
-          return this.renderPatchNote(patchNote);
+          return this.renderPatchNote(patchNote, divisionDescriptor);
         })}
-      </div>`;
+      </div>
+      </vaadin-details>
+      `;
   }
 
-  private renderPatchNote(patchNote: PatchUnitRecord) {
+  private renderPatchNote(
+    patchNote: PatchUnitRecord,
+    divisionDescriptor?: string
+  ) {
     return html` <div class="card">
       <div class="card-header">
         <a href="/unit/${patchNote.unitRecord.descriptorName.getFieldValue()}">
@@ -507,12 +558,15 @@ export class PatchNotesRoute extends LitElement {
         </div>
       </div>
       ${!patchNote.patch.new
-        ? html`${this.renderPatchNoteDiff(patchNote)}`
+        ? html`${this.renderPatchNoteDiff(patchNote, divisionDescriptor)}`
         : html``}
     </div>`;
   }
 
-  private renderPatchNoteDiff(patchNote: PatchUnitRecord) {
+  private renderPatchNoteDiff(
+    patchNote: PatchUnitRecord,
+    divisionDescriptor?: string
+  ) {
     const unitFields = patchNote.unitRecord.getFields();
     const weapons = patchNote.unitRecord.weaponRecords;
 
@@ -541,6 +595,58 @@ export class PatchNotesRoute extends LitElement {
               <division-flag .divisionId=${divisionDiff[1]}></division-flag>
             </div>`
           );
+        }
+      }
+    }
+
+    if (divisionDescriptor && patchNote.allUnitAvailabilityPatch) {
+      const divisionChanges = patchNote.allUnitAvailabilityPatch.find(
+        (divisionPatch: any) => {
+          return divisionPatch.descriptor === divisionDescriptor;
+        }
+      );
+
+      if (divisionChanges) {
+        const packChange = divisionChanges.packDiff.find((packDiff: any) => {
+          return (
+            packDiff.descriptor ===
+            patchNote.unitRecord.descriptorName.getFieldValue()
+          );
+        });
+
+        if (packChange) {
+          const numberOfUnitsInPackDiff: Diff | undefined =
+            packChange.diff.numberOfUnitsInPack;
+          const numberOfUnitInPackXPMultiplierDiff:
+            | ArrayDiffElement[]
+            | undefined = packChange.diff.numberOfUnitInPackXPMultiplier;
+
+          if (numberOfUnitsInPackDiff || numberOfUnitInPackXPMultiplierDiff) {
+            const division = this.divisionsMap?.[divisionDescriptor];
+            const unitRecord = patchNote.unitRecord;
+
+            if (division && unitRecord) {
+              outputHtml.push(
+                this.renderAvailabilityDiff(
+                  numberOfUnitsInPackDiff,
+                  numberOfUnitInPackXPMultiplierDiff,
+                  division,
+                  unitRecord
+                )
+              );
+            }
+          }
+
+          if (packChange.diff.numberOfCards) {
+            outputHtml.push(html`<div>
+              Number of cards: ${packChange.diff.numberOfCards.__old}
+              <vaadin-icon
+                class="arrow-icon"
+                .icon=${'vaadin:arrow-right'}
+              ></vaadin-icon>
+              ${packChange.diff.numberOfCards.__new}
+            </div>`);
+          }
         }
       }
     }
@@ -593,7 +699,11 @@ export class PatchNotesRoute extends LitElement {
       if (isDiffElement(weaponDiffRecord)) {
         const weaponFields = weaponRecord.getFields();
         outputHtml.push(
-          html` <h4 class="weapon-name">${weaponRecord.weaponName.getFieldValue()}</h4> `
+          html`
+            <h4 class="weapon-name">
+              ${weaponRecord.weaponName.getFieldValue()}
+            </h4>
+          `
         );
 
         if (
@@ -650,6 +760,70 @@ export class PatchNotesRoute extends LitElement {
     }
 
     return html`<div>${outputHtml}</div>`;
+  }
+
+  renderAvailabilityDiff(
+    numberOfUnitsInPackDiff: Diff | undefined,
+    numberOfUnitInPackXPMultiplierDiff: ArrayDiffElement[] | undefined,
+    division: Division,
+    unitRecord: UnitRecord
+  ) {
+    const pack = division.packs.find((pack) => {
+      return pack.unitDescriptor === unitRecord.descriptorName.getFieldValue();
+    });
+
+    if (pack) {
+      const newNumberOfUnitInPackXPMultiplier =
+        pack.numberOfUnitInPackXPMultiplier;
+      const newNumberOfUnitsInPack = pack.numberOfUnitsInPack;
+
+      let oldNumberOfUnitInPackXPMultiplier = [
+        ...newNumberOfUnitInPackXPMultiplier,
+      ];
+      let oldNumberOfUnitsInPack = newNumberOfUnitsInPack;
+
+      if (numberOfUnitInPackXPMultiplierDiff) {
+        oldNumberOfUnitInPackXPMultiplier = [];
+        let newNumberOfUnitInPackIndex = 0;
+
+        for (const diff of numberOfUnitInPackXPMultiplierDiff) {
+          if (isArrayDiffRemovedElement(diff)) {
+            oldNumberOfUnitInPackXPMultiplier.push(diff[1] as number);
+          } else if (isDudElement(diff)) {
+            oldNumberOfUnitInPackXPMultiplier.push(
+              newNumberOfUnitInPackXPMultiplier[newNumberOfUnitInPackIndex]
+            );
+            newNumberOfUnitInPackIndex++;
+          } else if (isArrayDiffAddedElement(diff)) {
+            newNumberOfUnitInPackIndex++;
+          }
+        }
+      }
+
+      if (numberOfUnitsInPackDiff !== undefined) {
+        oldNumberOfUnitsInPack = numberOfUnitsInPackDiff.__old as number;
+      }
+
+      const oldQuantities = Deck.convertMultipliersToQuantities(
+        oldNumberOfUnitInPackXPMultiplier,
+        oldNumberOfUnitsInPack
+      );
+      const newQuantities = Deck.convertMultipliersToQuantities(
+        newNumberOfUnitInPackXPMultiplier,
+        newNumberOfUnitsInPack
+      );
+
+      return html`<div>
+        Availability: [ ${oldQuantities.toString()} ]
+        <vaadin-icon
+          class="arrow-icon"
+          .icon=${'vaadin:arrow-right'}
+        ></vaadin-icon>
+        [ ${newQuantities.toString()} ]
+      </div>`;
+    }
+
+    return html``;
   }
 }
 

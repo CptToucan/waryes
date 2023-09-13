@@ -216,7 +216,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
   render(): TemplateResult {
     if (this.pack && this.deck) {
       const unit = this.deck.getUnitForPack(this.pack);
-      const veterancyQuantities = this.deck.getVeterancyQuantitiesForPack(
+      const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(
         this.pack
       );
 

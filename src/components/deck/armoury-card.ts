@@ -77,7 +77,7 @@ export class ArmouryCard extends LitElement {
 
   get activeVeterancy() {
     if (this.deck && this.pack) {
-      const defaultVeterancy = this.deck.getDefaultVeterancyForPack(this.pack);
+      const defaultVeterancy = Deck.getDefaultVeterancyForPack(this.pack);
       let activeVeterancy = defaultVeterancy;
 
       if (this.selectedVeterancy !== undefined) {
@@ -103,7 +103,7 @@ export class ArmouryCard extends LitElement {
   }
 
   protected renderDetailsForUnit(unit: Unit, pack: Pack, deck: Deck) {
-    const veterancyQuantities = deck.getVeterancyQuantitiesForPack(pack);
+    const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(pack);
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
       <div class="traits">

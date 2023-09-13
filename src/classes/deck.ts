@@ -370,22 +370,31 @@ export class Deck {
     return undefined;
   }
 
-  public getDefaultVeterancyForPack(pack: Pack): number {
+  public static getDefaultVeterancyForPack(pack: Pack): number {
     return pack.numberOfUnitInPackXPMultiplier.findIndex(
       (multiplier) => multiplier === 1
     );
   }
 
-  public getVeterancyQuantitiesForPack(pack: Pack): number[] {
-    const multipliers = pack.numberOfUnitInPackXPMultiplier;
+  public static getVeterancyQuantitiesForPack(pack: Pack): number[] {
+    return Deck.convertMultipliersToQuantities(
+      pack.numberOfUnitInPackXPMultiplier,
+      pack.numberOfUnitsInPack
+    );
+  }
+
+  public static convertMultipliersToQuantities(
+    multipliers: number[],
+    numberOfUnitsInPack: number
+  ): number[] {
     const quantities: number[] = multipliers.map((quantity) =>
-      Math.round(quantity * pack.numberOfUnitsInPack)
+      Math.round(quantity * numberOfUnitsInPack)
     );
     return quantities;
   }
 
   public getUnitQuantityForPack(pack: Pack, veterancy: number): number {
-    const veterancyQuantities = this.getVeterancyQuantitiesForPack(pack);
+    const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(pack);
     const unitCount = veterancyQuantities[veterancy];
     return unitCount;
   }
@@ -461,7 +470,7 @@ export class Deck {
       const transportCost = deckUnit.transport?.commandPoints || 0;
       const unitCost = this.getUnitForPack(deckUnit.pack)?.commandPoints || 0;
       const costPerCard = unitCost + transportCost;
-      const veterancyQuantities = this.getVeterancyQuantitiesForPack(
+      const veterancyQuantities = Deck.getVeterancyQuantitiesForPack(
         deckUnit.pack
       );
       const quantityInCard = veterancyQuantities[deckUnit.veterancy];
