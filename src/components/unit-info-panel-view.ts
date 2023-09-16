@@ -10,6 +10,7 @@ import {displayTime} from '../utils/unit-stats/display-time';
 import {displayEcm} from '../utils/unit-stats/display-ecm';
 import {displayStealth} from '../utils/unit-stats/display-stealth';
 import {displayOptics} from '../utils/unit-stats/display-optics';
+import { displayAirOptics } from '../utils/unit-stats/display-air-optics';
 
 export interface PanelItem {
   display: string;
@@ -125,6 +126,9 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Smoke', value: unit.hasDefensiveSmoke ? 'Yes' : 'No'},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
+      [
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+      ]
     ];
   }
 
@@ -163,6 +167,9 @@ export class UnitInfoPanelView extends LitElement {
           ),
         },
       ],
+      [
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+      ]
     ];
   }
 
@@ -186,6 +193,9 @@ export class UnitInfoPanelView extends LitElement {
         },
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
+      [
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+      ]
     ];
   }
 
@@ -213,7 +223,10 @@ export class UnitInfoPanelView extends LitElement {
         },
         {display: 'Supply', value: unit.supply},
       ],
-      [{display: 'Turn Time', value: displayTime(unit.rotationTime)}],
+      [
+        {display: 'Turn Time', value: displayTime(unit.rotationTime)},
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+      ],
     ];
   }
 
@@ -237,6 +250,7 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Supply', value: unit.supply},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
+      [{display: 'Air Optics', value: displayAirOptics(unit.airOptics)}],
     ];
   }
 
@@ -244,7 +258,7 @@ export class UnitInfoPanelView extends LitElement {
     return [
       [
         {display: 'Max Dmg', value: unit.maxDamage},
-        {display: 'Air Optics', value: unit.airOptics},
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
         {display: 'ECM', value: displayEcm(unit.ecm)},
       ],
       [
@@ -304,6 +318,7 @@ export class UnitInfoPanelView extends LitElement {
         },
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
+      [{display: 'Air Optics', value: displayAirOptics(unit.airOptics)}],
     ];
   }
 
