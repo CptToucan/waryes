@@ -312,8 +312,30 @@ export class PatchNotesRoute extends LitElement {
       removed: [],
     };
 
+    
+    for(const division of patchNotesDivisionJson) {
+      for(const packDiff of division.packDiff) {
+        // If a patch note is found, this will render correctly
+        const foundPatchNote = patchNotesUnitJson.find((patchNote: any) => patchNote.descriptorName === packDiff.descriptor);
+
+        if(!foundPatchNote) {
+          patchNotesUnitJson.push({
+            descriptorName: packDiff.descriptor,
+            diff: {}
+          });
+        }
+      }
+    }
+    
+
+    console.log(patchNotesDivisionJson);
+
+   
+
     for (const patchNote of patchNotesUnitJson) {
       const unit = unitMap[patchNote.descriptorName];
+
+      console.log(patchNote);
 
       const patchUnitRecord = new PatchUnitRecord(
         patchNote,
