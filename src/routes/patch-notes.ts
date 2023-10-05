@@ -636,9 +636,9 @@ export class PatchNotesRoute extends LitElement {
           );
         });
 
-        if (packChange) {
-          const numberOfUnitsInPackDiff: Diff | undefined =
-            packChange.diff.numberOfUnitsInPack;
+        console.log(packChange);
+        if (packChange?.diff) {
+          const numberOfUnitsInPackDiff: Diff | undefined = packChange?.diff?.numberOfUnitsInPack;
           const numberOfUnitInPackXPMultiplierDiff:
             | ArrayDiffElement[]
             | undefined = packChange.diff.numberOfUnitInPackXPMultiplier;

@@ -21,6 +21,8 @@ import ICON_RFA_TKS from '../../images/divisions/tks.png';
 import ICON_DDR_UZ from '../../images/divisions/unt-zen.png';
 import ICON_SOV_119 from '../../images/divisions/119-ya.png';
 import ICON_US_11ACR from '../../images/divisions/11-acr.png';
+import ICON_US_24INF from '../../images/divisions/24-inf.png';
+import ICON_SOV_27_YA from '../../images/divisions/27-ya.png';
 
 
 import { Division } from '../types/deck-builder';
@@ -47,6 +49,8 @@ const ICONS_DIVISION_MAP: {[key: string]: any} = {
     'Descriptor_Deck_Division_WP_Unternehmen_Zentrum_multi': ICON_DDR_UZ,
     'Descriptor_Deck_Division_SOV_119IndTkBrig_multi': ICON_SOV_119,
     'Descriptor_Deck_Division_US_11ACR_multi': ICON_US_11ACR,
+    'Descriptor_Deck_Division_US_24th_Inf_multi': ICON_US_24INF,
+    'Descriptor_Deck_Division_SOV_27_Gds_Rifle_multi': ICON_SOV_27_YA,
 
 }
 
