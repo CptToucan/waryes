@@ -1,6 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
-import {Alliance, Unit} from '../types/unit';
+import {Alliance, UnitMap} from '../types/unit';
 import '../components/unit-image';
 import '../components/country-flag';
 import '../components/division-flag';
@@ -26,7 +26,6 @@ import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 import {Division, DivisionsMap} from '../types/deck-builder';
 import {UnitRecord} from '../types/UnitRecord';
 import {Deck} from '../classes/deck';
-
 
 interface Diff {
   __old: unknown;
@@ -205,6 +204,17 @@ export class PatchNotesRoute extends LitElement {
         margin-bottom: var(--lumo-space-m);
         border-radius: var(--lumo-border-radius);
       }
+
+      .transport-images {
+        display: flex;
+        flex-direction: row;
+        gap: var(--lumo-space-xs);
+      }
+
+      .transport-images unit-image {
+        width: 80px;
+        height: 40px;
+      }
     `;
   }
 
@@ -216,6 +226,9 @@ export class PatchNotesRoute extends LitElement {
 
   @state()
   divisionsMap?: DivisionsMap;
+
+  @state()
+  unitMap?: UnitMap;
 
   @state()
   patchNotesByDivision?: {[key: string]: PatchNoteTypes};
@@ -300,11 +313,13 @@ export class PatchNotesRoute extends LitElement {
       return;
     }
 
-    const unitMap: {[key: string]: Unit} = {};
+    const unitMap: UnitMap = {};
 
     for (const unit of units) {
       unitMap[unit.descriptorName] = unit;
     }
+
+    this.unitMap = unitMap;
 
     const patchNotes: PatchNoteTypes = {
       added: [],
@@ -312,30 +327,24 @@ export class PatchNotesRoute extends LitElement {
       removed: [],
     };
 
-    
-    for(const division of patchNotesDivisionJson) {
-      for(const packDiff of division.packDiff) {
+    for (const division of patchNotesDivisionJson || []) {
+      for (const packDiff of division.packDiff) {
         // If a patch note is found, this will render correctly
-        const foundPatchNote = patchNotesUnitJson.find((patchNote: any) => patchNote.descriptorName === packDiff.descriptor);
+        const foundPatchNote = patchNotesUnitJson.find(
+          (patchNote: any) => patchNote.descriptorName === packDiff.descriptor
+        );
 
-        if(!foundPatchNote) {
+        if (!foundPatchNote) {
           patchNotesUnitJson.push({
             descriptorName: packDiff.descriptor,
-            diff: {}
+            diff: {},
           });
         }
       }
     }
-    
-
-    console.log(patchNotesDivisionJson);
-
-   
 
     for (const patchNote of patchNotesUnitJson) {
       const unit = unitMap[patchNote.descriptorName];
-
-      console.log(patchNote);
 
       const patchUnitRecord = new PatchUnitRecord(
         patchNote,
@@ -533,7 +542,8 @@ export class PatchNotesRoute extends LitElement {
   }
 
   renderUnitView(patchNotes: PatchNoteTypes, divisionDescriptor?: string) {
-    return html` <vaadin-details>
+    return html`
+      <vaadin-details>
         <h3 slot="summary">${patchNotes.added.length} New Units</h3>
         <div class="grid">
           ${patchNotes.added.map((patchNote) => {
@@ -542,14 +552,14 @@ export class PatchNotesRoute extends LitElement {
         </div>
       </vaadin-details>
       <vaadin-details>
-      <h3 slot="summary">${patchNotes.changed.length} Changed Units</h3>
-      <div class="grid">
-        ${patchNotes.changed.map((patchNote) => {
-          return this.renderPatchNote(patchNote, divisionDescriptor);
-        })}
-      </div>
+        <h3 slot="summary">${patchNotes.changed.length} Changed Units</h3>
+        <div class="grid">
+          ${patchNotes.changed.map((patchNote) => {
+            return this.renderPatchNote(patchNote, divisionDescriptor);
+          })}
+        </div>
       </vaadin-details>
-      `;
+    `;
   }
 
   private renderPatchNote(
@@ -636,9 +646,12 @@ export class PatchNotesRoute extends LitElement {
           );
         });
 
-        console.log(packChange);
+        /*
+         * If the pack has changed, we need to render the availability diff
+         */
         if (packChange?.diff) {
-          const numberOfUnitsInPackDiff: Diff | undefined = packChange?.diff?.numberOfUnitsInPack;
+          const numberOfUnitsInPackDiff: Diff | undefined =
+            packChange?.diff?.numberOfUnitsInPack;
           const numberOfUnitInPackXPMultiplierDiff:
             | ArrayDiffElement[]
             | undefined = packChange.diff.numberOfUnitInPackXPMultiplier;
@@ -668,6 +681,14 @@ export class PatchNotesRoute extends LitElement {
               ></vaadin-icon>
               ${packChange.diff.numberOfCards.__new}
             </div>`);
+          }
+
+          if (packChange.diff.availableTransportList) {
+            outputHtml.push(
+              this.renderTransportDiff(
+                packChange.diff.availableTransportList as AnyDiffArrayElement[]
+              )
+            );
           }
         }
       }
@@ -846,6 +867,46 @@ export class PatchNotesRoute extends LitElement {
     }
 
     return html``;
+  }
+
+  renderTransportDiff(transportChanges: AnyDiffArrayElement[]) {
+    const outputHtml: TemplateResult[] = [];
+
+    const addedTranports = transportChanges.filter((diff) => {
+      return isArrayDiffAddedElement(diff);
+    });
+
+    const removedTranports = transportChanges.filter((diff) => {
+      return isArrayDiffRemovedElement(diff);
+    });
+
+    if (addedTranports.length > 0) {
+      const addedTransports = addedTranports.map((diff) => {
+        const transport = diff[1] as string;
+        return html` <div>
+        ${this.unitMap?.[transport]?.name || transport}
+        <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+
+      </div>`});
+
+      outputHtml.push(html`<div>Added Transports:</div><div class="transport-images">${addedTransports}</div>`);
+    }
+
+    if (removedTranports.length > 0) {
+      const removedTransports = removedTranports.map((diff) => {
+        const transport = diff[1] as string;
+        return html` <div>
+        ${this.unitMap?.[transport]?.name || transport}
+        <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+
+      </div>`});
+
+      outputHtml.push(html`<div>Removed Transports:</div><div class="transport-images">${removedTransports}</div>`);
+    }
+
+    
+
+    return html`${outputHtml}`;
   }
 }
 
