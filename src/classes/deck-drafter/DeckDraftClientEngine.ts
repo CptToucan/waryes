@@ -5,7 +5,6 @@ import {
 } from '../../services/bundle-manager';
 import {Division, Pack, UnitCategory} from '../../types/deck-builder';
 import {Unit, UnitMap} from '../../types/unit';
-import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../../utils/convert-unit-factory-descriptor-to-category-descriptor';
 import {Deck} from '../deck';
 import {WaryesLookupAdapter} from '../WaryesLookupAdapter';
 import {DeckDraftEngine} from './DeckDraftEngineInterface';
@@ -329,9 +328,7 @@ export class DeckDraftClientEngine implements DeckDraftEngine {
       const packConfigsInAvailableCategories = selectablePackConfigs.filter(
         (packConfig) =>
           categoriesAvailable.includes(
-            convertUnitFactoryDescriptorToCategoryDescriptor(
-              allUnitsMappedByDescriptor[packConfig.unit].factoryDescriptor
-            ) as UnitCategory
+              allUnitsMappedByDescriptor[packConfig.unit].factoryDescriptor as UnitCategory
           )
       );
 

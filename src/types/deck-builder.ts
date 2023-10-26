@@ -1,13 +1,13 @@
 
 enum UnitCategory {
   LOG = 'EDefaultFactories/Logistic',
-  REC = 'EDefaultFactories/reco',
-  INF = 'EDefaultFactories/infanterie',
-  ART = 'EDefaultFactories/support',
-  TNK = 'EDefaultFactories/tank',
-  AA = 'EDefaultFactories/at',
+  REC = 'EDefaultFactories/Recons',
+  INF = 'EDefaultFactories/Infantry',
+  ART = 'EDefaultFactories/Support',
+  TNK = 'EDefaultFactories/Tanks',
+  AA = 'EDefaultFactories/AT',
   HEL = 'EDefaultFactories/Helis',
-  AIR = 'EDefaultFactories/air',
+  AIR = 'EDefaultFactories/Planes',
 }
 
 enum Country {

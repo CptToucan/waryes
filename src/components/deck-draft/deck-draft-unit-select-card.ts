@@ -10,7 +10,6 @@ import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import {Deck} from '../../classes/deck';
 import {getIconsWithFallback} from '../../utils/get-icons-with-fallback';
 import './deck-draft-info-panel';
-import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../../utils/convert-unit-factory-descriptor-to-category-descriptor';
 import {getCodeForFactoryDescriptor} from '../../utils/get-code-for-factory-descriptor';
 
 @customElement('deck-draft-unit-select-card')
@@ -227,9 +226,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
           cmdPoints += this.transport.commandPoints;
         }
 
-        const category = convertUnitFactoryDescriptorToCategoryDescriptor(
-          unit.factoryDescriptor
-        ) as UnitCategory;
+        const category = unit.factoryDescriptor as UnitCategory;
 
         return html`
           ${this.transport ? this.renderTransportModal(this.transport) : ''}

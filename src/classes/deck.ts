@@ -1,14 +1,13 @@
 import {DeckController} from '../controllers/deck-controller';
 import {Division, Pack, UnitCategory} from '../types/deck-builder';
 import {Unit, UnitMap} from '../types/unit';
-import {convertUnitFactoryDescriptorToCategoryDescriptor} from '../utils/convert-unit-factory-descriptor-to-category-descriptor';
 import {
   SimpleDeck,
   SimpleUnitCard,
   decodeDeckString,
   encodeDeck,
 } from '@izohek/warno-deck-utils';
-import { WaryesLookupAdapter } from './WaryesLookupAdapter';
+import {WaryesLookupAdapter} from './WaryesLookupAdapter';
 
 export interface DeckConstructorOptions {
   division: Division;
@@ -121,24 +120,24 @@ export class Deck {
     this._unitInDeckGroupedUnitsByPackDescriptor =
       this._groupUnitsByPackDescriptor(value);
 
-      const unitsGroupedUnitsByDescriptor = {} as {
-        [key: string]: DeckUnit[];
-      };
-  
-      for (const unit of this._units) {
-        if (!unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor]) {
-          unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor] = [];
-        }
-  
-        unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor].push(unit);
+    const unitsGroupedUnitsByDescriptor = {} as {
+      [key: string]: DeckUnit[];
+    };
+
+    for (const unit of this._units) {
+      if (!unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor]) {
+        unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor] = [];
       }
+
+      unitsGroupedUnitsByDescriptor[unit.pack.unitDescriptor].push(unit);
+    }
 
     this._unitsInDeckGroupedByDescriptor = unitsGroupedUnitsByDescriptor;
   }
 
   private _maxAvailabilityOfUnitCard!: {
     [key: string]: number;
-  }
+  };
 
   private _unitsInDeckGroupedUnitsByCategory: GroupedDeckUnits = {
     [UnitCategory.LOG]: [],
@@ -207,10 +206,8 @@ export class Deck {
 
     for (const deckUnit of units) {
       if (deckUnit) {
-        const categoryDescriptor =
-          convertUnitFactoryDescriptorToCategoryDescriptor(
-            this.getUnitForPack(deckUnit.pack)?.factoryDescriptor || ''
-          );
+        const categoryDescriptor = this.getUnitForPack(deckUnit.pack)?.factoryDescriptor as UnitCategory;
+
 
         if (categoryDescriptor !== undefined) {
           groupedUnits[categoryDescriptor].push(deckUnit);
@@ -245,7 +242,6 @@ export class Deck {
    * @returns
    */
   private _groupAvailableUnits(division: Division): GroupedPacksByCategory {
-
     const groupedPacksByCategoryByUnitCategory: GroupedPacksByCategory = {
       [UnitCategory.LOG]: {},
       [UnitCategory.INF]: {},
@@ -289,7 +285,6 @@ export class Deck {
         });
       }
     }
-
 
     return groupedPacksByCategoryByUnitCategory;
   }
@@ -357,7 +352,9 @@ export class Deck {
   }
 
   public getPackForUnitDescriptor(descriptor: string): Pack | undefined {
-    return this.division.packs.find((pack) => pack.unitDescriptor === descriptor);
+    return this.division.packs.find(
+      (pack) => pack.unitDescriptor === descriptor
+    );
   }
 
   public getTransportsForPack(pack: Pack): Unit[] | undefined {
@@ -411,11 +408,10 @@ export class Deck {
 
   public getAvailableQuantityOfUnit(unitDescriptor: string): number {
     const numberOfUsedCards =
-      this._unitsInDeckGroupedByDescriptor[unitDescriptor]?.length ||
-      0;
+      this._unitsInDeckGroupedByDescriptor[unitDescriptor]?.length || 0;
 
-   
-    const maximumNumberOfCards = this._maxAvailabilityOfUnitCard[unitDescriptor];
+    const maximumNumberOfCards =
+      this._maxAvailabilityOfUnitCard[unitDescriptor];
 
     const remainingCards = maximumNumberOfCards - numberOfUsedCards;
     return remainingCards;
@@ -424,7 +420,6 @@ export class Deck {
   public getNextSlotCostForCategory(
     category: UnitCategory
   ): number | undefined {
-
     const unitsInDeckCategory =
       this.unitsInDeckGroupedUnitsByCategory[category];
     const numberOfUnitsInCategory = unitsInDeckCategory.length;
@@ -513,9 +508,8 @@ export class Deck {
   }
 
   public getDeckCategoryForPack(pack: Pack) {
-    return convertUnitFactoryDescriptorToCategoryDescriptor(
-      this.getUnitForPack(pack)?.factoryDescriptor || ''
-    );
+    console.log(this.getUnitForPack(pack)?.factoryDescriptor);
+    return this.getUnitForPack(pack)?.factoryDescriptor as UnitCategory;
   }
 
   public getSpecialityForPack(pack: Pack) {
@@ -526,19 +520,24 @@ export class Deck {
     const deckBuilder: SimpleDeck = {
       modded: false,
       division: {
-        id: this.division.id
+        id: this.division.id,
       },
       numberCards: this.units.length,
-      cards: this.units.map( unit => {
-        const unitCard = this.getUnitForPack(unit.pack)
-        return unitCard && {
-          unit: {
-            id: unitCard.id
-          },
-          veterancy: unit.veterancy,
-          transport: unit.transport ? { id: unit.transport?.id } : undefined
-        } as SimpleUnitCard
-      }).filter ( item => item !== undefined) as SimpleUnitCard[]
+      cards: this.units
+        .map((unit) => {
+          const unitCard = this.getUnitForPack(unit.pack);
+          return (
+            unitCard &&
+            ({
+              unit: {
+                id: unitCard.id,
+              },
+              veterancy: unit.veterancy,
+              transport: unit.transport ? {id: unit.transport?.id} : undefined,
+            } as SimpleUnitCard)
+          );
+        })
+        .filter((item) => item !== undefined) as SimpleUnitCard[],
     };
 
     const deckString = encodeDeck(deckBuilder);
@@ -553,7 +552,10 @@ export class Deck {
    * @returns
    */
   public static fromDeckCode(_deckString: string, options: DeckStringOptions) {
-    const lookupAdapter = new WaryesLookupAdapter(options.unitMap, options.divisions)
+    const lookupAdapter = new WaryesLookupAdapter(
+      options.unitMap,
+      options.divisions
+    );
     const deckStringDeck = decodeDeckString(_deckString, lookupAdapter);
 
     const decodedDivision = options.divisions?.find((d) => {
@@ -585,12 +587,11 @@ export class Deck {
       // represent the deck code.
       if (!pack) {
         break;
-        
+
         /*throw new Error(
           'Decoded pack could not find pack for: ' + card.unit.descriptor
         );
         */
-        
       }
 
       const transport = pack.availableTransportList?.find((transport) => {
