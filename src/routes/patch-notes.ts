@@ -752,7 +752,7 @@ export class PatchNotesRoute extends LitElement {
         if (
           weaponDiffRecord[1]?.imageTexture?.__old ||
           weaponDiffRecord[1]?.imageTexture?.__new
-        )
+        ) {
           outputHtml.push(
             html` <div>
               Image Texture: ${weaponDiffRecord[1].imageTexture.__old}
@@ -763,6 +763,23 @@ export class PatchNotesRoute extends LitElement {
               ${weaponDiffRecord[1].imageTexture.__new}
             </div>`
           );
+        }
+
+        if(weaponDiffRecord[1]?.traits) {
+          for(const traitDiff of weaponDiffRecord[1].traits) {
+            if (isArrayDiffAddedElement(traitDiff)) {
+              outputHtml.push(
+                html`<div>Added: ${traitDiff[1]}</div>`
+              );
+            }
+    
+            if (isArrayDiffRemovedElement(traitDiff)) {
+              outputHtml.push(
+                html`<div>Removed: ${traitDiff[1]}</div>`
+              );
+            }
+          }
+        }
 
         for (const field of weaponFields) {
           const diffForWeapon = patchNote.patch.diff?.weapons?.[i];
@@ -884,27 +901,31 @@ export class PatchNotesRoute extends LitElement {
       const addedTransports = addedTranports.map((diff) => {
         const transport = diff[1] as string;
         return html` <div>
-        ${this.unitMap?.[transport]?.name || transport}
-        <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+          ${this.unitMap?.[transport]?.name || transport}
+          <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+        </div>`;
+      });
 
-      </div>`});
-
-      outputHtml.push(html`<div>Added Transports:</div><div class="transport-images">${addedTransports}</div>`);
+      outputHtml.push(
+        html`<div>Added Transports:</div>
+          <div class="transport-images">${addedTransports}</div>`
+      );
     }
 
     if (removedTranports.length > 0) {
       const removedTransports = removedTranports.map((diff) => {
         const transport = diff[1] as string;
         return html` <div>
-        ${this.unitMap?.[transport]?.name || transport}
-        <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+          ${this.unitMap?.[transport]?.name || transport}
+          <unit-image .unit=${this.unitMap?.[transport]}></unit-image>
+        </div>`;
+      });
 
-      </div>`});
-
-      outputHtml.push(html`<div>Removed Transports:</div><div class="transport-images">${removedTransports}</div>`);
+      outputHtml.push(
+        html`<div>Removed Transports:</div>
+          <div class="transport-images">${removedTransports}</div>`
+      );
     }
-
-    
 
     return html`${outputHtml}`;
   }
