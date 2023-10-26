@@ -38,7 +38,7 @@ export class DeckImportRoute extends LitElement {
 
   importDeck() {
     if(this.deckCode) {
-      viewDeckCode(this.deckCode);
+      return viewDeckCode(this.deckCode);
     }
     throw new Error("No deck code");
   }

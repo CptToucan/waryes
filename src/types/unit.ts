@@ -1,6 +1,6 @@
 import {BucketFolder} from '../services/bundle-manager';
 import {AbstractFieldMetadata} from './AbstractFieldMetadata';
-import {Country} from './deck-builder';
+import {Country, UnitCategory} from './deck-builder';
 import {NumberFieldMetadata} from './NumberFieldMetadata';
 import {StringFieldMetadata} from './StringFieldMetadata';
 
@@ -113,7 +113,7 @@ interface Unit {
   id: number;
   unitType: UnitType;
   commandPoints: number;
-  factoryDescriptor: string;
+  factoryDescriptor: UnitCategory;
   frontArmor: number;
   sideArmor: number;
   rearArmor: number;
