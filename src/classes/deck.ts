@@ -508,7 +508,6 @@ export class Deck {
   }
 
   public getDeckCategoryForPack(pack: Pack) {
-    console.log(this.getUnitForPack(pack)?.factoryDescriptor);
     return this.getUnitForPack(pack)?.factoryDescriptor as UnitCategory;
   }
 
