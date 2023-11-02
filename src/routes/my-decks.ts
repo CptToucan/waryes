@@ -9,6 +9,7 @@ import {
   where,
   updateDoc,
   deleteDoc,
+  limit,
 } from 'firebase/firestore';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
@@ -146,7 +147,7 @@ export class MyDecksRoute extends LitElement {
         ) {
           
           const deckCollection = collection(FirebaseService.db, 'decks');
-          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid));
+          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid), limit(60));
           const decksResponse = await getDocs(q); 
           const decks:DocumentData[] = [];
 
