@@ -21,7 +21,7 @@ import {Router} from '@vaadin/router';
 import '@vaadin/confirm-dialog';
 import {ConfirmDialogOpenedChangedEvent} from '@vaadin/confirm-dialog';
 import {notificationService} from '../services/notification';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 
 const TOTAL_ALLOWED_DECKS = 60;
 
@@ -135,65 +135,52 @@ export class MyDecksRoute extends LitElement {
 
   async onBeforeEnter() {
     FirebaseService.auth?.onAuthStateChanged(async (user) => {
-      this.loggedInUser = user;
+      try {
+        
+        this.loggedInUser = user;
 
-      if (
-        this.loggedInUser !== null &&
-        this.loggedInUser?.uid &&
-        !this.decksByDivision
-      ) {
+        if (
+          this.loggedInUser !== null &&
+          this.loggedInUser?.uid &&
+          !this.decksByDivision
+        ) {
+          
+          const deckCollection = collection(FirebaseService.db, 'decks');
+          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid));
+          const decksResponse = await getDocs(q); 
+          const decks:DocumentData[] = [];
 
-        const deckCollection = collection(FirebaseService.db, 'user_decks');
-        const deckSnap = await getDoc(
-          doc(deckCollection, this.loggedInUser?.uid)
-        );
-        const userDeckData = deckSnap.data();
-        const deckIds: string[] = userDeckData?.deckIds || [];
-
-        this.deckNames = userDeckData?.deckNames || {};
-
-        const chunkSize = 10;
-        const chunks = [];
-
-        for (let i = 0; i < deckIds.length; i += chunkSize) {
-          chunks.push(deckIds.slice(i, i + chunkSize));
-        }
-
-        const promises = [];
-
-        for (const chunk of chunks) {
-          const queryRef = query(
-            collection(FirebaseService.db, 'decks'),
-            where('__name__', 'in', chunk)
-          );
-          promises.push(getDocs(queryRef));
-        }
-
-        const decks: DocumentData[] = [];
-
-        await Promise.all(promises).then((querySnapshots) => {
-          querySnapshots.forEach((querySnapshot) => {
-            querySnapshot.forEach((docSnapshot) => {
-              if (docSnapshot.exists()) {
-                decks.push(docSnapshot);
-              }
-            });
+          decksResponse.forEach((deck) => {
+            const deckData = deck.data();
+            if (deckData) {
+              decks.push(deck);
+            }
           });
-        });
 
-        this.decks = decks;
+          this.decks = decks;
+          this.numberOfDecks = this.decks?.length || 0;
 
-        this.numberOfDecks = this.decks?.length || 0
+          const userDeckCollection = collection(FirebaseService.db, 'user_decks');
+          const userDeckSnap = await getDoc(
+            doc(userDeckCollection, this.loggedInUser?.uid)
+          );
 
-        // group decks by division
-        this.decksByDivision = this.decks.reduce((acc, deck) => {
-          const division = deck.data()?.division;
-          if (!acc[division]) {
-            acc[division] = [];
-          }
-          acc[division].push(deck);
-          return acc;
-        }, {});
+          this.deckNames = userDeckSnap?.data()?.deckNames || {};
+
+          // group decks by division
+          this.decksByDivision = this.decks.reduce((acc, deck) => {
+            const division = deck.data()?.division;
+            if (!acc[division]) {
+              acc[division] = [];
+            }
+            acc[division].push(deck);
+            return acc;
+          }, {});
+          
+        }
+        
+      } catch (error) {
+        console.error(error);
       }
     });
 
@@ -211,7 +198,9 @@ export class MyDecksRoute extends LitElement {
    * @returns A map of unit descriptors to unit objects
    */
   async fetchUnitMap() {
-    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
+    const units = await BundleManagerService.getUnitsForBucket(
+      BucketFolder.WARNO
+    );
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -228,7 +217,9 @@ export class MyDecksRoute extends LitElement {
    * @returns A map of division descriptors to division objects
    */
   async fetchDivisionMap() {
-    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
+    const divisions = await BundleManagerService.getDivisionsForBucket(
+      BucketFolder.WARNO
+    );
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {
@@ -372,54 +363,49 @@ export class MyDecksRoute extends LitElement {
                         slot="name"
                         style="width: 100%; display: flex; gap: var(--lumo-space-s); align-items: center;"
                       >
-                        ${
-                          this.editStates?.[deck.id]
-                            ? html`<vaadin-text-field
-                                theme="small"
-                                value=${this.nameStates?.[deck.id] || name}
-                                autofocus
-                                @value-changed=${(
-                                  e: TextFieldValueChangedEvent
-                                ) => {
-                                  this.nameStates = {
-                                    ...this.nameStates,
-                                    [deck.id]: e.detail.value,
-                                  };
-                                }}
-                                @keydown=${(e: KeyboardEvent) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    this.saveDeckName(
-                                      deck.id,
-                                      this.nameStates?.[deck.id]
-                                    );
-                                  }
-                                }}
-                              ></vaadin-text-field>`
-                            : html`<span
-                                style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex: 1 1 auto;"
-                                >${deck.data().public ? "PUBLIC " : ""}${this.nameStates?.[deck.id] || name}</span
-                              >`
-                        }
-                        ${
-                          this?.editStates?.[deck.id]
-                            ? html`<vaadin-button
-                                theme="icon small tertiary"
-                                @click=${() =>
+                        ${this.editStates?.[deck.id]
+                          ? html`<vaadin-text-field
+                              theme="small"
+                              value=${this.nameStates?.[deck.id] || name}
+                              autofocus
+                              @value-changed=${(
+                                e: TextFieldValueChangedEvent
+                              ) => {
+                                this.nameStates = {
+                                  ...this.nameStates,
+                                  [deck.id]: e.detail.value,
+                                };
+                              }}
+                              @keydown=${(e: KeyboardEvent) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
                                   this.saveDeckName(
                                     deck.id,
                                     this.nameStates?.[deck.id]
-                                  )}
-                                ><vaadin-icon
-                                  icon="lumo:checkmark"
-                                ></vaadin-icon
-                              ></vaadin-button>`
-                            : html`<vaadin-button
-                                theme="icon small tertiary"
-                                @click=${() => this.editDeckName(deck.id)}
-                                ><vaadin-icon icon="vaadin:edit"></vaadin-icon
-                              ></vaadin-button>`
-                        }
+                                  );
+                                }
+                              }}
+                            ></vaadin-text-field>`
+                          : html`<span
+                              style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex: 1 1 auto;"
+                              >${deck.data().public ? 'PUBLIC ' : ''}${this
+                                .nameStates?.[deck.id] || name}</span
+                            >`}
+                        ${this?.editStates?.[deck.id]
+                          ? html`<vaadin-button
+                              theme="icon small tertiary"
+                              @click=${() =>
+                                this.saveDeckName(
+                                  deck.id,
+                                  this.nameStates?.[deck.id]
+                                )}
+                              ><vaadin-icon icon="lumo:checkmark"></vaadin-icon
+                            ></vaadin-button>`
+                          : html`<vaadin-button
+                              theme="icon small tertiary"
+                              @click=${() => this.editDeckName(deck.id)}
+                              ><vaadin-icon icon="vaadin:edit"></vaadin-icon
+                            ></vaadin-button>`}
                       </div>
                       <vaadin-button
                         slot="buttons"
