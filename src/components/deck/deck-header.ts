@@ -82,7 +82,6 @@ export class DeckHeader extends LitElement {
               : this.deck.division.name ?? this.deck.division.descriptor}
           ></deck-title>
         </slot>
-
         <div class="toolbar">
           <div class="deck-summary">
             <span class="activation-points">

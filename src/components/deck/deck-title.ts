@@ -54,6 +54,7 @@ export class DeckTitle extends LitElement {
 
   render(): TemplateResult {
     if (!this.deck) return html`No deck to view`;
+
     return html`
       <div class="title">
         <div class="flags">
@@ -61,9 +62,11 @@ export class DeckTitle extends LitElement {
           ><country-flag .country=${this.deck.division.country}></country-flag>
         </div>
         <div style="display: flex;">
-          <slot name="title" style="flex: 1 1 100%; ">
-            <h2>${this.name}</h2>
-          </slot>
+          ${this.name
+            ? html`<div style="flex: 1 1 100%"><h2>${this.name}</h2></div>`
+            : html` <slot name="title" style="flex: 1 1 100%; ">
+                <h2>${this.name}</h2>
+              </slot>`}
         </div>
         <div></div>
       </div>
