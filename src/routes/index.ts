@@ -236,6 +236,12 @@ export class IndexRoute extends LitElement {
         'Division Analysis',
         'How do the Pros rate the divisions?'
       ),
+      this.renderChoiceButton(
+        '/maps',
+        'vaadin:map-marker',
+        'Maps',
+        'See the maps and their sectors.'
+      )
     ];
 
     return html`
