@@ -238,6 +238,16 @@ export class IndividualWeaponView extends LitElement {
           value: displayDistance(weapon.planeMinRange),
           expert: true,
         },
+        {
+          name: 'Dispersion at Max Range',
+          value: displayDistance(weapon.dispersionAtMaxRange),
+          expert: true,
+        },
+        {
+          name: 'Dispersion at Min Range',
+          value: displayDistance(weapon.dispersionAtMinRange),
+          expert: true,
+        }
       ],
     });
 
@@ -292,6 +302,16 @@ export class IndividualWeaponView extends LitElement {
           value: displayTime(weapon.timeBetweenSalvos),
           expert: true,
         },
+        {
+          name: 'Noise Malus',
+          value: weapon.noiseMalus,
+          expert: true,
+        },
+        {
+          name: 'Shots Before Max Noise',
+          value: weapon.shotsBeforeMaxNoise,
+          expert: true,
+        }
       ],
     });
 

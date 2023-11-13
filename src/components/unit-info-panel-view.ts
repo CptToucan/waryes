@@ -294,6 +294,10 @@ export class UnitInfoPanelView extends LitElement {
           display: 'Bomb Strategy',
           value: unit.bombStrategy || 'None',
         },
+        {
+          display: 'Stealth',
+          value: displayStealth(unit.stealth),
+        }
       ],
     ];
   }
