@@ -85,6 +85,10 @@ interface Weapon {
   maxRefuelTime?: number;
   maxRearmTime?: number;
   maxRepairTime?: number;
+  dispersionAtMaxRange?: number;
+  dispersionAtMinRange?: number;
+  noiseMalus: number;
+  shotsBeforeMaxNoise: number;
 }
 
 interface UnitType {

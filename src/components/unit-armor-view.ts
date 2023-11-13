@@ -1,6 +1,7 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
+import { displayArmor } from '../utils/unit-stats/display-armor';
 
 @customElement('unit-armor-view')
 export class UnitArmorView extends LitElement {
@@ -62,18 +63,20 @@ export class UnitArmorView extends LitElement {
     return html`
       <div class="unit-armor-view">
         <vaadin-horizontal-layout style="justify-content: space-around;">
-          ${this.renderArmorField('Front', this.unit?.frontArmor)}
-          ${this.renderArmorField('Side', this.unit?.sideArmor)}
-          ${this.renderArmorField('Rear', this.unit?.rearArmor)}
-          ${this.renderArmorField('Top', this.unit?.topArmor)}
+          ${this.renderArmorField('Front', this.unit?.frontArmor  || 0)}
+          ${this.renderArmorField('Side', this.unit?.sideArmor || 0)}
+          ${this.renderArmorField('Rear', this.unit?.rearArmor || 0)}
+          ${this.renderArmorField('Top', this.unit?.topArmor || 0)}
         </vaadin-horizontal-layout>
       </div>
     `;
   }
 
-  renderArmorField(name: string, value: unknown) {
+  renderArmorField(name: string, value: number) {
+    const displayValue = displayArmor(value);
+
     return html`<div class="armor-section">
-      <p class="armor-value">${value ?? '?'}</p>
+      <p class="armor-value">${displayValue}</p>
       <p class="armor-name">${name}</p>
     </div>`;
   }
