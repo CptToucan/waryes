@@ -8,10 +8,13 @@ const OPTICS: {[key: number]: string} = {
 };
 
 export function displayOptics(optics: number) {
-  const opticsValues = Object.keys(OPTICS).map((key) => Number(key)).sort();
-
+  const opticsValues = Object.keys(OPTICS).map((key) => Number(key));
   for (let i = 0; i < opticsValues.length; i++) {
     if (optics < opticsValues[i]) {
+      if(i === 0) {
+        return `Bad (${optics})`;
+      }
+
       return `${OPTICS[opticsValues[i - 1]]} (${optics})`;
     }
   }

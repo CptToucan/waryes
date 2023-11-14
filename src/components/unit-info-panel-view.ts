@@ -10,7 +10,7 @@ import {displayTime} from '../utils/unit-stats/display-time';
 import {displayEcm} from '../utils/unit-stats/display-ecm';
 import {displayStealth} from '../utils/unit-stats/display-stealth';
 import {displayOptics} from '../utils/unit-stats/display-optics';
-import { displayAirOptics } from '../utils/unit-stats/display-air-optics';
+import {displayAirOptics} from '../utils/unit-stats/display-air-optics';
 
 export interface PanelItem {
   display: string;
@@ -128,7 +128,8 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
-      ]
+        {display: 'Dangerousness', value: unit.dangerousness},
+      ],
     ];
   }
 
@@ -169,7 +170,8 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
-      ]
+        {display: 'Dangerousness', value: unit.dangerousness},
+      ],
     ];
   }
 
@@ -195,7 +197,8 @@ export class UnitInfoPanelView extends LitElement {
       ],
       [
         {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
-      ]
+        {display: 'Dangerousness', value: unit.dangerousness},
+      ],
     ];
   }
 
@@ -226,6 +229,7 @@ export class UnitInfoPanelView extends LitElement {
       [
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
         {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+        {display: 'Dangerousness', value: unit.dangerousness},
       ],
     ];
   }
@@ -250,7 +254,10 @@ export class UnitInfoPanelView extends LitElement {
         {display: 'Supply', value: unit.supply},
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
-      [{display: 'Air Optics', value: displayAirOptics(unit.airOptics)}],
+      [
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+        {display: 'Dangerousness', value: unit.dangerousness},
+      ],
     ];
   }
 
@@ -297,7 +304,8 @@ export class UnitInfoPanelView extends LitElement {
         {
           display: 'Stealth',
           value: displayStealth(unit.stealth),
-        }
+        },
+        {display: 'Dangerousness', value: unit.dangerousness},
       ],
     ];
   }
@@ -322,7 +330,10 @@ export class UnitInfoPanelView extends LitElement {
         },
         {display: 'Turn Time', value: displayTime(unit.rotationTime)},
       ],
-      [{display: 'Air Optics', value: displayAirOptics(unit.airOptics)}],
+      [
+        {display: 'Air Optics', value: displayAirOptics(unit.airOptics)},
+        {display: 'Dangerousness', value: unit.dangerousness},
+      ],
     ];
   }
 

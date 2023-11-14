@@ -259,6 +259,11 @@ export class IndividualWeaponView extends LitElement {
           value: displayPercentage(weapon.staticAccuracy),
         },
         {
+          name: 'Consecutive Shot Bonus',
+          value: displayPercentage(weapon.staticPrecisionBonusPerShot),
+          expert: true,
+        },
+        {
           name: 'Static Over Range',
           value: this.renderStaticAccuracyScaling(weapon, true),
         },
@@ -267,9 +272,19 @@ export class IndividualWeaponView extends LitElement {
           value: displayPercentage(weapon.movingAccuracy),
         },
         {
+          name: 'Consecutive Shot Bonus',
+          value: displayPercentage(weapon.movingPrecisionBonusPerShot),
+          expert: true,
+        },
+        {
           name: 'Motion Over Range',
           value: this.renderMotionAccuracyScaling(weapon, true),
         },
+        {
+          name: 'Max Consecutive Bonus Count',
+          value: weapon.maxSuccessiveHitCount || 0,
+          expert: true,
+        }
       ],
     });
 
@@ -538,7 +553,7 @@ function isWeaponGroupLayout(
 }
 
 function isTemplateResult(input: unknown): input is TemplateResult {
-  return (input as TemplateResult)._$litType$ !== undefined;
+  return (input as TemplateResult)?._$litType$ !== undefined;
 }
 
 declare global {
