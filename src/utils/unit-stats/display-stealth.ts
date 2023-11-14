@@ -8,8 +8,7 @@ const STEALTH: {[key: number]: string} = {
 export function displayStealth(stealth: number ) {
   // if below between thresholds return the lower threshold
 
-  const stealthValues = Object.keys(STEALTH).map((key) => Number(key));
-
+  const stealthValues = Object.keys(STEALTH).map((key) => Number(key)).sort();
   if(stealth > stealthValues[stealthValues.length - 1]) {
     return `${STEALTH[stealthValues[stealthValues.length - 1]]} (${stealth})`;
   }
