@@ -89,6 +89,11 @@ interface Weapon {
   dispersionAtMinRange?: number;
   noiseMalus: number;
   shotsBeforeMaxNoise: number;
+  maxStaticAccuracy?: number;
+  maxMovingAccuracy?: number;
+  staticPrecisionBonusPerShot?: number;
+  movingPrecisionBonusPerShot?: number;
+  maxSuccessiveHitCount?: number;
 }
 
 interface UnitType {
@@ -152,6 +157,7 @@ interface Unit {
   maxRearmTime?: number;
   maxRepairTime?: number;
   isCommand?: boolean;
+  dangerousness?: number;
 }
 
 enum UnitFieldType {
