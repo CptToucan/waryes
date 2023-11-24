@@ -554,12 +554,16 @@ export class DamageCalculator extends LitElement {
       const targetVeterancy = this.targetVeterancy;
       let suppressionVeterancyMultiplier = 1;
 
-      if(targetVeterancy) {
-        suppressionVeterancyMultiplier = VETERANCY_MODIFIERS_MAP[targetVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP]?.suppressionReceived || 1;
+      if (targetVeterancy) {
+        suppressionVeterancyMultiplier =
+          VETERANCY_MODIFIERS_MAP[
+            targetVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
+          ]?.suppressionReceived || 1;
       }
-     
-      const suppressionDamage = (suppress * suppressionMultiplier * suppressionVeterancyMultiplier) + (EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE * Math.floor(damage));
 
+      const suppressionDamage =
+        suppress * suppressionMultiplier * suppressionVeterancyMultiplier +
+        EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE * Math.floor(damage);
 
       if (isEra && isTandemCharge) {
         damage += 1;
@@ -593,7 +597,7 @@ export class DamageCalculator extends LitElement {
         VETERANCY_MODIFIERS_MAP[
           this.sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
         ];
-      accuracy = accuracy * veterancyModifier.accuracy
+      accuracy = accuracy * veterancyModifier.accuracy;
       aimTime = aimTime * veterancyModifier.aimTime;
       reloadTime = reloadTime * veterancyModifier.reloadTime;
     }
@@ -619,7 +623,7 @@ export class DamageCalculator extends LitElement {
     const accuracyAsDecimal = accuracy / 100;
     const averageDamagePerShot = damagePerShot * accuracyAsDecimal;
 
-    const shotsToKillWithAccuracy = Math.ceil(
+    const shotsToKillWithAccuracy = Math.round(
       healthOfUnit / averageDamagePerShot
     );
 
@@ -1167,38 +1171,6 @@ export class DamageCalculator extends LitElement {
 
       <div class="options">
         <vaadin-combo-box
-          label="Terrain"
-          ?disabled=${shouldDisableOptions}
-          .selectedItem=${this.selectedTerrain}
-          .items=${[
-            'None',
-            ...(this.targetUnit?.occupiableTerrains.map(
-              (terrain: string) =>
-                TERRAIN_NAMES_MAP[terrain as keyof typeof TERRAIN_NAMES_MAP] ||
-                terrain
-            ) || []),
-          ] || []}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<string>
-          ) => {
-            this.selectedTerrain = e.detail.value || 'None';
-            this.calculateDamage();
-          }}
-        ></vaadin-combo-box>
-        <vaadin-combo-box
-          label="Direction"
-          .selectedItem=${this.armourDirection}
-          ?disabled=${shouldDisableOptions}
-          .items=${[Side.FRONT, Side.SIDE, Side.REAR, Side.TOP]}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Side>
-          ) => {
-            this.armourDirection = e.detail.value || Side.FRONT;
-            this.calculateDamage();
-          }}
-        ></vaadin-combo-box>
-
-        <vaadin-combo-box
           label="Source Veterancy"
           ?disabled=${shouldDisableOptions}
           .selectedItem=${this.sourceVeterancy}
@@ -1208,6 +1180,33 @@ export class DamageCalculator extends LitElement {
             e: ComboBoxSelectedItemChangedEvent<Veterancy>
           ) => {
             this.sourceVeterancy = e.detail.value || undefined;
+            this.calculateDamage();
+          }}
+        >
+        </vaadin-combo-box>
+        <vaadin-combo-box
+          label="Source Cohesion"
+          ?disabled=${shouldDisableOptions}
+          .selectedItem=${this.cohesion}
+          .clearButtonVisible=${true}
+          .items=${this.getCohesionOptions()}
+          @selected-item-changed=${(
+            e: ComboBoxSelectedItemChangedEvent<Cohesion>
+          ) => {
+            this.cohesion = e.detail.value || undefined;
+            this.calculateDamage();
+          }}
+        >
+        </vaadin-combo-box>
+        <vaadin-combo-box
+          label="Source Motion"
+          ?disabled=${shouldDisableOptions}
+          .selectedItem=${this.motion}
+          .items=${[Motion.STATIC, Motion.MOVING]}
+          @selected-item-changed=${(
+            e: ComboBoxSelectedItemChangedEvent<Motion>
+          ) => {
+            this.motion = e.detail.value || Motion.STATIC;
             this.calculateDamage();
           }}
         >
@@ -1229,19 +1228,37 @@ export class DamageCalculator extends LitElement {
         </vaadin-combo-box>
 
         <vaadin-combo-box
-          label="Cohesion"
+          label="Target Direction"
+          .selectedItem=${this.armourDirection}
           ?disabled=${shouldDisableOptions}
-          .selectedItem=${this.cohesion}
-          .clearButtonVisible=${true}
-          .items=${this.getCohesionOptions()}
+          .items=${[Side.FRONT, Side.SIDE, Side.REAR, Side.TOP]}
           @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Cohesion>
+            e: ComboBoxSelectedItemChangedEvent<Side>
           ) => {
-            this.cohesion = e.detail.value || undefined;
+            this.armourDirection = e.detail.value || Side.FRONT;
             this.calculateDamage();
           }}
-        >
-        </vaadin-combo-box>
+        ></vaadin-combo-box>
+
+        <vaadin-combo-box
+          label="Target Terrain"
+          ?disabled=${shouldDisableOptions}
+          .selectedItem=${this.selectedTerrain}
+          .items=${[
+            'None',
+            ...(this.targetUnit?.occupiableTerrains.map(
+              (terrain: string) =>
+                TERRAIN_NAMES_MAP[terrain as keyof typeof TERRAIN_NAMES_MAP] ||
+                terrain
+            ) || []),
+          ] || []}
+          @selected-item-changed=${(
+            e: ComboBoxSelectedItemChangedEvent<string>
+          ) => {
+            this.selectedTerrain = e.detail.value || 'None';
+            this.calculateDamage();
+          }}
+        ></vaadin-combo-box>
       </div>
       <div>${this.renderDistanceSelect(shouldDisableOptions)}</div>
     `;
@@ -1266,13 +1283,12 @@ export class DamageCalculator extends LitElement {
     const numberOfReloads = Math.ceil(shotsToKill / salvoLength) - 1;
     const totalTimeReloading = numberOfReloads * reloadTime;
 
-
     let missileTravelTime = 0;
     let flightTimeOfOneMissile;
 
-    if(missileSpeed && missileAcceleration) {
-      const isFireAndForget = this.weapon?.traits.includes("F&F");
-      
+    if (missileSpeed && missileAcceleration) {
+      const isFireAndForget = this.weapon?.traits.includes('F&F');
+
       const missileTimeToHitTarget = this.calculateDistanceTravelledByMissile(
         distance,
         missileSpeed,
@@ -1281,10 +1297,9 @@ export class DamageCalculator extends LitElement {
 
       flightTimeOfOneMissile = missileTimeToHitTarget;
 
-      if(isFireAndForget) {
+      if (isFireAndForget) {
         missileTravelTime = missileTimeToHitTarget;
-      }
-      else {
+      } else {
         missileTravelTime = missileTimeToHitTarget * shotsToKill;
       }
     }
@@ -1301,14 +1316,18 @@ export class DamageCalculator extends LitElement {
       const numberOfTimeBetweenShots = burstsToKill - 1;
       instancesOfTimeBetweenShots = numberOfTimeBetweenShots - numberOfReloads;
 
-      if(missileTravelTime > 0) {
+      if (missileTravelTime > 0) {
         missileTravelTime = missileTravelTime * burstsToKill;
       }
     }
 
     const totalTimeBetweenShots =
       instancesOfTimeBetweenShots * timeBetweenShots;
-    const timeToKill = aimingTime + totalTimeReloading + totalTimeBetweenShots + missileTravelTime;
+    const timeToKill =
+      aimingTime +
+      totalTimeReloading +
+      totalTimeBetweenShots +
+      missileTravelTime;
 
     return {timeToKill, flightTimeOfOneMissile};
   }
@@ -1321,15 +1340,18 @@ export class DamageCalculator extends LitElement {
     let time = 0;
 
     const timeTilMaxVelocity = missileSpeed / missileAcceleration;
-    const distanceTravelledTilMaxVelocity = 0.5 * missileAcceleration * timeTilMaxVelocity * timeTilMaxVelocity;
-    
-    if(distanceTravelledTilMaxVelocity > distance) {
+    const distanceTravelledTilMaxVelocity =
+      0.5 * missileAcceleration * timeTilMaxVelocity * timeTilMaxVelocity;
+
+    if (distanceTravelledTilMaxVelocity > distance) {
       // missile never reaches max velocity
-      time = Math.sqrt(2 * distance / missileAcceleration);
+      time = Math.sqrt((2 * distance) / missileAcceleration);
     } else {
       // missile reaches max velocity
-      const distanceTravelledAfterMaxVelocity = distance - distanceTravelledTilMaxVelocity;
-      const timeAfterMaxVelocity = distanceTravelledAfterMaxVelocity / missileSpeed;
+      const distanceTravelledAfterMaxVelocity =
+        distance - distanceTravelledTilMaxVelocity;
+      const timeAfterMaxVelocity =
+        distanceTravelledAfterMaxVelocity / missileSpeed;
       time = timeTilMaxVelocity + timeAfterMaxVelocity;
     }
 
