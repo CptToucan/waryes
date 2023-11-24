@@ -474,9 +474,9 @@ export class AuthenticatedMenu extends LitElement {
         .items=${this.getLoggedInContextMenuItems()}
       >
         <vaadin-button theme="tertiary" aria-label="Account">
-          <div class="desktop-only">
+          <span class="desktop-only">
             ${this.user.displayName ? this.user.displayName : 'NO DISPLAY NAME'}
-          </div>
+          </span>
 
           <vaadin-icon icon="vaadin:user"></vaadin-icon>
         </vaadin-button>
@@ -548,24 +548,3 @@ function isMenuItemGroup(
 ): menuItem is MenuItemGroup {
   return (menuItem as MenuItemGroup).items !== undefined;
 }
-
-/*
-        <vaadin-tabs
-          orientation="vertical"
-          selected=${ifDefined(this.selectedMenuItemIndex)}
-        >
-          ${menu}
-        </vaadin-tabs>
-
-            return html`
-      <vaadin-tab>
-        <a tabindex="-1" href="${menuItem.href}">
-          <vaadin-icon
-            class="drawer-icon"
-            icon="${menuItem.icon}"
-          ></vaadin-icon>
-          <span>${menuItem.name}</span>
-        </div>
-      </vaadin-tab>
-    `;
-    */

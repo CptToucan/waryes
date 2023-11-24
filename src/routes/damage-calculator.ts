@@ -357,10 +357,11 @@ export class DamageCalculatorRoute
             : html` <div>Can't target</div> `}
 
           <div class="note">
-            NOTE: This damage calculator calculates damage from direct hits. It
-            does not take into account splash damage or precision bonus for
+            This damage calculator calculates damage from direct hits. It does
+            not take into account splash damage or precision bonus for
             consecutive shots (~3% accuracy). It also does not calculate using
-            sorting shots (left to right strafing).
+            sorting shots (left to right strafing). The average time to kill is
+            likely to be slightly faster than you will find in game.
           </div>
 
           <div class="note">
@@ -376,7 +377,6 @@ export class DamageCalculatorRoute
         ? html` <unit-card
             class="target-unit show-on-desktop"
             .unit=${this.targetUnit}
-
             .showImage=${true}
           ></unit-card>`
         : html`<div class="target-unit show-on-desktop">
