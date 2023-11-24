@@ -76,7 +76,6 @@ export class IndividualWeaponView extends LitElement {
         text-align: right;
         text-overflow: ellipsis;
         overflow: hidden;
-        max-width: 200px;
         font-size: var(--lumo-font-size-xs);
       }
 
