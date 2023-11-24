@@ -581,7 +581,7 @@ export class DamageCalculator extends LitElement {
       this.targetUnit?.movementType as MovementType
     );
 
-    let accuracy = baseAccuracy;
+    let accuracy = baseAccuracy * (1 + this.targetUnit.ecm);
     let aimTime = this.weapon?.aimingTime || 0;
     let reloadTime = this.weapon?.reloadTime || 0;
     const salvoLength = this.weapon?.salvoLength || 0;
@@ -593,7 +593,7 @@ export class DamageCalculator extends LitElement {
         VETERANCY_MODIFIERS_MAP[
           this.sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
         ];
-      accuracy = accuracy * veterancyModifier.accuracy;
+      accuracy = accuracy * veterancyModifier.accuracy
       aimTime = aimTime * veterancyModifier.aimTime;
       reloadTime = reloadTime * veterancyModifier.reloadTime;
     }
@@ -623,7 +623,7 @@ export class DamageCalculator extends LitElement {
       healthOfUnit / averageDamagePerShot
     );
 
-    const {timeToKill} = this.calculateTimeToKill(
+    const {timeToKill, flightTimeOfOneMissile} = this.calculateTimeToKill(
       shotsToKill,
       aimTime,
       reloadTime,
@@ -685,6 +685,7 @@ export class DamageCalculator extends LitElement {
           damageMultiplier: highestDamageMultiplier,
           suppressionDamage: highestDamageSuppressionDamage,
           suppressionMultiplier: highestDamageSuppressionMultiplier,
+          flightTimeOfOneMissile,
           timeToKill,
           shotsToKill,
           shotsToKillWithAccuracy,
@@ -1267,6 +1268,7 @@ export class DamageCalculator extends LitElement {
 
 
     let missileTravelTime = 0;
+    let flightTimeOfOneMissile;
 
     if(missileSpeed && missileAcceleration) {
       const isFireAndForget = this.weapon?.traits.includes("F&F");
@@ -1276,6 +1278,8 @@ export class DamageCalculator extends LitElement {
         missileSpeed,
         missileAcceleration
       );
+
+      flightTimeOfOneMissile = missileTimeToHitTarget;
 
       if(isFireAndForget) {
         missileTravelTime = missileTimeToHitTarget;
@@ -1306,7 +1310,7 @@ export class DamageCalculator extends LitElement {
       instancesOfTimeBetweenShots * timeBetweenShots;
     const timeToKill = aimingTime + totalTimeReloading + totalTimeBetweenShots + missileTravelTime;
 
-    return {timeToKill};
+    return {timeToKill, flightTimeOfOneMissile};
   }
 
   private calculateDistanceTravelledByMissile(
