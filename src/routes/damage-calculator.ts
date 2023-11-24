@@ -226,6 +226,10 @@ export class DamageCalculatorRoute
           value: `${this.selectedWeapon?.missileProperties?.maxMissileAcceleration.toFixed(
             0
           )} m/s²`,
+        },
+        {
+          label: 'Missile Travel Time',
+          value: `${this.calculatorOutput?.flightTimeOfOneMissile.toFixed(2)} s`,
         }
       );
     }
@@ -361,7 +365,7 @@ export class DamageCalculatorRoute
             not take into account splash damage or precision bonus for
             consecutive shots (~3% accuracy). It also does not calculate using
             sorting shots (left to right strafing). The average time to kill is
-            likely to be slightly faster than you will find in game.
+            likely to be slightly longer than you will find in game.
           </div>
 
           <div class="note">
