@@ -37,10 +37,18 @@ export class UnitSearch extends LitElement {
   }
 
   @property()
-  multi = false;
+  multi = false; 
+
+
+  private _selectedUnits: Unit[] = [];
 
   @property()
-  selectedUnits: Unit[] = [];
+  public get selectedUnits(): Unit[] {
+    return this._selectedUnits;
+  }
+  public set selectedUnits(value: Unit[]) {
+    this._selectedUnits = value;
+  }
 
   // Storage for manual filtering of comboboxes
   @property()
@@ -167,6 +175,7 @@ export class UnitSearch extends LitElement {
         : html` <vaadin-combo-box
             placeholder="Search for unit"
             .items=${this.units}
+            .selectedItem=${this.selectedUnits[0]}
             item-label-path="name"
             @selected-item-changed=${this.comboBoxUnitSelected}
             .filteredItems="${this.filteredUnits}"
@@ -175,6 +184,7 @@ export class UnitSearch extends LitElement {
           ></vaadin-combo-box>`}
     `;
   }
+
 }
 
 declare global {

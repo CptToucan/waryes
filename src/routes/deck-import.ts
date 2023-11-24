@@ -47,10 +47,9 @@ export class DeckImportRoute extends LitElement {
     return html` <div class="container">
       <div class="division-import">
         <h1>Import a deck</h1>
-        <span
+        <div
           >Paste your deck code in to the text area below, and press import. You
-          will then be taken to view and edit the deck.</span
-        >
+          will then be taken to view and edit the deck.</div>
         <vaadin-text-area label="Deck Code" clear-button-visible @value-changed=${(event: TextAreaValueChangedEvent) => this.deckCode = event.detail.value}>
           <vaadin-icon slot="prefix" icon="vaadin:code"></vaadin-icon>
         </vaadin-text-area>

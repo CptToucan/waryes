@@ -47,11 +47,14 @@ export class IndexRoute extends LitElement {
         align-items: center;
         padding-left: var(--lumo-space-xs);
         padding-right: var(--lumo-space-xs);
+        min-width: 320px;
       }
 
       unit-search {
         flex: 1 1 0;
         max-width: 512px;
+        margin-top: var(--lumo-space-m);
+        margin-bottom: var(--lumo-space-m);
       }
 
       .or {
@@ -73,16 +76,13 @@ export class IndexRoute extends LitElement {
 
       .button-grid {
         display: grid;
-        padding-left: var(--lumo-space-l);
-        padding-right: var(--lumo-space-l);
-        padding-top: var(--lumo-space-s);
-        padding-bottom: var(--lumo-space-s);
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
         gap: var(--lumo-space-xs);
-        justify-content: center;
-        max-width: 900px;
+        max-width: 800px;
         overflow: hidden;
         width: 100%;
+        margin-left: var(--lumo-space-s);
+        margin-right: var(--lumo-space-s);
       }
 
       .button-category {
@@ -93,7 +93,7 @@ export class IndexRoute extends LitElement {
 
       a.choice-button {
         border-radius: var(--lumo-border-radius-m);
-        padding: var(--lumo-space-m);
+        padding: var(--lumo-space-xs);
         background-color: var(--lumo-contrast-5pct);
         display: flex;
         align-items: center;
@@ -101,20 +101,56 @@ export class IndexRoute extends LitElement {
         flex-direction: column;
         color: var(--lumo-contrast-80pct);
         border: 2px solid transparent;
-        font-size: var(--lumo-font-size-m);
+        font-size: var(--lumo-font-size-xs);
         height: var(--lumo-size-xxl);
         text-align: center;
         text-decoration: none;
         user-select: none;
+        flex: 1 1 100%;
+        height: 110px;
       }
 
       .headline {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: var(--lumo-space-l);
+        gap: var(--lumo-space-s);
+        padding-top: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-s);
+        height: 100%;
+        justify-content: space-around
+      }
+
+      .socials {
+        display: flex;
+        justify-content: center;
+        gap: var(--lumo-space-m);
+        margin-top: var(--lumo-space-l);
         padding-top: var(--lumo-space-m);
         padding-bottom: var(--lumo-space-m);
+        flex-wrap: wrap;
+      }
+
+      .social {
+        display: flex;
+        flex-direction: column;
+        width: 256px;
+      }
+
+      .social img {
+        margin-bottom: var(--lumo-space-m);
+      }
+
+      .social div {
+        text-align: center;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a:visited {
+        color: var(--lumo-body-text-color);
       }
 
       a.choice-button.disabled {
@@ -158,7 +194,6 @@ export class IndexRoute extends LitElement {
     href: string,
     icon: string,
     headline: string,
-    description: string,
     disabled = false
   ) {
     return html` <a
@@ -170,29 +205,35 @@ export class IndexRoute extends LitElement {
         <h2>${headline}</h2>
       </div>
 
-      <span>${description}</span>
     </a>`;
   }
 
   renderSelectOrImportChoice() {
-    const browseChoices = [
+    const databaseChoices = [
       this.renderChoiceButton(
         '/units',
         'waryes:soldier',
-        'Units',
-        'Look around the barracks.'
+        'Browse Units',
       ),
       this.renderChoiceButton(
         '/weapons',
         'waryes:gun',
-        'Weapons',
-        "Lock'n'load."
+        'Browse Weapons',
+      ),
+      this.renderChoiceButton(
+        '/damage-calculator/NONE',
+        'waryes:calculator',
+        'Damage Calculator',
       ),
       this.renderChoiceButton(
         '/comparison',
         'vaadin:pie-bar-chart',
-        'Compare',
-        'Compare units and analyse.'
+        'Compare Units',
+      ),
+      this.renderChoiceButton(
+        '/maps',
+        'vaadin:map-marker',
+        'Maps',
       ),
     ];
 
@@ -200,26 +241,22 @@ export class IndexRoute extends LitElement {
       this.renderChoiceButton(
         '/deck-drafter',
         'vaadin:random',
-        'Draft',
-        'Draft a randomised deck.'
+        'Deck Draft',
       ),
       this.renderChoiceButton(
         '/deck-import',
         'vaadin:code',
-        'Import',
-        'Got a deck code? Import it here and start editing.'
+        'Deck Import',
       ),
       this.renderChoiceButton(
         '/deck-builder',
         'vaadin:tools',
-        'Build',
-        'Build a deck from scratch.'
+        'Deck Build',
       ),
       this.renderChoiceButton(
         '/deck-library',
         'vaadin:book',
-        'Browse',
-        'Browse decks from the community.'
+        'Deck Library',
       ),
     ];
 
@@ -228,35 +265,16 @@ export class IndexRoute extends LitElement {
         '/patch-notes',
         'vaadin:clipboard-text',
         'Patch Notes',
-        "See what's new in the latest patch."
       ),
       this.renderChoiceButton(
         '/division-analysis',
         'vaadin:chart',
         'Division Analysis',
-        'How do the Pros rate the divisions?'
       ),
-      this.renderChoiceButton(
-        '/maps',
-        'vaadin:map-marker',
-        'Maps',
-        'See the maps and their sectors.'
-      )
     ];
 
     return html`
-      <div class="button-category">
-        <h3>Browse</h3>
-        <div class="button-grid">${browseChoices}</div>
-      </div>
-      <div class="button-category">
-        <h3>Deck</h3>
-        <div class="button-grid">${deckChoices}</div>
-      </div>
-      <div class="button-category">
-        <h3>Inspect</h3>
-        <div class="button-grid">${inspectChoices}</div>
-      </div>
+      <div class="button-grid">${databaseChoices} ${deckChoices} ${inspectChoices}</div>
     `;
   }
 
@@ -265,18 +283,27 @@ export class IndexRoute extends LitElement {
       <div class="background">
         <div class="container">
           <div class="splash">
-            <img height="86" src=${WaryesImage} />
+            <img height="100" src=${WaryesImage} />
 
             <div>
-              <mod-selector></mod-selector>
-
               <div class="search">
                 <unit-search @unit-selected=${this.unitSelected}></unit-search>
               </div>
             </div>
+            ${this.renderSelectOrImportChoice()}
+            <div class="socials">
+              <a class="social" href="https://discord.gg/gqBgvgGj8H">
+                <img style="height: 32px" src="/discord-logo-white.svg" />
+                <div>Feel free to join our Discord community.</div>
+              </a>
+
+              <a class="social" href="https://www.patreon.com/WarYes">
+                <img style="height: 32px" src="/patreon-logo-white.svg" />
+                <div>Support the project on Patreon.</div>
+              </a>
+            </div>
           </div>
         </div>
-        ${this.renderSelectOrImportChoice()}
       </div>
     `;
   }

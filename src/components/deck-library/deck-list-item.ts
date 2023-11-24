@@ -229,10 +229,7 @@ export class DeckListItem extends LitElement {
                 ${deck.is_pro_deck
                   ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
-                <slot name="name">
-                  <span class="name"> ${deck.name}</span></slot
-                >
-
+                <slot name="name"> <div class="name">${deck.name}</div></slot>
               </div>
               <div class="details">
                 <div class="summary-icons">
@@ -257,11 +254,12 @@ export class DeckListItem extends LitElement {
             <div class="button-container">
               <a class="inspect" href="/deck/${this.deck?.id}">
                 <vaadin-icon icon="waryes:recon"></vaadin-icon>
-                <span
+                <div
                   class="desktop-only"
                   style="margin-left: var(--lumo-space-xs);"
-                  >Intel</span
                 >
+                  Intel
+                </div>
               </a>
               <slot name="buttons"></slot>
               <vaadin-button

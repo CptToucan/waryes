@@ -309,10 +309,9 @@ export class DeckBuilderRoute
           >
             <country-flag .country=${div.country}></country-flag>
             <division-flag .division=${div}></division-flag>
-            <span
+            <div
               >${getAllianceNameFromDescriptor(div.alliance)} -
-              ${div.name ?? div.descriptor}</span
-            >
+              ${div.name ?? div.descriptor}</div>
           </button>`;
         })}
       </div>

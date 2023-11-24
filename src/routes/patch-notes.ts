@@ -570,7 +570,7 @@ export class PatchNotesRoute extends LitElement {
       <div class="card-header">
         <a href="/unit/${patchNote.unitRecord.descriptorName.getFieldValue()}">
           <h4>${patchNote.unitRecord.name.getFieldValue()}</h4>
-        </a>
+  </a>
         ${patchNote.patch.new ? html`<simple-chip>New</simple-chip>` : ''}
       </div>
       <div class="unit-images">

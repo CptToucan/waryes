@@ -107,7 +107,7 @@ export class WeaponsRoute extends LitElement implements BeforeEnterObserver {
               <weapon-image .weapon=${weapon}></weapon-image>
               <div class="unit-name">${weapon.weaponName}</div>
               <mod-image .mod=${weapon.mod}></mod-image>
-            </a>
+        </a>
           </div>`;
         })}
       </div>

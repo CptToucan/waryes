@@ -10,6 +10,7 @@ import './division-flag';
 import {Unit} from '../types/unit';
 import {getIconForTrait} from '../utils/get-icon-for-trait';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
+import {router} from '../services/router';
 
 /**
  * Component for rendering the details of a single unit
@@ -22,6 +23,23 @@ export class UnitCardHeaderView extends LitElement {
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+      }
+
+      a {
+        color: var(--lumo-primary-color) !important;
+        text-decoration: none;
+        background-color: var(--lumo-contrast-5pct);
+
+        padding: var(--lumo-space-s);
+        border-radius: var(--lumo-border-radius);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: var(--lumo-space-xs) 0
+      }
+
+      a > vaadin-icon {
+        font-size: 12px;
       }
 
       div.unit-title {
@@ -89,6 +107,9 @@ export class UnitCardHeaderView extends LitElement {
   @property()
   expert = false;
 
+  @property()
+  hideExpertButton = false;
+
   render(): TemplateResult {
     const traits = this.unit?.specialities.slice(1) || [];
     if (this.unit) {
@@ -103,14 +124,28 @@ export class UnitCardHeaderView extends LitElement {
 
             <mod-image .mod=${this.unit?.mod}></mod-image>
           </div>
-          <vaadin-button
-            theme="primary"
-            @click=${() =>
-              this.dispatchEvent(
-                new CustomEvent('mode-toggled', {detail: !this.expert})
-              )}
-            >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
-          >
+
+          <div style="display: flex; gap: var(--lumo-space-xs);">
+            <a
+              href=${router.urlForPath('/damage-calculator/:unitId', {
+                unitId: this.unit.descriptorName,
+              })}
+              title="Damage Calculator"
+            >
+              <vaadin-icon icon="waryes:calculator"></vaadin-icon>
+            </a>
+
+            ${this.hideExpertButton
+              ? html``
+              : html` <vaadin-button
+                  theme="primary"
+                  @click=${() =>
+                    this.dispatchEvent(
+                      new CustomEvent('mode-toggled', {detail: !this.expert})
+                    )}
+                  >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
+                >`}
+          </div>
         </div>
         <div class="unit-title">
           <p class="unit-name">${this.unit?.name}</p>

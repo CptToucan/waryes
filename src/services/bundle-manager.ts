@@ -4,6 +4,7 @@ import {Unit, Weapon} from '../types/unit';
 import {FirebaseService} from './firebase';
 import {isSpecialtyCommand} from '../utils/is-specialty-command';
 import {isSpecialtyRecon} from '../utils/is-specialty-recon';
+import {FamilyIndexTuple, TerrainResistance} from '../types/damageTable';
 
 export enum BucketFolder {
   WARNO = 'warno',
@@ -13,7 +14,23 @@ export enum BucketFolder {
 
 export enum BucketType {
   UNITS_AND_DIVISIONS = 'units-and-divisions.json',
+  DAMAGE_TABLE = 'damageTable.json',
 }
+
+
+
+export type DamageTable = {
+  damageFamilyWithIndexes: FamilyIndexTuple[] | null;
+  resistanceFamilyWithIndexes: FamilyIndexTuple[] | null;
+  damageTable: number[][] | null;
+  terrainResistances: {
+    name: string;
+    damageFamilies: TerrainResistance[];
+  }[] | null;
+  defaultSuppressDamage: FamilyIndexTuple | null,
+  suppressionDamageExceptions: {exception: string, suppression: FamilyIndexTuple}[] | null,
+  armorToignoreForDamageFamilies: string[] | null,
+};
 
 type BundleMap = {
   [BucketFolder.WARNO]: {
@@ -22,6 +39,8 @@ type BundleMap = {
       divisions: Division[] | null;
       weapons: Weapon[] | null;
     };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    [BucketType.DAMAGE_TABLE]: DamageTable;
   };
   [BucketFolder.FRAGO]: {
     [BucketType.UNITS_AND_DIVISIONS]: {
@@ -114,6 +133,8 @@ class BundleManager {
       ),
     ]);
 
+    const damageTable = await this.getBundleFor<DamageTable>(BucketFolder.WARNO, BucketType.DAMAGE_TABLE);
+    this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
     // Warno
     this.initialiseBucket(unitDivisions[0], BucketFolder.WARNO);
 
@@ -170,6 +191,11 @@ class BundleManager {
       Object.values(weapons).sort((a, b) => {
         return a.weaponName.localeCompare(b.weaponName);
       });
+  }
+
+  async getDamageTable() {
+    await this.initialise();
+    return this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE];
   }
 
   async getUnits() {
@@ -329,6 +355,15 @@ class BundleManager {
         units: null,
         divisions: null,
         weapons: null,
+      },
+      [BucketType.DAMAGE_TABLE]: {
+        damageFamilyWithIndexes: null,
+        resistanceFamilyWithIndexes: null,
+        damageTable: null,
+        terrainResistances: null,
+        defaultSuppressDamage: null,
+        suppressionDamageExceptions: null,
+        armorToignoreForDamageFamilies: null,
       },
     },
     [BucketFolder.FRAGO]: {

@@ -66,6 +66,9 @@ export class UnitCard extends LitElement {
   @property()
   unit?: Unit;
 
+  @property()
+  selectedWeapon = 0;
+
   @property({type: Boolean})
   expert = false;
 
@@ -84,6 +87,10 @@ export class UnitCard extends LitElement {
         style="max-width: 100%"
         .unit=${this.unit}
         ?expert=${this.expert}
+        .selectedWeapon=${this.selectedWeapon}
+        @active-weapon-changed=${(e: CustomEvent) => {
+          this.dispatchEvent(new CustomEvent('active-weapon-changed', {detail: e.detail}))
+        }}
       ></unit-weapon-view>
       <unit-info-panel-view .unit=${this.unit}></unit-info-panel-view>
     </div>`;

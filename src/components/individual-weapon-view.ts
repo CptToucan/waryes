@@ -4,7 +4,8 @@ import {AccuracyScaling, Weapon} from '../types/unit';
 import {displayDistance} from '../utils/unit-stats/display-distance';
 import {displayTime} from '../utils/unit-stats/display-time';
 import {displayPercentage} from '../utils/unit-stats/display-percentage';
-import {displaySpeed} from '../utils/unit-stats/display-speed';
+import {displayProjectileSpeed} from '../utils/unit-stats/display-projectile-speed';
+import {displayProjectileAcceleration} from '../utils/unit-stats/display-projectile-acceleration';
 
 interface WeaponGroupLayout {
   name: string;
@@ -54,14 +55,21 @@ export class IndividualWeaponView extends LitElement {
 
       .stat-row {
         color: var(--lumo-contrast);
+        background-color: var(--lumo-contrast-5pct);
+        margin-bottom: 2px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        padding: 2px;
+      }
+
+      .title-row {
+        background-color: var(--lumo-background);
       }
 
       .name {
         color: var(--lumo-contrast-70pct);
-        font-size: 14px;
+        font-size: var(--lumo-font-size-xs);
       }
 
       .value {
@@ -69,11 +77,12 @@ export class IndividualWeaponView extends LitElement {
         text-overflow: ellipsis;
         overflow: hidden;
         max-width: 200px;
-        font-size: 14px;
+        font-size: var(--lumo-font-size-xs);
       }
 
       .weapon-stat-border-bottom {
-        border-bottom: 1px dotted var(--lumo-contrast-30pct);
+        background-color: var(--lumo-background);
+        // border-bottom: 1px dotted var(--lumo-contrast-30pct);
       }
 
       .accuracy-scaling {
@@ -88,7 +97,6 @@ export class IndividualWeaponView extends LitElement {
       h5 {
         margin: 0;
         margin-top: var(--lumo-space-xs);
-        text-decoration: underline;
       }
 
       .weapon-image-container {
@@ -144,11 +152,13 @@ export class IndividualWeaponView extends LitElement {
         stats: [
           {
             name: 'Speed',
-            value: displaySpeed(missileProperties.maxMissileSpeed),
+            value: displayProjectileSpeed(missileProperties.maxMissileSpeed),
           },
           {
             name: 'Acceleration',
-            value: displaySpeed(missileProperties.maxMissileAcceleration),
+            value: displayProjectileAcceleration(
+              missileProperties.maxMissileAcceleration
+            ),
           },
         ],
       });
@@ -247,7 +257,7 @@ export class IndividualWeaponView extends LitElement {
           name: 'Dispersion at Min Range',
           value: displayDistance(weapon.dispersionAtMinRange),
           expert: true,
-        }
+        },
       ],
     });
 
@@ -284,7 +294,7 @@ export class IndividualWeaponView extends LitElement {
           name: 'Max Consecutive Bonus Count',
           value: weapon.maxSuccessiveHitCount || 0,
           expert: true,
-        }
+        },
       ],
     });
 
@@ -326,13 +336,12 @@ export class IndividualWeaponView extends LitElement {
           name: 'Shots Before Max Noise',
           value: weapon.shotsBeforeMaxNoise,
           expert: true,
-        }
+        },
+        {
+          name: 'Supply Cost',
+          value: weapon.supplyCost,
+        },
       ],
-    });
-
-    layout.push({
-      name: 'Supply Cost',
-      value: weapon.supplyCost,
     });
 
     return layout;
@@ -365,9 +374,12 @@ export class IndividualWeaponView extends LitElement {
   }
 
   renderWeaponImage(weapon: Weapon) {
-    return html` <a class="weapon-image-container" href="/weapon/${weapon.ammoDescriptorName}">
+    return html` <a
+      class="weapon-image-container"
+      href="/weapon/${weapon.ammoDescriptorName}"
+    >
       <weapon-image .weapon=${weapon}></weapon-image>
-  </a>`;
+    </a>`;
   }
 
   renderWeaponStat(stat: WeaponStat) {
@@ -411,23 +423,18 @@ export class IndividualWeaponView extends LitElement {
     if (this.shouldRenderField(weaponGroupLayout.expert)) {
       return html`${this.renderWeaponGroupTitle(
         weaponGroupLayout.name
-      )}${weaponGroupLayout.stats.map((stat) => this.renderWeaponStat(stat))}
-      ${this.renderWeaponSeparator()} `;
+      )}${weaponGroupLayout.stats.map((stat) => this.renderWeaponStat(stat))} `;
     }
     return html``;
   }
 
   renderWeaponGroupTitle(name: string, expert?: boolean) {
     if (this.shouldRenderField(expert)) {
-      return html`<div class="stat-row">
+      return html`<div class="title-row stat-row">
         <h5>${name}</h5>
       </div>`;
     }
     return html``;
-  }
-
-  renderWeaponSeparator() {
-    return html` <div class="stat-row weapon-stat-border-bottom"></div>`;
   }
 
   shouldRenderField(expertStat?: boolean) {
@@ -492,12 +499,14 @@ export class IndividualWeaponView extends LitElement {
         tooltip: {
           trigger: 'axis',
           formatter: (params: Object | Array<unknown>) => {
-            const param = params as Array<{value: Array<number>, seriesName: string}>;
+            const param = params as Array<{
+              value: Array<number>;
+              seriesName: string;
+            }>;
             const distance = param[0].value[0];
             const accuracy = param[0].value[1];
             return `${param[0].seriesName}: ${accuracy}% at ${distance}m`;
-          }
-
+          },
         },
         xAxis: {
           type: 'value',

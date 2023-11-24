@@ -79,6 +79,7 @@ export class Deck {
       [UnitCategory.AA]: [],
       [UnitCategory.HEL]: [],
       [UnitCategory.AIR]: [],
+      [UnitCategory.DEFENSE]: [],
     };
 
     for (const matrixRow of this.division.costMatrix.matrix) {
@@ -148,6 +149,7 @@ export class Deck {
     [UnitCategory.AA]: [],
     [UnitCategory.HEL]: [],
     [UnitCategory.AIR]: [],
+    [UnitCategory.DEFENSE]: [],
   };
 
   private _unitsInDeckGroupedByDescriptor!: {
@@ -202,6 +204,7 @@ export class Deck {
       [UnitCategory.AA]: [],
       [UnitCategory.HEL]: [],
       [UnitCategory.AIR]: [],
+      [UnitCategory.DEFENSE]: [],
     };
 
     for (const deckUnit of units) {
@@ -251,6 +254,7 @@ export class Deck {
       [UnitCategory.AA]: {},
       [UnitCategory.HEL]: {},
       [UnitCategory.AIR]: {},
+      [UnitCategory.DEFENSE]: {},
     };
 
     for (const pack of division.packs) {

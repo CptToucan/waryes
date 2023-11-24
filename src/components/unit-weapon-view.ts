@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
+import {customElement, property} from 'lit/decorators.js';
 import {Weapon, Unit} from '../types/unit';
 import {TabsSelectedChangedEvent} from '@vaadin/tabs';
 import '@vaadin/tabs';
@@ -45,18 +45,23 @@ export class UnitWeaponView extends LitElement {
   @property({type: Boolean})
   expert = false;
 
-  @state()
-  private selectedWeapon = 0;
+  @property()
+  selectedWeapon = 0;
 
   private selectedWeaponTabChanged(event: TabsSelectedChangedEvent) {
     this.selectedWeapon = event.detail.value;
+    this.dispatchEvent(
+      new CustomEvent('active-weapon-changed', {
+        detail: this.selectedWeapon,
+      })
+    );
   }
 
   renderWeaponTabs(): TemplateResult[] {
     const tabs = (this.unit?.weapons ?? [])
       .filter((w: Weapon) => Object.keys(w).length > 0)
       .map((weapon: Weapon) => {
-        return html`<vaadin-tab>${weapon.weaponName}</vaadin-tab>`;
+        return html`<vaadin-tab >${weapon.weaponName}</vaadin-tab>`;
       });
 
     return tabs;
@@ -84,6 +89,7 @@ export class UnitWeaponView extends LitElement {
           theme="equal-width-tabs center"
           style="max-width: 100%;"
           @selected-changed="${this.selectedWeaponTabChanged}"
+          .selected=${this.selectedWeapon}
         >
           ${this.renderWeaponTabs()}
         </vaadin-tabs>

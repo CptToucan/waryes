@@ -13,6 +13,7 @@ const categoryNamesByEnum: CategoryEnumMap = {
   [UnitCategory.AA]: 'AA',
   [UnitCategory.HEL]: 'HEL',
   [UnitCategory.AIR]: 'AIR',
+  [UnitCategory.DEFENSE]: 'DEFENSE',
 };
 
 export function getCodeForFactoryDescriptor(

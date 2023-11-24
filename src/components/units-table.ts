@@ -65,8 +65,7 @@ export class UnitsTable extends LitElement {
         href=${router.urlForPath('/unit/:unitId', {
           unitId: model.item.descriptorName,
         })}
-        >${model.item.name}</a
-      >`,
+        >${model.item.name}</a>`,
       root
     );
   }

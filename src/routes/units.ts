@@ -277,7 +277,7 @@ export class UnitsRoute extends LitElement implements BeforeEnterObserver {
                       .country=${unit.unitType.motherCountry}
                     ></country-flag>
                   </div>
-                </a>`;
+            </a>`;
               })
             : html`<div class="no-units">No units found</div>`}
         </div>

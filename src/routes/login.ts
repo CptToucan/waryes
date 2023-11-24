@@ -145,7 +145,7 @@ export class LoginRoute extends LitElement {
           ?error=${this.loginError}
         ></vaadin-login-form>
 
-        <div class="separator"><span class="text-separator">OR</span></div>
+        <div class="separator"><div class="text-separator">OR</div></div>
 
         <div class="sign-up">
           <vaadin-button

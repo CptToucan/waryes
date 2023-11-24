@@ -8,6 +8,7 @@ enum UnitCategory {
   AA = 'EDefaultFactories/AT',
   HEL = 'EDefaultFactories/Helis',
   AIR = 'EDefaultFactories/Planes',
+  DEFENSE = 'EDefaultFactories/Defense',
 }
 
 enum Country {
