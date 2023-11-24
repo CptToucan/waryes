@@ -439,7 +439,7 @@ export class DamageCalculator extends LitElement {
   public set sourceUnit(value: Unit | undefined) {
     if (value?.descriptorName !== this._sourceUnit?.descriptorName) {
       this.cohesion = undefined;
-      this.veterancy = undefined;
+      this.sourceVeterancy = undefined;
     }
     this._sourceUnit = value;
   }
@@ -463,6 +463,7 @@ export class DamageCalculator extends LitElement {
       this.maxRange = 0;
       this.minRange = 0;
       this.distance = 0;
+      this.targetVeterancy = undefined;
       return;
     }
 
@@ -471,8 +472,6 @@ export class DamageCalculator extends LitElement {
     this.maxRange = this.getMaxRangeOfWeaponTargettingUnit(value);
     this.minRange = this.getMinRangeOfWeaponTargettingUnit(value);
 
-    console.log('oldValue', oldValue);
-    console.log('value', value);
     if (oldValue?.descriptorName !== value?.descriptorName) {
       this.selectedTerrain = 'None';
       this.distance = this.maxRange;
@@ -502,7 +501,10 @@ export class DamageCalculator extends LitElement {
   cohesion?: Cohesion;
 
   @state()
-  veterancy?: Veterancy;
+  sourceVeterancy?: Veterancy;
+
+  @state()
+  targetVeterancy?: Veterancy;
 
   public async calculateDamage() {
     if (!this.weapon || !this.targetUnit) {
@@ -548,9 +550,16 @@ export class DamageCalculator extends LitElement {
       }
 
       let damage = he * damageMultiplier;
-      const suppressionDamage =
-        suppress * suppressionMultiplier +
-        EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE * damage;
+
+      const targetVeterancy = this.targetVeterancy;
+      let suppressionVeterancyMultiplier = 1;
+
+      if(targetVeterancy) {
+        suppressionVeterancyMultiplier = VETERANCY_MODIFIERS_MAP[targetVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP]?.suppressionReceived || 1;
+      }
+     
+      const suppressionDamage = (suppress * suppressionMultiplier * suppressionVeterancyMultiplier) + (EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE * Math.floor(damage));
+
 
       if (isEra && isTandemCharge) {
         damage += 1;
@@ -579,10 +588,10 @@ export class DamageCalculator extends LitElement {
     // timeBetweenSalvos is a misnomer here, it's actually the time between shots
     const timeBetweenShots = this.weapon?.timeBetweenSalvos || 0;
 
-    if (this.veterancy) {
+    if (this.sourceVeterancy) {
       const veterancyModifier =
         VETERANCY_MODIFIERS_MAP[
-          this.veterancy as keyof typeof VETERANCY_MODIFIERS_MAP
+          this.sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
         ];
       accuracy = accuracy * veterancyModifier.accuracy;
       aimTime = aimTime * veterancyModifier.aimTime;
@@ -1074,12 +1083,12 @@ export class DamageCalculator extends LitElement {
     );
   }
 
-  private getVeterancyOptions() {
-    if (!this.sourceUnit) {
+  private getVeterancyOptions(unit?: Unit) {
+    if (!unit) {
       return [];
     }
 
-    const isSpecialForces = this.sourceUnit.isSpecialForces;
+    const isSpecialForces = unit.isSpecialForces;
 
     if (isSpecialForces) {
       return SF_VETERANCIES;
@@ -1189,15 +1198,30 @@ export class DamageCalculator extends LitElement {
         ></vaadin-combo-box>
 
         <vaadin-combo-box
-          label="Veterancy"
+          label="Source Veterancy"
           ?disabled=${shouldDisableOptions}
-          .selectedItem=${this.veterancy}
+          .selectedItem=${this.sourceVeterancy}
           .clearButtonVisible=${true}
-          .items=${this.getVeterancyOptions()}
+          .items=${this.getVeterancyOptions(this.sourceUnit)}
           @selected-item-changed=${(
             e: ComboBoxSelectedItemChangedEvent<Veterancy>
           ) => {
-            this.veterancy = e.detail.value || undefined;
+            this.sourceVeterancy = e.detail.value || undefined;
+            this.calculateDamage();
+          }}
+        >
+        </vaadin-combo-box>
+
+        <vaadin-combo-box
+          label="Target Veterancy"
+          ?disabled=${shouldDisableOptions}
+          .selectedItem=${this.targetVeterancy}
+          .clearButtonVisible=${true}
+          .items=${this.getVeterancyOptions(this.targetUnit)}
+          @selected-item-changed=${(
+            e: ComboBoxSelectedItemChangedEvent<Veterancy>
+          ) => {
+            this.targetVeterancy = e.detail.value || undefined;
             this.calculateDamage();
           }}
         >
