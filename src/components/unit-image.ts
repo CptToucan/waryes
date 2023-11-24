@@ -49,15 +49,25 @@ export class UnitImage extends LitElement {
       return true;
     }
   })
-  unit?: Unit;
+  get unit(): Unit | undefined {
+    return this._unit;
+  }
+
+  set unit(value: Unit | undefined) {
+    this._unit = value;
+    this.showFallback = false;
+  }
+
+  @state()
+  _unit?: Unit;
 
   @state()
   showFallback = false;
 
   render(): TemplateResult {
     let iconHtml: TemplateResult;
-    if (this.unit) {
-      const unit = this.unit;
+    if (this._unit) {
+      const unit = this._unit;
 
       const icons = getIconsWithFallback(unit);
       let subIcon;
@@ -76,7 +86,7 @@ export class UnitImage extends LitElement {
     } else {
       iconHtml = html`<vaadin-icon
         style="font-size: 48px;"
-        icon="$vaadin:question"
+        icon="vaadin:question"
       ></vaadin-icon>`;
     }
 
@@ -85,12 +95,12 @@ export class UnitImage extends LitElement {
         ? iconHtml
         : html` <img
             src=${this.generateSrc()}
-            alt=${this.unit?.name}
-            title=${this.unit?.name}
+            alt=${this._unit?.name}
+            title=${this._unit?.name}
             loading="eager"
             @error=${() => {
               const img = new Image();
-              img.onerror = () => {this.showFallback = true}
+            img.onerror = () => {this.showFallback = true}
               img.src = this.generateSrc();
             }}
           />`}
@@ -98,7 +108,7 @@ export class UnitImage extends LitElement {
   }
 
   generateSrc() {
-    let descriptorName = this.unit?.descriptorName || "";
+    let descriptorName = this._unit?.descriptorName || "";
 
     descriptorName = getDescriptorWithoutMod(descriptorName)
    

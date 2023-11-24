@@ -135,19 +135,17 @@ export class ArmouryWithTransportCard extends ArmouryCard {
     _deck: Deck
   ) {
     let unitHtml = html`<div class="details-row">
-      <span class="unit-name"
+      <div class="unit-name"
         ><vaadin-icon icon=${getIconForUnit(unit)}></vaadin-icon
-        >${unit.name}</span
-      ><span class="unit-points">${unit.commandPoints}</span>
+        >${unit.name}</div><div class="unit-points">${unit.commandPoints}</div>
     </div>`;
 
     if (this.transport) {
       unitHtml = html`${unitHtml}
         <div class="details-row">
-          <span class="unit-name"
+          <div class="unit-name"
             ><vaadin-icon icon=${getIconForUnit(this.transport)}></vaadin-icon
-            >${this.transport?.name}</span
-          ><span class="unit-points">${this.transport.commandPoints}</span>
+            >${this.transport?.name}</div><div class="unit-points">${this.transport.commandPoints}</div>
         </div>`;
     }
     return html`

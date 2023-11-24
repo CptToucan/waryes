@@ -345,19 +345,18 @@ export class DeckView extends LitElement {
             </div>
 
             <div class="deck-header-row">
-              <span class="activation-points">
+              <div class="activation-points">
                 ${this.deck.totalSpentActivationPoints} /
                 ${this.deck.division.maxActivationPoints} Activation Points
-              </span>
+              </div>
               ${this.renderActionsMenu()}
             </div>
           </div>
           <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
           <div class="total-unit-cost">
             Total Points:
-            <span class="${displayWarningOnCost && 'warning'}"
-              >${unitCosts}</span
-            >
+            <div class="${displayWarningOnCost && 'warning'}"
+              >${unitCosts}</div>
             ${displayWarningOnCost
               ? html`<vaadin-icon
                     id="warning-icon"
@@ -475,10 +474,9 @@ export class DeckView extends LitElement {
           isInUse = true;
         }
 
-        return html`<span
+        return html`<div
             class="${isInUse ? 'in-use' : ''} ${isNext ? 'is-next' : ''}"
-            >${el}</span
-          >
+            >${el}</div>
           ${isLast ? ', ' : ''}`;
       })}]
     </div> `;
@@ -533,9 +531,8 @@ export class DeckView extends LitElement {
       <div class="deck-category-cards">
         ${deckUnitsInCategoryToRender.length > 0
           ? deckUnitsInCategoryToRender
-          : html`<span class="category-empty-state"
-              >No cards in category</span
-            >`}
+          : html`<div class="category-empty-state"
+              >No cards in category</div>`}
       </div>
     </vaadin-details>`;
   }

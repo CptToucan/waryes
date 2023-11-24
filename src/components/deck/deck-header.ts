@@ -84,10 +84,10 @@ export class DeckHeader extends LitElement {
         </slot>
         <div class="toolbar">
           <div class="deck-summary">
-            <span class="activation-points">
+            <div class="activation-points">
               ${this.deck.totalSpentActivationPoints} /
               ${this.deck.division.maxActivationPoints} Activation Points
-            </span>
+            </div>
             <div class="total-unit-cost">
               ${this.deck.getSumOfUnitsCosts()} points
             </div>

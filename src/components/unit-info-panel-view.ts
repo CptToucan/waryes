@@ -34,12 +34,14 @@ export class UnitInfoPanelView extends LitElement {
       }
 
       .info-row:not(:last-child) {
-        border-bottom: 1px dotted var(--lumo-contrast-30pct);
+        margin-bottom: 2px;
+        // border-bottom: 1px dotted var(--lumo-contrast-30pct);
       }
 
       .stat {
         flex: 1 1 0px;
         padding: var(--lumo-space-xs);
+        background-color: var(--lumo-contrast-5pct);
       }
 
       .stat-name {
@@ -47,7 +49,8 @@ export class UnitInfoPanelView extends LitElement {
       }
 
       .stat:not(:last-child) {
-        border-right: 1px dotted var(--lumo-contrast-30pct);
+        margin-right: 2px;
+        // border-right: 1px dotted var(--lumo-contrast-30pct);
       }
 
       .divisions {

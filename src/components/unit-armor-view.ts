@@ -8,7 +8,7 @@ export class UnitArmorView extends LitElement {
   static get styles() {
     return css`
       .armor-section {
-        padding: var(--lumo-space-s);
+        padding: var(--lumo-space-xs);
       }
 
       p {
@@ -22,7 +22,7 @@ export class UnitArmorView extends LitElement {
         flex-shrink: 0;
         justify-content: space-around;
         margin: 0;
-        font-size: var(--lumo-font-size-xxl);
+        font-size: var(--lumo-font-size-xl);
         color: var(--lumo-contrast);
         font-weight: bold;
       }
@@ -34,11 +34,6 @@ export class UnitArmorView extends LitElement {
         color: var(--lumo-contrast-70pct);
       }
 
-      h2 {
-        display: block;
-        text-align: center;
-        font-size: var(--lumo-font-size-xl);
-      }
 
       vaadin-horizontal-layout {
         display: flex;

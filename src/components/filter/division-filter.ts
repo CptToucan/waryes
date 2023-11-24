@@ -52,11 +52,11 @@ export class DivisionFilter extends LitElement {
       style="display: flex; align-items: center; gap: var(--lumo-space-s); overflow: hidden;"
     >
       <division-flag .division=${division}></division-flag>
-      <span
+      <div
         style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1 1 100%;"
       >
         ${division.name}
-      </span>
+      </div>
     </div>
   `;
 

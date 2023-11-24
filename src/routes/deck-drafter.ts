@@ -240,7 +240,7 @@ export class DeckDrafterRoute
       <div class="card center">
         <div class="header">
           <img src=${WaryesImage} alt="WarYes Logo" />
-          <span>Deck Draft <simple-chip>BETA</simple-chip></span>
+          <div>Deck Draft <simple-chip>BETA</simple-chip></div>
         </div>
         <div>
           <p>

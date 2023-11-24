@@ -323,10 +323,9 @@ export class MyDecksRoute extends LitElement {
     return html`
       <div class="page">
         <h2>My Decks ${this.numberOfDecks}/${TOTAL_ALLOWED_DECKS}</h2>
-        <span
+        <div
           >Changed deck names will only be visible to you for organisation
-          purposes, this is to prevent abuse.</span
-        >
+          purposes, this is to prevent abuse.</div>
         <div class="categories">
           ${divisionKeys.length === 0
             ? html`<div style="margin: var(--lumo-space-l);">
@@ -387,11 +386,10 @@ export class MyDecksRoute extends LitElement {
                                 }
                               }}
                             ></vaadin-text-field>`
-                          : html`<span
+                          : html`<div
                               style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex: 1 1 auto;"
                               >${deck.data().public ? 'PUBLIC ' : ''}${this
-                                .nameStates?.[deck.id] || name}</span
-                            >`}
+                                .nameStates?.[deck.id] || name}</div>`}
                         ${this?.editStates?.[deck.id]
                           ? html`<vaadin-button
                               theme="icon small tertiary"

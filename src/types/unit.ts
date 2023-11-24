@@ -53,6 +53,7 @@ interface Weapon {
   heDamageRadius: number;
   suppress: number;
   suppressDamagesRadius: number;
+  suppressDamages: number[];
   groundRange: number;
   groundMinRange: number;
   helicopterRange: number;
@@ -94,6 +95,11 @@ interface Weapon {
   staticPrecisionBonusPerShot?: number;
   movingPrecisionBonusPerShot?: number;
   maxSuccessiveHitCount?: number;
+  damageFamilies: string[];
+  piercingWeapon: boolean;
+  damageDropOffTokens: string[];
+  tandemCharges: boolean[];
+  numberOfSimultaneousProjectiles: number[];
 }
 
 interface UnitType {
@@ -112,6 +118,12 @@ interface SpeedForTerrain {
   name: string;
 }
 
+enum MovementType {
+  LAND = 'land',
+  PLANE = 'plane',
+  HELICOPTER = 'helicopter',
+}
+
 /**
  * This interface should have all of its values defined in FieldMetadata, this is the glue holding field metadata and interface types together
  */
@@ -127,6 +139,10 @@ interface Unit {
   sideArmor: number;
   rearArmor: number;
   topArmor: number;
+  frontArmorType: string;
+  sideArmorType: string;
+  rearArmorType: string;
+  topArmorType: string;
   maxDamage: number;
   speed: number;
   speedsForTerrains: SpeedForTerrain[];
@@ -158,6 +174,10 @@ interface Unit {
   maxRepairTime?: number;
   isCommand?: boolean;
   dangerousness?: number;
+  movementType: MovementType;
+  occupiableTerrains: string[];
+  era: boolean;
+  isSpecialForces: boolean;
 }
 
 enum UnitFieldType {
@@ -339,4 +359,5 @@ export {
   Alliance,
   SpeedForTerrain,
   UnitType,
+  MovementType,
 };

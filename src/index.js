@@ -32,6 +32,7 @@ import "./routes/patch-notes";
 import "./routes/maps";
 import "./routes/deck-drafter";
 import "./routes/deck-draft";
+import "./routes/damage-calculator";
 
 /** Components */
 import "./components/unit-card";

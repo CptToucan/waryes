@@ -63,7 +63,7 @@ export class PaginationControls extends LitElement {
     pageButtons.push(this.renderNumberButton(1));
 
     if (this.page >= 5) {
-      pageButtons.push(html`<span>...</span>`);
+      pageButtons.push(html`<div>...</div>`);
     }
 
     for (

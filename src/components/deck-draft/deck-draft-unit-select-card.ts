@@ -230,14 +230,11 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
 
         return html`
           ${this.transport ? this.renderTransportModal(this.transport) : ''}
-          <span class="veterancy"
-            >${getVeterancyName(this.activeVeterancy)}</span
-          >
+          <div class="veterancy"
+            >${getVeterancyName(this.activeVeterancy)}</div>
           <div class="bar">
-            <span class="name">${unit.name}</span
-            ><span class="availability"
-              >x${veterancyQuantities[this.activeVeterancy]}</span
-            >
+            <div class="name">${unit.name}</div><div class="availability"
+              >x${veterancyQuantities[this.activeVeterancy]}</div>
           </div>
           <div class="main">
             ${this.renderUnitImageContainer(unit, this.pack, this.deck)}

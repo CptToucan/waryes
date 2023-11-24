@@ -51,6 +51,12 @@ const defaultMenu: MenuDefinition = {
       href: '/',
     },
     {
+      name: 'WARNO Patch Notes',
+      icon: 'vaadin:clipboard-text',
+      href: '/patch-notes',
+    },
+
+    {
       name: 'Database',
       items: [
         {
@@ -63,6 +69,12 @@ const defaultMenu: MenuDefinition = {
           icon: 'waryes:gun',
           href: '/weapons',
         },
+        {
+          name: 'Damage Calculator',
+          icon: 'waryes:calculator',
+          href: '/damage-calculator/NONE',
+        },
+
         {
           name: 'Unit Comparison',
           icon: 'vaadin:pie-bar-chart',
@@ -88,41 +100,37 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:code',
           href: '/deck-import',
         },
-        {
-          name: 'Library',
-          icon: 'vaadin:book',
-          href: '/deck-library',
-        },
+
         {
           name: 'My Decks',
           icon: 'vaadin:folder',
           href: '/my-decks',
         },
+      ],
+    },
+    {
+      name: 'Community',
+      items: [
         {
-          name: 'Draft',
+          name: 'Division Analysis',
+          icon: 'vaadin:bar-chart',
+          href: '/division-analysis',
+        },
+        {
+          name: 'Deck Library',
+          icon: 'vaadin:book',
+          href: '/deck-library',
+        },
+        {
+          name: 'Deck Drafting',
           icon: 'vaadin:clipboard-text',
           href: '/deck-drafter',
         },
       ],
     },
     {
-      name: 'Division',
-      items: [
-        {
-          name: 'Analysis',
-          icon: 'vaadin:bar-chart',
-          href: '/division-analysis',
-        },
-      ],
-    },
-    {
       name: 'Information',
       items: [
-        {
-          name: 'Warno Patch Notes',
-          icon: 'vaadin:info-circle',
-          href: '/patch-notes',
-        },
         {
           name: 'Discord',
           icon: 'vaadin:comments',
@@ -137,7 +145,7 @@ const defaultMenu: MenuDefinition = {
           name: 'Support the Site',
           icon: 'vaadin:heart',
           href: 'https://www.patreon.com/WarYes',
-        }
+        },
       ],
     },
   ],
@@ -146,6 +154,11 @@ const defaultMenu: MenuDefinition = {
       name: 'Home',
       icon: 'vaadin:home',
       href: '/',
+    },
+    {
+      name: 'WARNO Patch Notes',
+      icon: 'vaadin:clipboard-text',
+      href: '/patch-notes',
     },
     {
       name: 'Database',
@@ -159,6 +172,11 @@ const defaultMenu: MenuDefinition = {
           name: 'Weapons',
           icon: 'waryes:gun',
           href: '/weapons',
+        },
+        {
+          name: 'Damage Calculator',
+          icon: 'waryes:calculator',
+          href: '/damage-calculator/NONE',
         },
         {
           name: 'Unit Comparison',
@@ -185,36 +203,31 @@ const defaultMenu: MenuDefinition = {
           icon: 'vaadin:code',
           href: '/deck-import',
         },
+      ],
+    },
+    {
+      name: 'Community',
+      items: [
         {
-          name: 'Library',
+          name: 'Division Analysis',
+          icon: 'vaadin:bar-chart',
+          href: '/division-analysis',
+        },
+        {
+          name: 'Deck Library',
           icon: 'vaadin:book',
           href: '/deck-library',
         },
         {
-          name: 'Draft',
+          name: 'Deck Drafting',
           icon: 'vaadin:clipboard-text',
           href: '/deck-drafter',
         },
       ],
     },
     {
-      name: 'Division',
-      items: [
-        {
-          name: 'Analysis',
-          icon: 'vaadin:bar-chart',
-          href: '/division-analysis',
-        },
-      ],
-    },
-    {
       name: 'Information',
       items: [
-        {
-          name: 'Game Patch Notes',
-          icon: 'vaadin:info-circle',
-          href: '/patch-notes',
-        },
         {
           name: 'Login',
           icon: 'vaadin:sign-in',
@@ -234,7 +247,7 @@ const defaultMenu: MenuDefinition = {
           name: 'Support the Site',
           icon: 'vaadin:heart',
           href: 'https://www.patreon.com/WarYes',
-        }
+        },
       ],
     },
   ],
@@ -461,9 +474,9 @@ export class AuthenticatedMenu extends LitElement {
         .items=${this.getLoggedInContextMenuItems()}
       >
         <vaadin-button theme="tertiary" aria-label="Account">
-          <span class="desktop-only">
+          <div class="desktop-only">
             ${this.user.displayName ? this.user.displayName : 'NO DISPLAY NAME'}
-          </span>
+          </div>
 
           <vaadin-icon icon="vaadin:user"></vaadin-icon>
         </vaadin-button>
@@ -552,7 +565,7 @@ function isMenuItemGroup(
             icon="${menuItem.icon}"
           ></vaadin-icon>
           <span>${menuItem.name}</span>
-        </a>
+        </div>
       </vaadin-tab>
     `;
     */

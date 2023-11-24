@@ -120,11 +120,11 @@ export class CompactArmouryCard extends ArmouryWithTransportCard {
             </div>
             ${this.transport?.name
               ? html` <div class="details">
-                  <span class="name">${this.transport?.name}</span>
+                  <div class="name">${this.transport?.name}</div>
                 </div>`
               : ''}
 
-            <div class="unit-name"><span class="name">${unit.name}</span></div>
+            <div class="unit-name"><div class="name">${unit.name}</div></div>
           </div>
         `;
       }
