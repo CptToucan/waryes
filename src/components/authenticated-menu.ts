@@ -72,7 +72,7 @@ const defaultMenu: MenuDefinition = {
         {
           name: 'Damage Calculator',
           icon: 'waryes:calculator',
-          href: '/damage-calculator/NONE',
+          href: '/damage-calculator',
         },
 
         {
@@ -176,7 +176,7 @@ const defaultMenu: MenuDefinition = {
         {
           name: 'Damage Calculator',
           icon: 'waryes:calculator',
-          href: '/damage-calculator/NONE',
+          href: '/damage-calculator',
         },
         {
           name: 'Unit Comparison',

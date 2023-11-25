@@ -221,7 +221,7 @@ export class IndexRoute extends LitElement {
         'Browse Weapons',
       ),
       this.renderChoiceButton(
-        '/damage-calculator/NONE',
+        '/damage-calculator',
         'waryes:calculator',
         'Damage Calculator',
       ),
