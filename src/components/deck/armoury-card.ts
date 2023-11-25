@@ -165,7 +165,6 @@ export class ArmouryCard extends LitElement {
         theme="primary small icon"
         class="info-icon-button"
         @click=${() => {
-          console.log(openCallback);
           if (openCallback) {
             openCallback();
           } else {

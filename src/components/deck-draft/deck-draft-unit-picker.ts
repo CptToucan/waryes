@@ -124,7 +124,6 @@ export class DeckDraftUnitPicker extends LitElement {
 
   updated(changedProperties: PropertyValues<this>) {
     // only need to check changed properties for an expensive computation.
-    console.log(changedProperties);
     if (changedProperties.has('disable') && this.disable === false) {
       this.playAnimation();
     }
