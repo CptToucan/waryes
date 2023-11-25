@@ -1335,8 +1335,8 @@ export class DamageCalculator extends LitElement {
       const numberOfTimeBetweenShots = burstsToKill - 1;
       instancesOfTimeBetweenShots = numberOfTimeBetweenShots - numberOfReloads;
 
-      if (missileTravelTime > 0) {
-        missileTravelTime = missileTravelTime * burstsToKill;
+      if (flightTimeOfOneMissile && flightTimeOfOneMissile > 0) {
+        missileTravelTime = flightTimeOfOneMissile * burstsToKill;
       }
     }
 
@@ -1347,6 +1347,26 @@ export class DamageCalculator extends LitElement {
       totalTimeReloading +
       totalTimeBetweenShots +
       missileTravelTime;
+
+    console.table(
+      {
+        shotsToKill,
+        aimingTime,
+        reloadTime,
+        timeBetweenShots,
+        salvoLength,
+        numberOfSimultaneousProjectiles,
+        distance,
+        missileSpeed,
+        missileAcceleration,
+        numberOfReloads,
+        totalTimeReloading,
+        instancesOfTimeBetweenShots,
+        totalTimeBetweenShots,
+        missileTravelTime,
+        timeToKill,
+      },
+    )
 
     return {timeToKill, flightTimeOfOneMissile};
   }
