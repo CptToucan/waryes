@@ -516,6 +516,7 @@ export class DamageCalculator extends LitElement {
     let highestDamageSuppressionMultiplier = 0;
     let highestDamageSuppressionDamage = 0;
     let highestDamageSimultaneousProjectiles = 0;
+    let highestDamageFamily = "";
 
     const missileSpeed = this.weapon?.missileProperties?.maxMissileSpeed;
     const missileAcceleration =
@@ -575,6 +576,7 @@ export class DamageCalculator extends LitElement {
         highestDamageSuppressionMultiplier = suppressionMultiplier;
         highestDamageSuppressionDamage = suppressionDamage;
         highestDamageSimultaneousProjectiles = numberOfSimultaenousProjectiles;
+        highestDamageFamily = family;
       }
     }
 
@@ -585,7 +587,13 @@ export class DamageCalculator extends LitElement {
       this.targetUnit?.movementType as MovementType
     );
 
-    let accuracy = baseAccuracy * (1 + this.targetUnit.ecm);
+    let ecmToApply = 0;
+    
+    if(highestDamageFamily === 'missile_he') {
+      ecmToApply = this.targetUnit?.ecm || 0;
+    }
+
+    let accuracy = baseAccuracy * (1 + ecmToApply);
     let aimTime = this.weapon?.aimingTime || 0;
     let reloadTime = this.weapon?.reloadTime || 0;
     const salvoLength = this.weapon?.salvoLength || 0;
@@ -909,12 +917,23 @@ export class DamageCalculator extends LitElement {
       resistanceFamilyArmorKey
     ] as string;
 
+
     const resistanceFamily = this.getFamilyOfFamilyIndex(
       resistanceFamilyWithIndex
     );
     const resistanceFamilyIndex = this.getIndexOfFamilyIndex(
       resistanceFamilyWithIndex
     );
+
+    // AP weapons don't have accuracy on helicopters, so they can't hit them
+    // this is a hacky way to fix that, rather than extracting the accuracy for each ammunition
+    // as of writing, the accuracies are merged into one value for each weapon which is why this is necessary
+    if(damageFamily === "ap" && resistanceFamily === "helico") {
+      return {
+        damageMultiplier: 0,
+        suppressionMultiplier: 0
+      }
+    }
 
     const indexOfTargetResistanceFamilyColumn =
       this.getIndexOfTargetResistanceFamilyColumn(
