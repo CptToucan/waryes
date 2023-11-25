@@ -17,19 +17,21 @@ export enum BucketType {
   DAMAGE_TABLE = 'damageTable.json',
 }
 
-
-
 export type DamageTable = {
   damageFamilyWithIndexes: FamilyIndexTuple[] | null;
   resistanceFamilyWithIndexes: FamilyIndexTuple[] | null;
   damageTable: number[][] | null;
-  terrainResistances: {
-    name: string;
-    damageFamilies: TerrainResistance[];
-  }[] | null;
-  defaultSuppressDamage: FamilyIndexTuple | null,
-  suppressionDamageExceptions: {exception: string, suppression: FamilyIndexTuple}[] | null,
-  armorToignoreForDamageFamilies: string[] | null,
+  terrainResistances:
+    | {
+        name: string;
+        damageFamilies: TerrainResistance[];
+      }[]
+    | null;
+  defaultSuppressDamage: FamilyIndexTuple | null;
+  suppressionDamageExceptions:
+    | {exception: string; suppression: FamilyIndexTuple}[]
+    | null;
+  armorToignoreForDamageFamilies: string[] | null;
 };
 
 type BundleMap = {
@@ -97,19 +99,13 @@ class BundleManager {
   }
 
   public loadConfig() {
-    const mods = localStorage.getItem('mods');
+    this.config = {
+      [BucketFolder.WARNO]: true,
+      [BucketFolder.FRAGO]: false,
+      [BucketFolder.WARNO_LET_LOOSE]: false,
+    };
 
-    if (mods) {
-      this.config = JSON.parse(mods);
-    } else {
-      this.config = {
-        [BucketFolder.WARNO]: true,
-        [BucketFolder.FRAGO]: false,
-        [BucketFolder.WARNO_LET_LOOSE]: false,
-      };
-
-      localStorage.setItem('mods', JSON.stringify(this.config));
-    }
+    localStorage.setItem('mods', JSON.stringify(this.config));
   }
 
   async initialise() {
@@ -133,7 +129,10 @@ class BundleManager {
       ),
     ]);
 
-    const damageTable = await this.getBundleFor<DamageTable>(BucketFolder.WARNO, BucketType.DAMAGE_TABLE);
+    const damageTable = await this.getBundleFor<DamageTable>(
+      BucketFolder.WARNO,
+      BucketType.DAMAGE_TABLE
+    );
     this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
     // Warno
     this.initialiseBucket(unitDivisions[0], BucketFolder.WARNO);
