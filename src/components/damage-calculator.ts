@@ -631,7 +631,7 @@ export class DamageCalculator extends LitElement {
     const accuracyAsDecimal = accuracy / 100;
     const averageDamagePerShot = damagePerShot * accuracyAsDecimal;
 
-    const shotsToKillWithAccuracy = Math.round(
+    const shotsToKillWithAccuracy = Math.ceil(
       healthOfUnit / averageDamagePerShot
     );
 
