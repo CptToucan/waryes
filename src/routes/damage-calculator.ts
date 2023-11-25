@@ -178,8 +178,9 @@ export class DamageCalculatorRoute
   calculatorOutput: any;
 
   async onBeforeEnter(location: RouterLocation) {
-    const unitId = location.params.unitId as string;
-    if (unitId !== 'NONE') {
+    const unitId = location?.params?.unitId as string;
+
+    if (unitId !== 'NONE' && unitId !== undefined) {
       await this.fetchUnit(unitId);
     }
   }
