@@ -193,7 +193,7 @@ export class DeckDraftRoute extends LitElement implements BeforeEnterObserver {
   private activeDeck: Deck | null = null;
 
   @state({
-    hasChanged: (newValue) => {
+    hasChanged: () => {
       return true;
     },
   })

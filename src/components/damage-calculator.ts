@@ -625,6 +625,9 @@ export class DamageCalculator extends LitElement {
       }
     }
 
+    // cap accuracy at 100% after all modifiers
+    accuracy = Math.min(accuracy, 100);
+
     const healthOfUnit = this.targetUnit?.maxDamage || 0;
     const damagePerShot = highestDamage;
     const shotsToKill = Math.ceil(healthOfUnit / damagePerShot);
@@ -871,9 +874,7 @@ export class DamageCalculator extends LitElement {
       lowerBoundAccuracyValue +
       (upperBoundAccuracyValue - lowerBoundAccuracyValue) * interpolationValue;
 
-    const cappedAccuracy = Math.min(accuracy, 100);
-
-    return cappedAccuracy;
+    return accuracy;
   }
 
   getIndexOfFamilyIndex(familyIndexString: string) {
