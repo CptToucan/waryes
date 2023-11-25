@@ -230,7 +230,6 @@ export class DeckDraftClientEngine implements DeckDraftEngine {
       };
 
       this.state = nextSessionStateData;
-      console.log(this.state);
     }
 
     return;

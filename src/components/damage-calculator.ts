@@ -1348,26 +1348,6 @@ export class DamageCalculator extends LitElement {
       totalTimeBetweenShots +
       missileTravelTime;
 
-    console.table(
-      {
-        shotsToKill,
-        aimingTime,
-        reloadTime,
-        timeBetweenShots,
-        salvoLength,
-        numberOfSimultaneousProjectiles,
-        distance,
-        missileSpeed,
-        missileAcceleration,
-        numberOfReloads,
-        totalTimeReloading,
-        instancesOfTimeBetweenShots,
-        totalTimeBetweenShots,
-        missileTravelTime,
-        timeToKill,
-      },
-    )
-
     return {timeToKill, flightTimeOfOneMissile};
   }
 

@@ -295,7 +295,6 @@ export class DamageCalculatorRoute
             <unit-search
               .selectedUnits=${[this.sourceUnit]}
               @unit-selected=${(e: CustomEvent) => {
-                console.log(e.detail.value);
                 this.sourceUnit = e.detail.value;
                 this.selectedWeaponIndex = 0;
               }}
