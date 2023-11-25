@@ -529,7 +529,7 @@ export class DamageCalculator extends LitElement {
       const damageFamilyWithIndex = this.weapon?.damageFamilies[i] as string;
       const damageDropOff = this.weapon?.damageDropOffTokens[i] as string;
       const isTandemCharge = this.weapon?.tandemCharges[i] as boolean;
-      const suppress = this.weapon?.suppressDamages[i] || 0;
+      const suppress = (this.weapon?.suppressDamages[i] * this.weapon.numberOfWeapons) || 0;
       const numberOfSimultaenousProjectiles =
         this.weapon?.numberOfSimultaneousProjectiles[i];
 
