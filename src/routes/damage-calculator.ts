@@ -230,7 +230,7 @@ export class DamageCalculatorRoute
         },
         {
           label: 'Missile Travel Time',
-          value: `${this.calculatorOutput?.flightTimeOfOneMissile.toFixed(2)} s`,
+          value: `${this.calculatorOutput?.flightTimeOfOneMissile?.toFixed(2)} s`,
         }
       );
     }
