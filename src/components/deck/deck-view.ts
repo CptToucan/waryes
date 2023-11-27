@@ -355,8 +355,8 @@ export class DeckView extends LitElement {
           <div class="deck-card-categories">${this.renderDeck(this.deck)}</div>
           <div class="total-unit-cost">
             Total Points:
-            <div class="${displayWarningOnCost && 'warning'}"
-              >${unitCosts}</div>
+            <span class="${displayWarningOnCost && 'warning'}"
+              >${unitCosts}</span>
             ${displayWarningOnCost
               ? html`<vaadin-icon
                     id="warning-icon"
