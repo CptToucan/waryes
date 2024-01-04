@@ -151,10 +151,22 @@ export class DamageCalculatorRoute
           display: block;
         }
       }
+
+      .calculator-title {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
     `;
   }
 
-  @state()
+  @state({
+    hasChanged: (newVal, oldVal) => {
+      return (
+        (newVal as Unit)?.descriptorName !== (oldVal as Unit)?.descriptorName
+      );
+    },
+  })
   sourceUnit?: Unit;
 
   @state({
@@ -188,6 +200,12 @@ export class DamageCalculatorRoute
   async fetchUnit(unitId: string) {
     const units = await BundleManagerService.getUnits();
     this.sourceUnit = units?.find((u) => u.descriptorName === unitId);
+  }
+
+  swapUnits() {
+    const sourceUnit = this.sourceUnit;
+    this.sourceUnit = this.targetUnit;
+    this.targetUnit = sourceUnit;
   }
 
   render(): TemplateResult {
@@ -230,7 +248,9 @@ export class DamageCalculatorRoute
         },
         {
           label: 'Missile Travel Time',
-          value: `${this.calculatorOutput?.flightTimeOfOneMissile?.toFixed(2)} s`,
+          value: `${this.calculatorOutput?.flightTimeOfOneMissile?.toFixed(
+            2
+          )} s`,
         }
       );
     }
@@ -240,9 +260,18 @@ export class DamageCalculatorRoute
         label: 'Shots to Kill',
         value: this.calculatorOutput?.shotsToKill.toFixed(1),
       },
+
       {
         label: 'Time to Kill',
         value: `${this.calculatorOutput?.timeToKill.toFixed(2)} s`,
+      },
+      {
+        label: 'Damage Per Second',
+        value: `${this.calculatorOutput?.damagePerSecond.toFixed(2)}`,
+      },
+      {
+        label: 'Shots to Suppress',
+        value: this.calculatorOutput?.shotsToMaxSuppression.toFixed(1),
       },
       {
         label: 'Time to Suppress',
@@ -261,6 +290,11 @@ export class DamageCalculatorRoute
       {
         label: 'Time to Kill',
         value: `${this.calculatorOutput?.averageTimeToKill.toFixed(2)} s`,
+      },
+      {
+        label: 'Shots to Suppress',
+        value:
+          this.calculatorOutput?.shotsToMaxSuppressionWithAccuracy.toFixed(1),
       },
 
       {
@@ -288,7 +322,16 @@ export class DamageCalculatorRoute
           </div>`}
 
       <div class="configuration">
-        <h2>Advanced Damage Calculator</h2>
+        <div class="calculator-title">
+          <h2>Advanced Damage Calculator</h2>
+          <vaadin-button
+            theme="icon primary small"
+            @click=${() => {
+              this.swapUnits();
+            }}
+            ><vaadin-icon icon="vaadin:exchange"></vaadin-icon
+          ></vaadin-button>
+        </div>
         <div class="units">
           <div class="source">
             <h3>Source</h3>
@@ -334,6 +377,7 @@ export class DamageCalculatorRoute
               @unit-selected=${(e: CustomEvent) => {
                 this.targetUnit = e.detail.value;
               }}
+              .selectedUnits=${[this.targetUnit]}
             ></unit-search>
           </div>
         </div>

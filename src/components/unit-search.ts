@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
 import {
   BundleManagerService,
@@ -40,6 +40,11 @@ export class UnitSearch extends LitElement {
   multi = false; 
 
 
+  @state( {
+    hasChanged() {
+      return true;
+    }
+  })
   private _selectedUnits: Unit[] = [];
 
   @property()
