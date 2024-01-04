@@ -74,6 +74,7 @@ export class DivisionFlag extends LitElement {
   @property()
   division?: Division
 
+  @property()
   divisionId?: string
 
   render(): TemplateResult {
