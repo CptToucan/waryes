@@ -1,16 +1,18 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
+import {customElement, property} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
 import {
   BundleManagerService,
-  UNIT_SEARCH_IGNORED_CHARACTERS
+  UNIT_SEARCH_IGNORED_CHARACTERS,
 } from '../services/bundle-manager';
 import {
   ComboBoxFilterChangedEvent,
   ComboBoxSelectedItemChangedEvent,
 } from '@vaadin/combo-box';
 import '@vaadin/multi-select-combo-box';
-import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
+import {
+  MultiSelectComboBoxSelectedItemsChangedEvent,
+} from '@vaadin/multi-select-combo-box';
 import type {ComboBoxLitRenderer} from '@vaadin/combo-box/lit.js';
 import {comboBoxRenderer} from '@vaadin/combo-box/lit.js';
 
@@ -37,14 +39,9 @@ export class UnitSearch extends LitElement {
   }
 
   @property()
-  multi = false; 
+  multi = false;
 
 
-  @state( {
-    hasChanged() {
-      return true;
-    }
-  })
   private _selectedUnits: Unit[] = [];
 
   @property()
@@ -167,7 +164,9 @@ export class UnitSearch extends LitElement {
           <div class="unit-name">${unit.name}</div>
         </div>
       </div>
-      <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1 1 100%; padding-left: var(--lumo-space-xs);">
+      <div
+        style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1 1 100%; padding-left: var(--lumo-space-xs);"
+      >
         <mod-image style="height: 10px;" .mod=${unit.mod}></mod-image>
       </div>
     </div>
@@ -189,7 +188,6 @@ export class UnitSearch extends LitElement {
           ></vaadin-combo-box>`}
     `;
   }
-
 }
 
 declare global {
