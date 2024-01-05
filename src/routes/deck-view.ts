@@ -24,8 +24,12 @@ import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
 import '../components/intel-report';
 import '@vaadin/tabs';
 import {TabsSelectedChangedEvent} from '@vaadin/tabs';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
+import {TextFieldValueChangedEvent} from '@vaadin/text-field';
+import {DialogOpenedChangedEvent} from '@vaadin/dialog';
+import {dialogRenderer, dialogFooterRenderer} from '@vaadin/dialog/lit.js';
 
+const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
 @customElement('deck-view-route')
 export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   static get styles() {
@@ -64,6 +68,15 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       .pro {
         --color: var(--lumo-secondary-color);
         --background: var(--lumo-contrast-10pct);
+      }
+
+      .embed-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-s);
       }
     `;
   }
@@ -106,6 +119,19 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       this.loggedInUser &&
       this.userDeck?.created_by === this.loggedInUser?.uid
     ) {
+      if (this.userInfo?.is_content_creator) {
+        items.push({
+          component: this.createItem(
+            'link',
+            'Link',
+            false,
+            this.actionHappening
+          ),
+          text: 'Link',
+          disabled: this.actionHappening,
+        });
+      }
+
       items.push({
         component: this.createItem('edit', 'Edit', false, this.actionHappening),
         text: 'Edit',
@@ -168,6 +194,14 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   @property()
   loggedInUser: User | null | undefined;
 
+  youtubeLink?: string;
+
+  @property()
+  userInfo: null | DocumentData = null;
+
+  @property()
+  youtubeLinkDialogOpened = false;
+
   @state()
   deckError = false;
 
@@ -176,9 +210,20 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
 
   async onBeforeEnter(location: RouterLocation) {
     try {
+      this.youtubeLink = undefined;
       this.deckId = location.params.deckId as string;
-      FirebaseService.auth?.onAuthStateChanged((user) => {
+      FirebaseService.auth?.onAuthStateChanged(async (user) => {
         this.loggedInUser = user;
+        const ref = doc(
+          FirebaseService.db,
+          'users',
+          this.loggedInUser?.uid || ''
+        );
+        const userSnap = await getDoc(ref);
+
+        if (userSnap.exists()) {
+          this.userInfo = userSnap.data();
+        }
       });
       await this.fetchDeck(this.deckId);
 
@@ -237,7 +282,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async fetchUnitMap() {
-    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
+    const units = await BundleManagerService.getUnitsForBucket(
+      BucketFolder.WARNO
+    );
     const unitMap: UnitMap = {};
 
     if (units) {
@@ -250,7 +297,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async fetchDivisionMap() {
-    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
+    const divisions = await BundleManagerService.getDivisionsForBucket(
+      BucketFolder.WARNO
+    );
     const divisionMap: DivisionsMap = {};
 
     if (divisions) {
@@ -334,6 +383,10 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
           this.actionHappening = false;
         }, 1000);
         break;
+      case 'Link':
+
+        this.openYoutubeDialog();
+        break;
       case 'Public':
       case 'Private':
         this.actionHappening = true;
@@ -413,64 +466,180 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
 
     return html`<div class="container">
-      <deck-header .deck=${this.deck}>
-        <div slot="title" style="display: flex; width: 100%;">
-          <deck-title
-            .deck=${this.deck}
-            style="flex: 1 1 0; width: 100%; display: flex; overflow: hidden;"
-          >
-            <div
-              slot="title"
-              style="display: flex; flex: 1 1 0; align-items: center;"
+        <deck-header .deck=${this.deck}>
+          <div slot="title" style="display: flex; width: 100%;">
+            <deck-title
+              .deck=${this.deck}
+              style="flex: 1 1 0; width: 100%; display: flex; overflow: hidden;"
             >
-              ${this.userDeck?.is_pro_deck
-                ? html`<simple-chip class="pro">PRO</simple-chip>`
-                : ''}
-
               <div
-                style="display: flex; flex-direction: column; flex: 1 1 0; overflow: hidden;"
+                slot="title"
+                style="display: flex; flex: 1 1 0; align-items: center;"
               >
-                <h2>${this.userDeck?.name}</h2>
-
-                ${this.copyDeck
-                  ? html` <div
-                      style="display: flex; align-items: center; font-size: var(--lumo-font-size-s); overflow: hidden;"
-                    >
-                      Copied from:
-
-                      <a
-                        style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                        href="/deck/${this.copyDeck?.id}"
-                        target="_blank"
-                      >
-                        ${this.copyDeck?.name}
-                      </a>
-                    </div>`
+                ${this.userDeck?.is_pro_deck
+                  ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
+
+                <div
+                  style="display: flex; flex-direction: column; flex: 1 1 0; overflow: hidden;"
+                >
+                  <h2>${this.userDeck?.name}</h2>
+
+                  ${this.copyDeck
+                    ? html` <div
+                        style="display: flex; align-items: center; font-size: var(--lumo-font-size-s); overflow: hidden;"
+                      >
+                        Copied from:
+
+                        <a
+                          style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
+                          href="/deck/${this.copyDeck?.id}"
+                          target="_blank"
+                        >
+                          ${this.copyDeck?.name}
+                        </a>
+                      </div>`
+                    : ''}
+                </div>
               </div>
-            </div>
-          </deck-title>
-        </div>
-        <div class="toolbar-menu" slot="toolbar">
-          <vaadin-menu-bar
-            .items=${this.toolbarItems}
-            @item-selected=${(event: MenuBarItemSelectedEvent) => {
-              this.toolbarItemSelected(event.detail?.value?.text || '');
-            }}
-          ></vaadin-menu-bar>
-        </div>
-      </deck-header>
-      <vaadin-tabs
-        @selected-changed=${(e: TabsSelectedChangedEvent) => {
-          const tabIndex = e.detail.value;
-          this.selectedTabIndex = tabIndex;
-        }}
-      >
-        <vaadin-tab>Deck</vaadin-tab>
-        <vaadin-tab>Report</vaadin-tab>
-      </vaadin-tabs>
-      ${tabContent}
+            </deck-title>
+          </div>
+          <div class="toolbar-menu" slot="toolbar">
+            <vaadin-menu-bar
+              .items=${this.toolbarItems}
+              @item-selected=${(event: MenuBarItemSelectedEvent) => {
+                this.toolbarItemSelected(event.detail?.value?.text || '');
+              }}
+            ></vaadin-menu-bar>
+          </div>
+        </deck-header>
+        ${this.userDeck?.youtube_link
+          ? this.renderEmbed(this.userDeck?.youtube_link)
+          : html``}
+        <vaadin-tabs
+          @selected-changed=${(e: TabsSelectedChangedEvent) => {
+            const tabIndex = e.detail.value;
+            this.selectedTabIndex = tabIndex;
+          }}
+        >
+          <vaadin-tab>Deck</vaadin-tab>
+          <vaadin-tab>Report</vaadin-tab>
+        </vaadin-tabs>
+        ${tabContent}
+      </div>
+      ${this.renderYoutubeLinkDialog()} `;
+  }
+
+  renderEmbed(link: string) {
+    return html`<div class="embed-container">
+      <iframe
+        width="560"
+        height="315"
+        src=${link}
+        frameborder="0"
+        allow="autoplay;picture-in-picture"
+      ></iframe>
     </div>`;
+  }
+
+  renderYoutubeLinkDialog() {
+    return html`<vaadin-dialog
+      aria-label="Input Youtube Link"
+      header-title="Input Youtube Link"
+      .opened="${this.youtubeLinkDialogOpened}"
+      @opened-changed="${(event: DialogOpenedChangedEvent) => {
+        this.youtubeLinkDialogOpened = event.detail.value;
+        if (event.detail.value === false) {
+          this.actionHappening = false;
+        }
+      }}"
+      ${dialogRenderer(
+        () =>
+          html`<vaadin-text-field
+            style="width: 100%"
+            .value="${this.youtubeLink}"
+            @value-changed=${(e: TextFieldValueChangedEvent) => {
+              this.youtubeLink = e.detail.value;
+            }}
+            label="Link"
+          ></vaadin-text-field>`,
+        [this.youtubeLink]
+      )}
+      ${dialogFooterRenderer(
+        () =>
+          html` <vaadin-button
+              @click="${() => {
+                this.closeYoutubeDialog();
+              }}"
+              .disabled="${this.actionHappening}"
+              >Close</vaadin-button
+            >
+            <vaadin-button
+              theme="primary"
+              @click="${() => {
+                this.saveYoutubeLink(this.youtubeLink || '');
+              }}"
+              .disabled="${this.actionHappening}"
+              >Save</vaadin-button
+            >`,
+       [this.actionHappening])}
+    ></vaadin-dialog>`;
+  }
+
+  async saveYoutubeLink(link: string) {
+    try {
+      this.actionHappening = true;
+      const user = this.loggedInUser;
+
+      if (!user) {
+        return;
+      }
+
+      const headers = new Headers();
+      headers.append('Authorization', `Bearer ${await user.getIdToken()}`);
+
+      const response = await fetch(`${BASE_URL}/setYoutubeLink`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          deckId: this.userDeck?.id,
+          youtubeLink: link,
+        }),
+      });
+
+      if (!response?.ok) {
+        throw new Error('Error saving youtube link');
+      }
+
+      notificationService.instance?.addNotification({
+        content: 'Youtube link saved, refreshing...',
+        theme: 'success',
+        duration: 5000,
+      });
+    } catch (err) {
+      console.error(err);
+      notificationService.instance?.addNotification({
+        content: 'Error saving youtube link, refreshing...',
+        theme: 'error',
+        duration: 5000,
+      });
+    } finally {
+      this.closeYoutubeDialog();
+      // refresh page
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    }
+  }
+
+  private openYoutubeDialog() {
+    this.youtubeLinkDialogOpened = true;
+  }
+
+  private closeYoutubeDialog() {
+    this.youtubeLink = undefined;
+    this.youtubeLinkDialogOpened = false;
+    this.actionHappening = false;
   }
 
   async vote(itemId: string, userId: string): Promise<void> {

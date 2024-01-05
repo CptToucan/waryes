@@ -11,6 +11,7 @@ export class SimpleChip extends LitElement {
         border-radius: var(--lumo-border-radius-m);
         padding: 7px 6px;
         display: inline-flex;
+        justify-content: center;
         position: relative;
         align-items: center;
         height: 32px;
@@ -23,6 +24,7 @@ export class SimpleChip extends LitElement {
         vertical-align: middle;
         box-sizing: border-box;
         white-space: nowrap;
+        text-align: center;
       }
     `;
   }

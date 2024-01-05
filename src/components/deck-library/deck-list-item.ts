@@ -125,13 +125,24 @@ export class DeckListItem extends LitElement {
       .button-container {
         display: flex;
         gap: var(--lumo-space-s);
+        height: 30px;
+        align-items: center;
       }
 
       .summary {
         display: flex;
+        flex-direction: column;
         overflow-y: auto;
         flex: 1 1 100%;
-        // height: 500px;
+      }
+
+      .embed-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: var(--lumo-space-s);
+        padding-bottom: var(--lumo-space-s);
       }
 
       .pro {
@@ -139,6 +150,7 @@ export class DeckListItem extends LitElement {
         --color: var(--lumo-secondary-color);
         width: 35px;
         min-width: 35px;
+        text-align: center;
       }
 
       simple-chip {
@@ -229,6 +241,9 @@ export class DeckListItem extends LitElement {
                 ${deck.is_pro_deck
                   ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
+                ${deck.is_content_creator_deck
+                  ? html`<simple-chip class="pro">CC</simple-chip>`
+                  : ''}
                 <slot name="name"> <div class="name">${deck.name}</div></slot>
               </div>
               <div class="details">
@@ -252,6 +267,10 @@ export class DeckListItem extends LitElement {
           </div>
           <div class="right">
             <div class="button-container">
+              ${deck.youtube_link
+                ? html` <vaadin-icon icon="vaadin:youtube"> </vaadin-icon> `
+                : html``}
+
               <a class="inspect" href="/deck/${this.deck?.id}">
                 <vaadin-icon icon="waryes:recon"></vaadin-icon>
                 <div
@@ -279,12 +298,26 @@ export class DeckListItem extends LitElement {
         </div>
         ${this._expanded
           ? html` <div class="summary">
+              ${deck.youtube_link ? this.renderEmbed(deck.youtube_link) : html``}
               <summary-view .deck=${deckFromString}></summary-view>
             </div>`
           : ''}
       </div>
     `;
   }
+
+  renderEmbed(link: string) {
+    return html`<div class="embed-container">
+      <iframe
+        width="340"
+        height="191"
+        src=${link}
+        frameborder="0"
+        allow="autoplay;picture-in-picture"
+      ></iframe>
+    </div>`;
+  }
+
 }
 
 declare global {
