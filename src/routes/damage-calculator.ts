@@ -182,6 +182,9 @@ export class DamageCalculatorRoute
   selectedWeaponIndex = 0;
 
   @state()
+  showUnitSelection = true;
+
+  @state()
   get selectedWeapon() {
     return this.sourceUnit?.weapons[this.selectedWeaponIndex];
   }
@@ -203,9 +206,14 @@ export class DamageCalculatorRoute
   }
 
   swapUnits() {
+    this.showUnitSelection = false;
     const sourceUnit = this.sourceUnit;
     this.sourceUnit = this.targetUnit;
     this.targetUnit = sourceUnit;
+
+    setTimeout(() => {
+      this.showUnitSelection = true;
+    }, 0);
   }
 
   render(): TemplateResult {
@@ -335,13 +343,13 @@ export class DamageCalculatorRoute
         <div class="units">
           <div class="source">
             <h3>Source</h3>
-            <unit-search
+            ${this.showUnitSelection ? html`<unit-search
               .selectedUnits=${[this.sourceUnit]}
               @unit-selected=${(e: CustomEvent) => {
                 this.sourceUnit = e.detail.value;
                 this.selectedWeaponIndex = 0;
               }}
-            ></unit-search>
+            ></unit-search>` : html``}
 
             <vaadin-radio-group
               theme="vertical"
@@ -373,12 +381,13 @@ export class DamageCalculatorRoute
           </div>
           <div class="target">
             <h3>Target</h3>
+            ${this.showUnitSelection ? html`
             <unit-search
               @unit-selected=${(e: CustomEvent) => {
                 this.targetUnit = e.detail.value;
               }}
               .selectedUnits=${[this.targetUnit]}
-            ></unit-search>
+            ></unit-search>`: html``}
           </div>
         </div>
 
