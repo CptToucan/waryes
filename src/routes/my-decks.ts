@@ -25,6 +25,7 @@ import {notificationService} from '../services/notification';
 import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 
 const TOTAL_ALLOWED_DECKS = 60;
+const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
 
 @customElement('my-decks-route')
 export class MyDecksRoute extends LitElement {
@@ -96,6 +97,8 @@ export class MyDecksRoute extends LitElement {
   @property()
   loggedInUser: User | null | undefined;
 
+  userRecordData?: DocumentData | null;
+
   @property()
   decks: DocumentData[] | null = null;
 
@@ -147,7 +150,7 @@ export class MyDecksRoute extends LitElement {
         ) {
           
           const deckCollection = collection(FirebaseService.db, 'decks');
-          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid), limit(60));
+          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid), limit(TOTAL_ALLOWED_DECKS));
           const decksResponse = await getDocs(q); 
           const decks:DocumentData[] = [];
 
@@ -157,6 +160,8 @@ export class MyDecksRoute extends LitElement {
               decks.push(deck);
             }
           });
+
+
 
           this.decks = decks;
           this.numberOfDecks = this.decks?.length || 0;
@@ -177,7 +182,17 @@ export class MyDecksRoute extends LitElement {
             acc[division].push(deck);
             return acc;
           }, {});
-          
+
+          // get user record
+          const userRecord = await getDoc(
+            doc(FirebaseService.db, 'users', this.loggedInUser?.uid)
+          );
+           
+          // set the record if it exists
+          if (userRecord.exists()) {
+            this.userRecordData = userRecord.data();
+          }
+
         }
         
       } catch (error) {
@@ -241,12 +256,34 @@ export class MyDecksRoute extends LitElement {
     const userDeckData = deckSnap.data();
     const deckNames = userDeckData?.deckNames || {};
 
-    await updateDoc(deckDoc, {
+    const headers = new Headers();
+    headers.append('Authorization', `Bearer ${await this.loggedInUser?.getIdToken()}`);
+
+    const promisesToWaitFor = [];
+
+    // if user is content creator or pro
+    if(this.userRecordData?.is_content_creator || this.userRecordData?.is_pro) {
+      const cloudFunctionResponse = await fetch(`${BASE_URL}/editDeckName`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          deckId,
+          name
+        }),
+      });
+
+      promisesToWaitFor.push(cloudFunctionResponse);
+    }
+
+
+    const updateDocResponse = await updateDoc(deckDoc, {
       deckNames: {
         ...deckNames,
         [deckId]: name,
       },
     });
+
+    promisesToWaitFor.push(updateDocResponse);
 
     deckNames[deckId] = name;
 
