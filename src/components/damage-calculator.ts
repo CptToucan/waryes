@@ -511,27 +511,213 @@ export class DamageCalculator extends LitElement {
       return;
     }
 
+    const {
+      damageFamily,
+      damage,
+      simultaneousProjectiles,
+      missileSpeed,
+      missileAcceleration,
+      suppressionDamage,
+      damageMultiplier,
+      suppressionMultiplier,
+    } = await this.extractAmmunitionForTargetStats(
+      this.weapon,
+      this.targetUnit
+    );
+
+    const isMoving = this.motion === Motion.MOVING;
+
+    const baseAccuracy = this.getAccuracy(
+      isMoving,
+      this.targetUnit?.movementType as MovementType
+    );
+
+    const baseAimTime = this.weapon?.aimingTime || 0;
+    const baseReloadTime = this.weapon?.reloadTime || 0;
+    const salvoLength = this.weapon?.salvoLength || 0;
+    // timeBetweenSalvos is a misnomer here, it's actually the time between shots
+    const timeBetweenShots = this.weapon?.timeBetweenSalvos || 0;
+
+    const {accuracy, aimTime, reloadTime} = this.applyModifiersToWeaponStats(
+      damageFamily,
+      baseAccuracy,
+      baseAimTime,
+      baseReloadTime,
+      this.sourceVeterancy,
+      this.cohesion
+    );
+
+    const healthOfUnit = this.targetUnit?.maxDamage || 0;
+    const damagePerShot = damage;
+    const shotsToKill = Math.ceil(healthOfUnit / damagePerShot);
+    const accuracyAsDecimal = accuracy / 100;
+    const averageDamagePerShot = damagePerShot * accuracyAsDecimal;
+
+    const shotsToKillWithAccuracy = Math.ceil(
+      healthOfUnit / averageDamagePerShot
+    );
+
+    const {timeToKill, flightTimeOfOneMissile} = this.calculateTimeToKill(
+      shotsToKill,
+      aimTime,
+      reloadTime,
+      timeBetweenShots,
+      salvoLength,
+      simultaneousProjectiles,
+      this.distance,
+      missileSpeed,
+      missileAcceleration
+    );
+
+
+    // WRONG
+    const damagePerSecond = (shotsToKill * damagePerShot) / timeToKill;
+
+    const {timeToKill: averageTimeToKill} = this.calculateTimeToKill(
+      shotsToKillWithAccuracy,
+      aimTime,
+      reloadTime,
+      timeBetweenShots,
+      salvoLength,
+      simultaneousProjectiles,
+      this.distance,
+      missileSpeed,
+      missileAcceleration
+    );
+
+    // const averageDamagePerSecond = (shotsToKillWithAccuracy * averageDamagePerShot) / averageTimeToKill;
+
+    const maxSuppression = MAX_SUPPRESSION;
+    const suppressPerShot = suppressionDamage;
+    const shotsToMaxSuppression = Math.ceil(maxSuppression / suppressPerShot);
+    const averageSuppressPerShot = suppressPerShot * accuracyAsDecimal;
+    const shotsToMaxSuppressionWithAccuracy = Math.ceil(
+      maxSuppression / averageSuppressPerShot
+    );
+
+    const {timeToKill: suppressionTimeToKill} = this.calculateTimeToKill(
+      shotsToMaxSuppression,
+      aimTime,
+      reloadTime,
+      timeBetweenShots,
+      salvoLength,
+      simultaneousProjectiles,
+      this.distance,
+      missileSpeed,
+      missileAcceleration
+    );
+
+    // const suppressionPerSecond = suppressPerShot / suppressionTimeToKill;
+
+    const {timeToKill: suppressionTimeToKillWithAccuracy} =
+      this.calculateTimeToKill(
+        shotsToMaxSuppressionWithAccuracy,
+        aimTime,
+        reloadTime,
+        timeBetweenShots,
+        salvoLength,
+        simultaneousProjectiles,
+        this.distance,
+        missileSpeed,
+        missileAcceleration
+      );
+
+    this.dispatchEvent(
+      new CustomEvent('damage-calculated', {
+        detail: {
+          damage,
+          damagePerSecond,
+          damageMultiplier,
+          suppressionDamage,
+          suppressionMultiplier,
+          flightTimeOfOneMissile,
+          timeToKill,
+          shotsToKill,
+          shotsToKillWithAccuracy,
+          shotsToMaxSuppression,
+          averageTimeToKill,
+          suppressionTimeToKill,
+          suppressionTimeToKillWithAccuracy,
+          shotsToMaxSuppressionWithAccuracy,
+          accuracy,
+          canTarget: this.canSelectedUnitBeTargetedByWeapon(),
+        },
+      })
+    );
+  }
+
+  private applyModifiersToWeaponStats(
+    damageFamily: string,
+    baseAccuracy: number,
+    baseAimTime: number,
+    baseReloadTime: number,
+    sourceVeterancy?: Veterancy,
+    cohesion?: Cohesion
+  ) {
+    let ecmToApply = 0;
+
+    if (damageFamily === 'missile_he') {
+      ecmToApply = this.targetUnit?.ecm || 0;
+    }
+
+    let accuracy = baseAccuracy * (1 + ecmToApply);
+    let aimTime = baseAimTime;
+    let reloadTime = baseReloadTime;
+
+    if (sourceVeterancy) {
+      const veterancyModifier =
+        VETERANCY_MODIFIERS_MAP[
+          sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
+        ];
+      accuracy = accuracy * veterancyModifier.accuracy;
+      aimTime = aimTime * veterancyModifier.aimTime;
+      reloadTime = reloadTime * veterancyModifier.reloadTime;
+    }
+
+    if (cohesion) {
+      const cohesionModifier =
+        COHESION_MODIFIERS_MAP[cohesion as keyof typeof COHESION_MODIFIERS_MAP];
+      accuracy = accuracy * cohesionModifier.accuracy;
+      if ((cohesionModifier?.aimTime || 0) > 0) {
+        aimTime = aimTime * (cohesionModifier?.aimTime || 0);
+      }
+
+      if ((cohesionModifier?.reloadTime || 0) > 0) {
+        reloadTime = reloadTime * (cohesionModifier?.reloadTime || 0);
+      }
+    }
+
+    // cap accuracy at 100% after all modifiers
+    accuracy = Math.min(accuracy, 100);
+    return {accuracy, aimTime, reloadTime};
+  }
+
+  private async extractAmmunitionForTargetStats(
+    sourceWeapon: Weapon,
+    targetUnit: Unit
+  ) {
     let highestDamage = 0;
     let highestDamageMultiplier = 0;
     let highestDamageSuppressionMultiplier = 0;
     let highestDamageSuppressionDamage = 0;
     let highestDamageSimultaneousProjectiles = 0;
-    let highestDamageFamily = "";
+    let highestDamageFamily = '';
 
-    const missileSpeed = this.weapon?.missileProperties?.maxMissileSpeed;
+    const missileSpeed = sourceWeapon?.missileProperties?.maxMissileSpeed;
     const missileAcceleration =
-      this.weapon?.missileProperties?.maxMissileAcceleration;
+      sourceWeapon?.missileProperties?.maxMissileAcceleration;
 
-    const iterLength = this.weapon?.damageFamilies?.length || 0;
-    const isEra = this.targetUnit?.era || false;
+    const iterLength = sourceWeapon?.damageFamilies?.length || 0;
+    const isEra = targetUnit?.era || false;
 
     for (let i = 0; i < iterLength; i++) {
-      const damageFamilyWithIndex = this.weapon?.damageFamilies[i] as string;
-      const damageDropOff = this.weapon?.damageDropOffTokens[i] as string;
-      const isTandemCharge = this.weapon?.tandemCharges[i] as boolean;
-      const suppress = (this.weapon?.suppressDamages[i] * this.weapon.numberOfWeapons) || 0;
+      const damageFamilyWithIndex = sourceWeapon?.damageFamilies[i] as string;
+      const damageDropOff = sourceWeapon?.damageDropOffTokens[i] as string;
+      const isTandemCharge = sourceWeapon?.tandemCharges[i] as boolean;
+      const suppress =
+        sourceWeapon?.suppressDamages[i] * sourceWeapon.numberOfWeapons || 0;
       const numberOfSimultaenousProjectiles =
-        this.weapon?.numberOfSimultaneousProjectiles[i];
+        sourceWeapon?.numberOfSimultaneousProjectiles[i];
 
       const damageDropOffValue = damageDropOff
         ? DROP_OFF[damageDropOff as keyof typeof DROP_OFF]
@@ -579,139 +765,16 @@ export class DamageCalculator extends LitElement {
         highestDamageFamily = family;
       }
     }
-
-    const isMoving = this.motion === Motion.MOVING;
-
-    const baseAccuracy = this.getAccuracy(
-      isMoving,
-      this.targetUnit?.movementType as MovementType
-    );
-
-    let ecmToApply = 0;
-    
-    if(highestDamageFamily === 'missile_he') {
-      ecmToApply = this.targetUnit?.ecm || 0;
-    }
-
-    let accuracy = baseAccuracy * (1 + ecmToApply);
-    let aimTime = this.weapon?.aimingTime || 0;
-    let reloadTime = this.weapon?.reloadTime || 0;
-    const salvoLength = this.weapon?.salvoLength || 0;
-    // timeBetweenSalvos is a misnomer here, it's actually the time between shots
-    const timeBetweenShots = this.weapon?.timeBetweenSalvos || 0;
-
-    if (this.sourceVeterancy) {
-      const veterancyModifier =
-        VETERANCY_MODIFIERS_MAP[
-          this.sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
-        ];
-      accuracy = accuracy * veterancyModifier.accuracy;
-      aimTime = aimTime * veterancyModifier.aimTime;
-      reloadTime = reloadTime * veterancyModifier.reloadTime;
-    }
-
-    if (this.cohesion) {
-      const cohesionModifier =
-        COHESION_MODIFIERS_MAP[
-          this.cohesion as keyof typeof COHESION_MODIFIERS_MAP
-        ];
-      accuracy = accuracy * cohesionModifier.accuracy;
-      if ((cohesionModifier?.aimTime || 0) > 0) {
-        aimTime = aimTime * (cohesionModifier?.aimTime || 0);
-      }
-
-      if ((cohesionModifier?.reloadTime || 0) > 0) {
-        reloadTime = reloadTime * (cohesionModifier?.reloadTime || 0);
-      }
-    }
-
-    // cap accuracy at 100% after all modifiers
-    accuracy = Math.min(accuracy, 100);
-
-    const healthOfUnit = this.targetUnit?.maxDamage || 0;
-    const damagePerShot = highestDamage;
-    const shotsToKill = Math.ceil(healthOfUnit / damagePerShot);
-    const accuracyAsDecimal = accuracy / 100;
-    const averageDamagePerShot = damagePerShot * accuracyAsDecimal;
-
-    const shotsToKillWithAccuracy = Math.ceil(
-      healthOfUnit / averageDamagePerShot
-    );
-
-    const {timeToKill, flightTimeOfOneMissile} = this.calculateTimeToKill(
-      shotsToKill,
-      aimTime,
-      reloadTime,
-      timeBetweenShots,
-      salvoLength,
-      highestDamageSimultaneousProjectiles,
-      this.distance,
+    return {
+      damageFamily: highestDamageFamily,
+      damage: highestDamage,
+      simultaneousProjectiles: highestDamageSimultaneousProjectiles,
       missileSpeed,
-      missileAcceleration
-    );
-    const {timeToKill: averageTimeToKill} = this.calculateTimeToKill(
-      shotsToKillWithAccuracy,
-      aimTime,
-      reloadTime,
-      timeBetweenShots,
-      salvoLength,
-      highestDamageSimultaneousProjectiles,
-      this.distance,
-      missileSpeed,
-      missileAcceleration
-    );
-
-    const maxSuppression = MAX_SUPPRESSION;
-    const suppressPerShot = highestDamageSuppressionDamage;
-    const shotsToMaxSuppression = Math.ceil(maxSuppression / suppressPerShot);
-    const averageSuppressPerShot = suppressPerShot * accuracyAsDecimal;
-    const shotsToMaxSuppressionWithAccuracy = Math.ceil(
-      maxSuppression / averageSuppressPerShot
-    );
-
-    const {timeToKill: suppressionTimeToKill} = this.calculateTimeToKill(
-      shotsToMaxSuppression,
-      aimTime,
-      reloadTime,
-      timeBetweenShots,
-      salvoLength,
-      highestDamageSimultaneousProjectiles,
-      this.distance,
-      missileSpeed,
-      missileAcceleration
-    );
-    const {timeToKill: suppressionTimeToKillWithAccuracy} =
-      this.calculateTimeToKill(
-        shotsToMaxSuppressionWithAccuracy,
-        aimTime,
-        reloadTime,
-        timeBetweenShots,
-        salvoLength,
-        highestDamageSimultaneousProjectiles,
-        this.distance,
-        missileSpeed,
-        missileAcceleration
-      );
-
-    this.dispatchEvent(
-      new CustomEvent('damage-calculated', {
-        detail: {
-          damage: highestDamage,
-          damageMultiplier: highestDamageMultiplier,
-          suppressionDamage: highestDamageSuppressionDamage,
-          suppressionMultiplier: highestDamageSuppressionMultiplier,
-          flightTimeOfOneMissile,
-          timeToKill,
-          shotsToKill,
-          shotsToKillWithAccuracy,
-          averageTimeToKill,
-          suppressionTimeToKill,
-          suppressionTimeToKillWithAccuracy,
-          accuracy,
-          canTarget: this.canSelectedUnitBeTargetedByWeapon(),
-        },
-      })
-    );
+      missileAcceleration,
+      suppressionDamage: highestDamageSuppressionDamage,
+      damageMultiplier: highestDamageMultiplier,
+      suppressionMultiplier: highestDamageSuppressionMultiplier,
+    };
   }
 
   async getTerrainResistanceMultiplierForDamageFamily(
@@ -918,7 +981,6 @@ export class DamageCalculator extends LitElement {
       resistanceFamilyArmorKey
     ] as string;
 
-
     const resistanceFamily = this.getFamilyOfFamilyIndex(
       resistanceFamilyWithIndex
     );
@@ -929,11 +991,11 @@ export class DamageCalculator extends LitElement {
     // AP weapons don't have accuracy on helicopters, so they can't hit them
     // this is a hacky way to fix that, rather than extracting the accuracy for each ammunition
     // as of writing, the accuracies are merged into one value for each weapon which is why this is necessary
-    if(damageFamily === "ap" && resistanceFamily === "helico") {
+    if (damageFamily === 'ap' && resistanceFamily === 'helico') {
       return {
         damageMultiplier: 0,
-        suppressionMultiplier: 0
-      }
+        suppressionMultiplier: 0,
+      };
     }
 
     const indexOfTargetResistanceFamilyColumn =
