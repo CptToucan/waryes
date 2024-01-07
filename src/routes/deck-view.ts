@@ -4,10 +4,15 @@ import {customElement, property, state} from 'lit/decorators.js';
 import {DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
 import {
+  collection,
   doc,
   DocumentData,
   DocumentReference,
   getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
   QueryDocumentSnapshot,
   setDoc,
 } from 'firebase/firestore';
@@ -28,6 +33,8 @@ import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 import {TextFieldValueChangedEvent} from '@vaadin/text-field';
 import {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {dialogRenderer, dialogFooterRenderer} from '@vaadin/dialog/lit.js';
+import {FirebasePatchRecord} from './patch-notes';
+import '@vaadin/tooltip';
 
 const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
 @customElement('deck-view-route')
@@ -202,11 +209,29 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   @property()
   youtubeLinkDialogOpened = false;
 
+  @property()
+  isOutdated = false;
+
   @state()
   deckError = false;
 
   @state()
   selectedTabIndex = 0;
+
+  async fetchLastPatch() {
+    const q = query(
+      collection(FirebaseService.db, 'patches'),
+      orderBy('created', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const patchArray = querySnapshot.docs.map((doc) =>
+      doc.data()
+    ) as FirebasePatchRecord[];
+    return patchArray[0]?.created.toDate() || new Date();
+  }
 
   async onBeforeEnter(location: RouterLocation) {
     try {
@@ -260,6 +285,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         } else {
           this.copyDeck = undefined;
         }
+
+        const lastPatch = await this.fetchLastPatch();
+        this.isOutdated = this.userDeck?.updated.toDate() < lastPatch;
       } catch (err) {
         console.error(err);
       }
@@ -384,7 +412,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         }, 1000);
         break;
       case 'Link':
-
         this.openYoutubeDialog();
         break;
       case 'Public':
@@ -479,11 +506,16 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                 ${this.userDeck?.is_pro_deck
                   ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
+                ${this.userDeck?.is_content_creator_deck
+                  ? html`<simple-chip class="pro">CC</simple-chip>`
+                  : ''}
+
 
                 <div
                   style="display: flex; flex-direction: column; flex: 1 1 0; overflow: hidden;"
                 >
                   <h2>${this.userDeck?.name}</h2>
+                  
 
                   ${this.copyDeck
                     ? html` <div
@@ -501,6 +533,15 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                       </div>`
                     : ''}
                 </div>
+                ${this.isOutdated
+                  ? html` <vaadin-icon id="warning-icon" icon="vaadin:warning">
+                      </vaadin-icon
+                      ><vaadin-tooltip
+                        for="warning-icon"
+                        text=${"This deck hasn't been updated since the last patch and might not work anymore."}
+                        position="top-end"
+                      ></vaadin-tooltip>`
+                  : ''}
               </div>
             </deck-title>
           </div>
@@ -582,7 +623,8 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
               .disabled="${this.actionHappening}"
               >Save</vaadin-button
             >`,
-       [this.actionHappening])}
+        [this.actionHappening]
+      )}
     ></vaadin-dialog>`;
   }
 

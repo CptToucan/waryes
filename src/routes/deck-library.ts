@@ -12,6 +12,7 @@ import {
   where,
   startAfter,
   endAt,
+  query,
 } from 'firebase/firestore';
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, state} from 'lit/decorators.js';
@@ -23,6 +24,7 @@ import {dialogRenderer} from '@vaadin/dialog/lit.js';
 import '../components/deck-library/deck-filters';
 import '../components/pagination-controls';
 import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import { FirebasePatchRecord } from './patch-notes';
 
 interface PageReference {
   first: DocumentData | null;
@@ -130,6 +132,7 @@ export class DeckLibraryRoute extends LitElement {
 
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
+  lastPatchDate?: Date;
 
   @state()
   selectedTags: string[] = [];
@@ -181,13 +184,16 @@ export class DeckLibraryRoute extends LitElement {
   async onBeforeEnter() {
     this.unitMap = await this.fetchUnitMap();
 
-    const [units, divisions] = await Promise.all([
+    const [units, divisions, lastPatch] = await Promise.all([
       this.fetchUnitMap(),
       this.fetchDivisionMap(),
+      this.fetchLastPatch(),
     ]);
 
     this.unitMap = units;
     this.divisionsMap = divisions;
+    this.lastPatchDate = lastPatch;
+
   }
 
   /**
@@ -222,6 +228,19 @@ export class DeckLibraryRoute extends LitElement {
     }
 
     return divisionMap;
+  }
+
+  async fetchLastPatch() {
+    const q = query(
+      collection(FirebaseService.db, 'patches'),
+      orderBy('created', 'desc'),
+      limit(1)
+    );
+
+    const querySnapshot = await getDocs(q);
+
+    const patchArray = (querySnapshot.docs.map((doc) => doc.data()) as FirebasePatchRecord[]);
+    return patchArray[0]?.created.toDate() || new Date(); 
   }
 
   /**
@@ -428,13 +447,16 @@ export class DeckLibraryRoute extends LitElement {
         <div class="body">
           <div class="decks">
             ${this.decks.map(
-              (deck) => html`
+              (deck) => {
+                const isOutdated = deck.data().updated.toDate() < ( this.lastPatchDate || new Date());
+                return html`
                 <deck-list-item
                   .deck=${deck}
                   .unitMap=${this.unitMap}
                   .divisionsMap=${this.divisionsMap}
+                  .isOutdated=${isOutdated}
                 ></deck-list-item>
-              `
+              `}
             )}
           </div>
           <div class="filters">
