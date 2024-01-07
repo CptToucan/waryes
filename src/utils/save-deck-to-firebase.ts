@@ -12,7 +12,8 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
       theme: 'error',
       duration: 5000,
     });
-    return;
+
+    throw new Error('Too many tags');
   }
 
   if(selectedTags.length < 1) {
@@ -21,7 +22,8 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
       theme: 'error',
       duration: 5000,
     });
-    return;
+    
+    throw new Error('Please select at least one tag');
   }
 
   if (deck) {

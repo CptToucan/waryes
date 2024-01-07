@@ -1,5 +1,5 @@
 import {css, CSSResultGroup, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
+import {customElement, property, query, state} from 'lit/decorators.js';
 import './deck-card';
 import {Deck, DeckUnit} from '../../classes/deck';
 import {UnitCategory} from '../../types/deck-builder';
@@ -17,6 +17,7 @@ import {updateDeckToFirebase} from '../../utils/update-deck-to-firebase';
 import {DetailsOpenedChangedEvent} from '@vaadin/details';
 import {FirebaseService} from '../../services/firebase';
 import {User} from 'firebase/auth';
+import { UploadDeck } from './upload-deck';
 
 @customElement('deck-view')
 export class DeckView extends LitElement {
@@ -151,6 +152,9 @@ export class DeckView extends LitElement {
   @property()
   showClose = false;
 
+  @query("upload-deck")
+  uploadDeckElement?: UploadDeck;
+
   @state()
   uploading = false;
 
@@ -212,7 +216,7 @@ export class DeckView extends LitElement {
     } else {
       try {
         if (this.deck) {
-          this.uploading = true;
+          this.uploadDeckElement?.showDialog();
         } else {
           throw new Error('No deck to upload');
         }
@@ -324,9 +328,7 @@ export class DeckView extends LitElement {
         warningText = 'Typical decks should be more than 12000 points';
       }
 
-      return html`${this.uploading
-          ? html`<upload-deck .deck=${this.deck}></upload-deck>`
-          : html``}
+      return html`<upload-deck .deck=${this.deck}></upload-deck>
         <div class="deck">
           <div class="deck-header">
             <div class="deck-header-row">
