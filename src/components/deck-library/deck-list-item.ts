@@ -9,6 +9,7 @@ import {DivisionsMap} from '../../types/deck-builder';
 import {UnitMap} from '../../types/unit';
 import {Deck} from '../../classes/deck';
 import {QueryDocumentSnapshot, DocumentData} from 'firebase/firestore';
+import "@vaadin/tooltip";
 
 @customElement('deck-list-item')
 export class DeckListItem extends LitElement {
@@ -200,6 +201,9 @@ export class DeckListItem extends LitElement {
   private _expanded = false;
 
   @property()
+  isOutdated = false;
+
+  @property()
   hideVotes = false;
 
   @state()
@@ -229,7 +233,7 @@ export class DeckListItem extends LitElement {
       <div class="deck">
         <div class="headline-container">
           <div class="time">
-            ${this.deck.data().created.toDate().toLocaleString()}
+            ${this.deck.data().updated.toDate().toLocaleString()}
           </div>
           <div class="left">
             ${!this.hideVotes
@@ -267,8 +271,23 @@ export class DeckListItem extends LitElement {
           </div>
           <div class="right">
             <div class="button-container">
+              ${this.isOutdated
+                ? html` <vaadin-icon id="warning-icon" icon="vaadin:warning">
+                    </vaadin-icon
+                    ><vaadin-tooltip
+                      for="warning-icon"
+                      text=${"This deck hasn't been updated since the last patch and might not work anymore."}
+                      position="top-end"
+                    ></vaadin-tooltip>`
+                : ''}
               ${deck.youtube_link
-                ? html` <vaadin-icon icon="vaadin:youtube"> </vaadin-icon> `
+                ? html` <vaadin-icon id="youtube-icon" icon="vaadin:youtube">
+                    </vaadin-icon>
+                    <vaadin-tooltip
+                      for="youtube-icon"
+                      text=${'This deck has a YouTube video associated with it.'}
+                      position="top-end"
+                    ></vaadin-tooltip>`
                 : html``}
 
               <a class="inspect" href="/deck/${this.deck?.id}">
@@ -298,7 +317,9 @@ export class DeckListItem extends LitElement {
         </div>
         ${this._expanded
           ? html` <div class="summary">
-              ${deck.youtube_link ? this.renderEmbed(deck.youtube_link) : html``}
+              ${deck.youtube_link
+                ? this.renderEmbed(deck.youtube_link)
+                : html``}
               <summary-view .deck=${deckFromString}></summary-view>
             </div>`
           : ''}
@@ -317,7 +338,6 @@ export class DeckListItem extends LitElement {
       ></iframe>
     </div>`;
   }
-
 }
 
 declare global {

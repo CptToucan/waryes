@@ -46,7 +46,7 @@ type AnyDiffArrayElement =
   | ArrayDiffAddedElement
   | ArrayDiffRemovedElement;
 
-type FirebasePatchRecord = {
+export type FirebasePatchRecord = {
   data?: string;
   created: Timestamp;
   name: string;
