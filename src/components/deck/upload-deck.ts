@@ -20,7 +20,7 @@ import { CheckboxCheckedChangedEvent } from '@vaadin/checkbox';
 @customElement('upload-deck')
 export class UploadDeck extends LitElement {
   @state()
-  private showing = true;
+  private showing = false;
 
   @property()
   deck?: Deck;
@@ -75,6 +75,17 @@ export class UploadDeck extends LitElement {
 
     const deckName = `${user?.displayName}'s ${this.deck?.division.name}`;
 
+    let tagsErrorMessage: string | undefined;
+
+    if(this.selectedTags.length > 5) {
+      tagsErrorMessage = 'Too many tags';
+    }
+
+    if(this.selectedTags.length < 1) {
+      tagsErrorMessage = 'Please select at least one tag';
+    }
+
+    console.log(tagsErrorMessage);
 
     return html`
       <vaadin-dialog
@@ -104,22 +115,21 @@ export class UploadDeck extends LitElement {
                 ></vaadin-text-field>
 
                 <vaadin-multi-select-combo-box
-                  label="Tags"
+                  label="Tags (Max 5)"
                   .required=${true}
                   .items=${tags}
-                  .selectedItems=${this.selectedTags}
-                  .errorMessage=${'Please select at least one tag'}
+                  .errorMessage=${tagsErrorMessage}
                   @selected-items-changed=${(
                     event: MultiSelectComboBoxSelectedItemsChangedEvent<string>
                   ) => {
-                    this.selectedTags = event.detail.value;
+                    this.selectedTags = [...event.detail.value];
                   }}
                 >
                 </vaadin-multi-select-combo-box>
                 <div>${deckName}</div>
               </vaadin-form-layout>
             `,
-          [this.deck]
+          [this.deck, this.selectedTags, tagsErrorMessage]
         )}
         ${dialogFooterRenderer(
           () => html` <vaadin-button @click="${this.closeDialog}"
@@ -127,9 +137,10 @@ export class UploadDeck extends LitElement {
             ><vaadin-button
               theme="primary"
               @click="${() => this._uploadDeck(deckName)}"
+              .disabled=${tagsErrorMessage !== undefined}
               >Upload</vaadin-button
             >`,
-          [deckName]
+          [deckName, this.selectedTags, tagsErrorMessage]
         )}
         .opened="${this.showing}"
       ></vaadin-dialog>
