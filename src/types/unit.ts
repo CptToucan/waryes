@@ -178,6 +178,7 @@ interface Unit {
   occupiableTerrains: string[];
   era: boolean;
   isSpecialForces: boolean;
+  xpBonuses: string;
 }
 
 enum UnitFieldType {
