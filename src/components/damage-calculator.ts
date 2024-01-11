@@ -533,7 +533,7 @@ export class DamageCalculator extends LitElement {
       }
 
       // remove dodge bonus
-      accuracy = accuracy - ((veterancyModifier?.dodgeBonus?.[1] || 0) || 0)
+      accuracy = accuracy - (((veterancyModifier?.dodgeBonus?.[1] || 0) * 100) || 0)
 
       if(accuracyModifier[0] === "+") {
         accuracy = accuracy + (accuracyModifier[1] * 100);
