@@ -19,6 +19,7 @@ export const iconMap: IconMap = {
   _transport2: 'trait-transport',
   _sniper: 'trait-sniper',
   _era: 'trait-era',
+  _falseflag: 'trait-false-flag',
   hq: 'command',
   hq_veh: 'command',
   hq_inf: 'command',

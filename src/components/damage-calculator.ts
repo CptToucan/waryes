@@ -1,6 +1,18 @@
 import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
 import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
+import {
+  Veterancy,
+  Cohesion,
+  ARTY_VETERANCIES,
+  PLANE_VETERANCIES,
+  PLANE_COHESIONS,
+  COHESIONS,
+  VETERANCIES,
+  SF_VETERANCIES,
+  VETERANCY_MODIFIERS_MAP,
+  COHESION_MODIFIERS_MAP,
+} from '../lib/veterancies-and-cohesions';
 import {BundleManagerService, DamageTable} from '../services/bundle-manager';
 import {FamilyIndexTuple} from '../types/damageTable';
 import {MovementType, Unit, Weapon} from '../types/unit';
@@ -38,166 +50,6 @@ export const enum Side {
   REAR = 'Rear',
   TOP = 'Top',
 }
-
-export enum Veterancy {
-  VET_0 = 'Vet 0',
-  VET_1 = 'Vet 1',
-  VET_2 = 'Vet 2',
-  VET_3 = 'Vet 3',
-  SF_VET_1 = 'SF Vet 1',
-  SF_VET_2 = 'SF Vet 2',
-  SF_VET_3 = 'SF Vet 3',
-}
-
-export enum Cohesion {
-  HIGH = 'High',
-  NORMAL = 'Normal',
-  MEDIOCRE = 'Mediocre',
-  LOW = 'Low',
-  PLANE_HIGH = 'High (Plane)',
-  PLANE_NORMAL = 'Normal (Plane)',
-  PLANE_MEDIOCRE = 'Mediocre (Plane)',
-  PLANE_LOW = 'Low (Plane)',
-}
-
-type VeterancyModifier = {
-  accuracy: number;
-  aimTime: number;
-  reloadTime: number;
-  suppressionReceived: number;
-  veterancy: Veterancy;
-};
-
-type CohesionModifier = {
-  accuracy: number;
-  reloadTime?: number;
-  aimTime?: number;
-  cohesion: Cohesion;
-};
-
-const VETERANCY_MODIFIERS_MAP: {[key in Veterancy]: VeterancyModifier} = {
-  [Veterancy.VET_0]: {
-    accuracy: 0.8,
-    aimTime: 1.2,
-    reloadTime: 1.2,
-    suppressionReceived: 1.33,
-    veterancy: Veterancy.VET_0,
-  },
-  [Veterancy.VET_1]: {
-    accuracy: 1,
-    aimTime: 1,
-    reloadTime: 1,
-    suppressionReceived: 1,
-    veterancy: Veterancy.VET_1,
-  },
-  [Veterancy.VET_2]: {
-    accuracy: 1.05,
-    aimTime: 0.95,
-    reloadTime: 0.95,
-    suppressionReceived: 0.8,
-    veterancy: Veterancy.VET_2,
-  },
-  [Veterancy.VET_3]: {
-    accuracy: 1.1,
-    aimTime: 0.9,
-    reloadTime: 0.9,
-    suppressionReceived: 0.6,
-    veterancy: Veterancy.VET_3,
-  },
-  [Veterancy.SF_VET_1]: {
-    accuracy: 1,
-    aimTime: 1,
-    reloadTime: 1,
-    suppressionReceived: 1,
-    veterancy: Veterancy.SF_VET_1,
-  },
-  [Veterancy.SF_VET_2]: {
-    accuracy: 1.1,
-    aimTime: 0.85,
-    reloadTime: 0.85,
-    suppressionReceived: 0.67,
-    veterancy: Veterancy.SF_VET_2,
-  },
-  [Veterancy.SF_VET_3]: {
-    accuracy: 1.15,
-    aimTime: 0.8,
-    reloadTime: 0.8,
-    suppressionReceived: 0.5,
-    veterancy: Veterancy.SF_VET_3,
-  },
-};
-
-const COHESION_MODIFIERS_MAP: {[key in Cohesion]: CohesionModifier} = {
-  [Cohesion.HIGH]: {
-    accuracy: 1,
-    reloadTime: 1,
-    aimTime: 1,
-    cohesion: Cohesion.HIGH,
-  },
-  [Cohesion.NORMAL]: {
-    accuracy: 0.75,
-    reloadTime: 1.1,
-    aimTime: 1.08,
-    cohesion: Cohesion.NORMAL,
-  },
-  [Cohesion.MEDIOCRE]: {
-    accuracy: 0.55,
-    reloadTime: 1.2,
-    aimTime: 1.12,
-    cohesion: Cohesion.MEDIOCRE,
-  },
-  [Cohesion.LOW]: {
-    accuracy: 0.3,
-    reloadTime: 1.4,
-    aimTime: 1.18,
-    cohesion: Cohesion.LOW,
-  },
-  [Cohesion.PLANE_HIGH]: {
-    accuracy: 1,
-    reloadTime: 1,
-    aimTime: 1,
-    cohesion: Cohesion.PLANE_HIGH,
-  },
-  [Cohesion.PLANE_NORMAL]: {
-    accuracy: 0.75,
-    cohesion: Cohesion.PLANE_NORMAL,
-  },
-  [Cohesion.PLANE_MEDIOCRE]: {
-    accuracy: 0.55,
-    cohesion: Cohesion.PLANE_MEDIOCRE,
-  },
-  [Cohesion.PLANE_LOW]: {
-    accuracy: 0.3,
-    cohesion: Cohesion.PLANE_LOW,
-  },
-};
-
-const VETERANCIES: Veterancy[] = [
-  Veterancy.VET_0,
-  Veterancy.VET_1,
-  Veterancy.VET_2,
-  Veterancy.VET_3,
-];
-
-const SF_VETERANCIES: Veterancy[] = [
-  Veterancy.SF_VET_1,
-  Veterancy.SF_VET_2,
-  Veterancy.SF_VET_3,
-];
-
-const COHESIONS: Cohesion[] = [
-  Cohesion.HIGH,
-  Cohesion.NORMAL,
-  Cohesion.MEDIOCRE,
-  Cohesion.LOW,
-];
-
-const PLANE_COHESIONS: Cohesion[] = [
-  Cohesion.PLANE_HIGH,
-  Cohesion.PLANE_NORMAL,
-  Cohesion.PLANE_MEDIOCRE,
-  Cohesion.PLANE_LOW,
-];
 
 const REVERSE_TERRAIN_NAMES_MAP = {};
 
@@ -543,8 +395,9 @@ export class DamageCalculator extends LitElement {
       baseAccuracy,
       baseAimTime,
       baseReloadTime,
+      isMoving,
       this.sourceVeterancy,
-      this.cohesion
+      this.cohesion,
     );
 
     const healthOfUnit = this.targetUnit?.maxDamage || 0;
@@ -568,7 +421,6 @@ export class DamageCalculator extends LitElement {
       missileSpeed,
       missileAcceleration
     );
-
 
     // WRONG
     const damagePerSecond = (shotsToKill * damagePerShot) / timeToKill;
@@ -651,8 +503,9 @@ export class DamageCalculator extends LitElement {
     baseAccuracy: number,
     baseAimTime: number,
     baseReloadTime: number,
+    isMoving: boolean,
     sourceVeterancy?: Veterancy,
-    cohesion?: Cohesion
+    cohesion?: Cohesion,
   ) {
     let ecmToApply = 0;
 
@@ -660,7 +513,10 @@ export class DamageCalculator extends LitElement {
       ecmToApply = this.targetUnit?.ecm || 0;
     }
 
-    let accuracy = baseAccuracy * (1 + ecmToApply);
+    let accuracy = baseAccuracy;
+
+    
+
     let aimTime = baseAimTime;
     let reloadTime = baseReloadTime;
 
@@ -669,14 +525,29 @@ export class DamageCalculator extends LitElement {
         VETERANCY_MODIFIERS_MAP[
           sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
         ];
-      accuracy = accuracy * veterancyModifier.accuracy;
-      aimTime = aimTime * veterancyModifier.aimTime;
-      reloadTime = reloadTime * veterancyModifier.reloadTime;
+
+      let accuracyModifier = veterancyModifier.staticAccuracy || ["+", 0];
+
+      if(isMoving) {
+        accuracyModifier = veterancyModifier.motionAccuracy || ["+", 0];
+      }
+
+      // remove dodge bonus
+      accuracy = accuracy - ((veterancyModifier?.dodgeBonus?.[1] || 0) || 0)
+
+      if(accuracyModifier[0] === "+") {
+        accuracy = accuracy + (accuracyModifier[1] * 100);
+      }
+      else if(accuracyModifier[0] === "-") {
+        accuracy = accuracy + (accuracyModifier[1] * 100);
+      }
+
+      aimTime = aimTime * (veterancyModifier.aimTime || 1);
+      reloadTime = reloadTime * ( veterancyModifier.reloadTime || 1) ;
     }
 
     if (cohesion) {
-      const cohesionModifier =
-        COHESION_MODIFIERS_MAP[cohesion as keyof typeof COHESION_MODIFIERS_MAP];
+      const cohesionModifier = COHESION_MODIFIERS_MAP[cohesion as keyof typeof COHESION_MODIFIERS_MAP];
       accuracy = accuracy * cohesionModifier.accuracy;
       if ((cohesionModifier?.aimTime || 0) > 0) {
         aimTime = aimTime * (cohesionModifier?.aimTime || 0);
@@ -687,6 +558,7 @@ export class DamageCalculator extends LitElement {
       }
     }
 
+    accuracy = accuracy * (1 + ecmToApply);
     // cap accuracy at 100% after all modifiers
     accuracy = Math.min(accuracy, 100);
     return {accuracy, aimTime, reloadTime};
@@ -1175,13 +1047,21 @@ export class DamageCalculator extends LitElement {
       return [];
     }
 
-    const isSpecialForces = unit.isSpecialForces;
+    const xpBonuses = unit.xpBonuses;
 
-    if (isSpecialForces) {
+    if (xpBonuses.includes('ExperienceLevelsPackDescriptor_XP_pack_SF')) {
       return SF_VETERANCIES;
+    } else if (
+      xpBonuses.includes('ExperienceLevelsPackDescriptor_XP_pack_artillery')
+    ) {
+      return ARTY_VETERANCIES;
+    } else if (
+      xpBonuses.includes('ExperienceLevelsPackDescriptor_XP_pack_avion')
+    ) {
+      return PLANE_VETERANCIES;
+    } else {
+      return VETERANCIES;
     }
-
-    return VETERANCIES;
   }
 
   private getCohesionOptions() {
