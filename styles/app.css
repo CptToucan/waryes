@@ -29,7 +29,7 @@ html[theme~='dark'] {
   --lumo-secondary-color-10pct: hsla(60, 98%, 66%, 0.13);
   --lumo-clickable-cursor: pointer;
 
-  
+
   --warno-exceptional: rgb(117, 255, 255);
   --warno-exceptional-40pct: rgba(117, 255, 255, 0.4);
   --warno-good: rgb(127, 255, 117);
@@ -40,7 +40,7 @@ html[theme~='dark'] {
   --warno-bad-40pct: rgba(255, 168, 69, 0.4);
   --warno-very-bad: #ff5454;
   --warno-very-bad-40pct: rgba(255, 84, 84, 0.4);
-  
+
 }
 
 vaadin-dialog-overlay::part(header) {
@@ -82,13 +82,13 @@ vaadin-combo-box-item {
   border-bottom: 1px dotted var(--lumo-contrast-30pct);
 }
 
-.unit-search-result > .unit-information {
+.unit-search-result>.unit-information {
   display: flex;
   align-items: center;
   margin-top: var(--lumo-space-s);
 }
 
-.unit-search-result > .unit-image-wrapper {
+.unit-search-result>.unit-image-wrapper {
   margin-right: var(--lumo-space-s);
 }
 
