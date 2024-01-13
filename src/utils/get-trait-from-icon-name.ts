@@ -17,9 +17,13 @@ const iconTraitMap: IconTraitMap = {
     },
     'trait-leader':
     { 
-        name: "Leader", range: '', 
+        name: "Leader", range: 'Variable', 
         activationCondition: 'Own units nearby', 
-        effects: ['Grants +1 veterancy to all allies within radius']
+        effects: [
+            'Grants +1 veterancy to all allies within radius',
+            'Radius is 425m/565m/636m depending on leader veterancy',
+            'Veterancy bonus caps at level 3 veterancy and does not apply to other leaders'
+        ]
     },
     'trait-ifv':
     { 
