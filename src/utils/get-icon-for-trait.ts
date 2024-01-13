@@ -1,6 +1,6 @@
-import { TemplateResult, html } from 'lit';
-import { getIconForSpecialty } from './get-icon-for-specialty';
-import { getTraitFromIconName } from './get-trait-from-icon-name';
+import {TemplateResult, html} from 'lit';
+import {getIconForSpecialty} from './get-icon-for-specialty';
+import {getTraitFromIconName} from './get-trait-from-icon-name';
 import '@vaadin/icon';
 
 export function getIconForTrait(trait: string): TemplateResult {

@@ -188,7 +188,7 @@ export class UnitCardHeaderView extends LitElement {
                   theme="primary"
                   @click=${() =>
                     this.dispatchEvent(
-                      new CustomEvent('mode-toggled', { detail: !this.expert })
+                      new CustomEvent('mode-toggled', {detail: !this.expert})
                     )}
                   >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
                 >`}
