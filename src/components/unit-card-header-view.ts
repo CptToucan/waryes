@@ -1,5 +1,5 @@
-import { css, html, LitElement, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import {css, html, LitElement, TemplateResult} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
 import './unit-armor-view';
 import './unit-weapon-view';
 import './unit-info-panel-view';
@@ -7,10 +7,10 @@ import './trait-badge';
 import './mod-image';
 import '@vaadin/button';
 import './division-flag';
-import { Unit } from '../types/unit';
-import { getIconForTrait } from '../utils/get-icon-for-trait';
-import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
-import { router } from '../services/router';
+import {Unit} from '../types/unit';
+import {getIconForTrait} from '../utils/get-icon-for-trait';
+import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
+import {router} from '../services/router';
 
 /**
  * Component for rendering the details of a single unit
@@ -175,21 +175,21 @@ export class UnitCardHeaderView extends LitElement {
           <div style="display: flex; gap: var(--lumo-space-xs);">
             <a
               href=${router.urlForPath('/damage-calculator/:unitId', {
-        unitId: this.unit.descriptorName,
-      })}
+                unitId: this.unit.descriptorName,
+              })}
               title="Damage Calculator"
             >
               <vaadin-icon icon="waryes:calculator"></vaadin-icon>
             </a>
 
             ${this.hideExpertButton
-          ? html``
-          : html` <vaadin-button
+              ? html``
+              : html` <vaadin-button
                   theme="primary"
                   @click=${() =>
-              this.dispatchEvent(
-                new CustomEvent('mode-toggled', { detail: !this.expert })
-              )}
+                    this.dispatchEvent(
+                      new CustomEvent('mode-toggled', { detail: !this.expert })
+                    )}
                   >${this.expert ? 'Simple' : 'Expert'}</vaadin-button
                 >`}
           </div>
@@ -202,15 +202,15 @@ export class UnitCardHeaderView extends LitElement {
           <div class="unit-category icon-container">
             <vaadin-icon icon=${icons.icon}></vaadin-icon>
             ${icons.subIcon
-          ? html`<vaadin-icon icon=${icons.subIcon}></vaadin-icon>`
-          : html``}
+              ? html`<vaadin-icon icon=${icons.subIcon}></vaadin-icon>`
+              : html``}
           </div>
           <div class="traits">
             ${traits.map(
-            (speciality) => html`<div class="icon-container">
+              (speciality) => html`<div class="icon-container">
                 ${getIconForTrait(speciality)}
               </div>`
-          )}
+            )}
           </div>
         </div>
       `;
