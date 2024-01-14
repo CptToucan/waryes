@@ -12,6 +12,7 @@ import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import '@vaadin/dialog';
 import '../unit-card';
 import "./../unit-traits";
+import { isSpecialtyTrait } from '../../utils/is-specialty-trait';
 
 export interface ArmouryCardOptions {
   unit: Unit;
@@ -134,9 +135,9 @@ export class ArmouryCard extends LitElement {
   }
 
   renderTraits(specialities: Array<string>) {
-    const specsThatAreTraits = specialities.filter(s => s[0] == '_');
+    const specsThatAreTraits = specialities.filter(s => isSpecialtyTrait(s));
     return specsThatAreTraits.length > 0
-      ? html`<unit-traits .traitNames=${specialities.filter(s => s[0] == '_')}></unit-traits>`
+      ? html`<unit-traits .traitNames=${specsThatAreTraits}></unit-traits>`
       : 'No Traits';
   }
 
