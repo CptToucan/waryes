@@ -11,7 +11,8 @@ import {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import '@vaadin/dialog';
 import '../unit-card';
-import {getIconForTrait} from '../../utils/get-icon-for-trait';
+import "./../unit-traits";
+
 export interface ArmouryCardOptions {
   unit: Unit;
   veterancyOptions?: ArmouryCardVeterancyOptions;
@@ -107,9 +108,7 @@ export class ArmouryCard extends LitElement {
 
     return html`<div class="main ${this.disabled ? 'disabled' : ''}">
       <div class="traits">
-        ${unit.specialities.length > 1
-          ? unit.specialities.slice(1).map((trait) => getIconForTrait(trait))
-          : 'No Traits'}
+        ${this.renderTraits(unit.specialities)}
       </div>
       <div class="body">
         <div class="top-section">
@@ -132,6 +131,13 @@ export class ArmouryCard extends LitElement {
         deck
       )}
     </div>`;
+  }
+
+  renderTraits(specialities: Array<string>) {
+    const specsThatAreTraits = specialities.filter(s => s[0] == '_');
+    return specsThatAreTraits.length > 0
+      ? html`<unit-traits .traitNames=${specialities.filter(s => s[0] == '_')}></unit-traits>`
+      : 'No Traits';
   }
 
   renderButton(activeVeterancy: number, unit: Unit, _pack: Pack, _deck: Deck) {
