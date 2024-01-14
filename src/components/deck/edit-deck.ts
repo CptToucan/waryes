@@ -89,7 +89,7 @@ export class EditDeck extends LitElement {
         height: 60px;
         width: 100%;
         background-color: var(--lumo-base-color);
-        z-index: 1;
+        z-index: 2;
         display: flex;
         justify-content: space-between;
         align-items: center;
