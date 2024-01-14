@@ -11,6 +11,7 @@ import {Unit} from '../types/unit';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
 import {router} from '../services/router';
 import "./unit-traits";
+import {isSpecialtyTrait} from '../utils/is-specialty-trait';
 
 /**
  * Component for rendering the details of a single unit
@@ -159,7 +160,7 @@ export class UnitCardHeaderView extends LitElement {
               : html``}
           </div>
           <div class="traits">
-            <unit-traits .traitNames=${traits.filter(s => s[0] == '_')}></unit-traits>
+            <unit-traits .traitNames=${traits.filter(s => isSpecialtyTrait(s))}></unit-traits>
           </div>
         </div>
       `;
