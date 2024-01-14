@@ -13,7 +13,6 @@ export class UnitTraits extends LitElement {
     return css`
         .trait-tooltip-toggle {
             position: relative;
-            z-index: 1;
 
             .trait-tooltip {
                 visibility: hidden;
@@ -27,6 +26,7 @@ export class UnitTraits extends LitElement {
                 text-transform: none;
                 width: 220px;
                 font-size: 11px;
+                z-index: 1;
             }
 
             .trait-tooltip div {
