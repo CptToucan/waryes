@@ -8,9 +8,9 @@ import './mod-image';
 import '@vaadin/button';
 import './division-flag';
 import {Unit} from '../types/unit';
-import {getIconForTrait} from '../utils/get-icon-for-trait';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
 import {router} from '../services/router';
+import "./unit-traits";
 
 /**
  * Component for rendering the details of a single unit
@@ -98,53 +98,6 @@ export class UnitCardHeaderView extends LitElement {
         justify-content: flex-start;
         column-gap: var(--lumo-space-s);
       }
-
-      .trait-tooltip-toggle {
-        position: relative;
-
-        .trait-tooltip {
-          display: none;
-          position: absolute;
-          top: 30px;
-          background-color: #303236;
-          border-radius: 2px;
-          color: #fff;
-          padding: 10px;
-          text-transform: none;
-          width: 220px;
-          font-size: 11px;
-        }
-
-        .trait-tooltip div {
-          padding-top: 2px;
-          padding-bottom: 2px;
-        }
-
-        .trait-tooltip ul {
-          padding: 2px 0px 0px 25px;
-          margin: 0px;
-        }
-
-        .trait-tooltip div:first-child {
-          padding-top: 0px;
-        }
-
-        .trait-tooltip div:last-child {
-          padding-bottom: 0px;
-        }
-
-        .trait-tooltip-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-          white-space: nowrap;
-        }
-
-        &:hover .trait-tooltip {
-          display: flex;
-          flex-direction: column;
-        }
-      }
     `;
   }
 
@@ -206,11 +159,7 @@ export class UnitCardHeaderView extends LitElement {
               : html``}
           </div>
           <div class="traits">
-            ${traits.map(
-              (speciality) => html`<div class="icon-container">
-                ${getIconForTrait(speciality)}
-              </div>`
-            )}
+            <unit-traits .traitNames=${traits.filter(s => s[0] == '_')}></unit-traits>
           </div>
         </div>
       `;

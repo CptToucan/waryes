@@ -15,7 +15,6 @@ export const armouryCardStyles = css`
     flex: 1 1 100%;
 
     border-radius: var(--lumo-border-radius-m);
-    overflow: hidden;
 
     color: white;
   }
