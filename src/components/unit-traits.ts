@@ -2,7 +2,7 @@ import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { getTraitFromIconName } from '../utils/get-trait-from-icon-name';
 import "@vaadin/icon/src/vaadin-icon";
-import { getIconForSpecialty } from '../utils/get-icon-for-specialty';
+import {getIconForSpecialty} from '../utils/get-icon-for-specialty';
 
 /**
  * Component for rendering the traits of a unit
@@ -19,9 +19,9 @@ export class UnitTraits extends LitElement {
             display: none;
             position: absolute;
             top: 30px;
-            background-color: #303236;
+            background-color: var(--lumo-base-color);
             border-radius: 2px;
-            color: #fff;
+            color: white;
             padding: 10px;
             text-transform: none;
             width: 220px;
