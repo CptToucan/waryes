@@ -102,29 +102,29 @@ export class UnitTraits extends LitElement {
   render(): TemplateResult {
     const traits = this.traitNames.map(n => getTraitFromIconName(getIconForSpecialty(n)));
     return html`<div class="icon-container">
-        ${traits.map(t => (
-      html`<div class="trait-tooltip-toggle" @mouseover="${this._shiftTooltipOnViewportOverflow}" @mouseout="${this._resetShiftOnTooltipClose}">
-        <vaadin-icon
-          id="${t.name}"
-          icon="waryes:${t.icon}"
-          class="trait-tooltip-toggle"
-          ></vaadin-icon>
-          <div class="trait-tooltip">
-            <div class="trait-tooltip-header">
-              <div class="trait-tooltip-name"><b>Trait: </b>${t.name}</div>
-              <div class="trait-tooltip-range"><b>Range: </b>${t.range}</div>
-            </div>
-              <div class="trait-tooltip-activation"><b>Activation: </b>${t.activationCondition}</div>
-              <div class="trait-tooltip-effects">
-                  <b>Effects: </b>
-                  <ul>
-                    ${t.effects.map(e => html`<li>${e}</li>`)}
-                  </ul>
+      ${traits.map(t => (
+        html`<div class="trait-tooltip-toggle" @mouseover="${this._shiftTooltipOnViewportOverflow}" @mouseout="${this._resetShiftOnTooltipClose}">
+          <vaadin-icon
+            id="${t.name}"
+            icon="waryes:${t.icon}"
+            class="trait-tooltip-toggle"
+            ></vaadin-icon>
+            <div class="trait-tooltip">
+              <div class="trait-tooltip-header">
+                <div class="trait-tooltip-name"><b>Trait: </b>${t.name}</div>
+                <div class="trait-tooltip-range"><b>Range: </b>${t.range}</div>
               </div>
-          </div>
-      </div>`
-    ))}
-  </div>`
+                <div class="trait-tooltip-activation"><b>Activation: </b>${t.activationCondition}</div>
+                <div class="trait-tooltip-effects">
+                  <b>Effects: </b>
+                    <ul>
+                      ${t.effects.map(e => html`<li>${e}</li>`)}
+                    </ul>
+                </div>
+            </div>
+        </div>`
+      ))}
+    </div>`
   }
 }
 
