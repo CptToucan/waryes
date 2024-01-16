@@ -12,7 +12,7 @@ import {dialogHeaderRenderer, dialogRenderer} from '@vaadin/dialog/lit.js';
 import '@vaadin/dialog';
 import '../unit-card';
 import "./../unit-traits";
-import { isSpecialtyTrait } from '../../utils/is-specialty-trait';
+import {isSpecialtyTrait} from '../../utils/is-specialty-trait';
 
 export interface ArmouryCardOptions {
   unit: Unit;
