@@ -1,6 +1,6 @@
-import { css, html, LitElement, TemplateResult } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
-import { getTraitFromIconName } from '../utils/get-trait-from-icon-name';
+import {css, html, LitElement, TemplateResult} from 'lit';
+import {customElement, property} from 'lit/decorators.js';
+import {getTraitFromIconName} from '../utils/get-trait-from-icon-name';
 import "@vaadin/icon/src/vaadin-icon";
 import {getIconForSpecialty} from '../utils/get-icon-for-specialty';
 
@@ -20,8 +20,8 @@ export class UnitTraits extends LitElement {
             position: absolute;
             top: 30px;
             background-color: var(--lumo-base-color);
-            border-radius: 2px;
-            color: white;
+            border-radius: var(--lumo-border-radius);
+            color: var(--lumo-body-text-color);
             padding: 10px;
             text-transform: none;
             width: 220px;
