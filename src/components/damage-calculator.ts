@@ -397,6 +397,7 @@ export class DamageCalculator extends LitElement {
       baseReloadTime,
       isMoving,
       this.sourceVeterancy,
+      this.targetVeterancy,
       this.cohesion,
     );
 
@@ -505,6 +506,7 @@ export class DamageCalculator extends LitElement {
     baseReloadTime: number,
     isMoving: boolean,
     sourceVeterancy?: Veterancy,
+    targetVeterancy?: Veterancy,
     cohesion?: Cohesion,
   ) {
     let ecmToApply = 0;
@@ -515,25 +517,30 @@ export class DamageCalculator extends LitElement {
 
     let accuracy = baseAccuracy;
 
-    
-
     let aimTime = baseAimTime;
     let reloadTime = baseReloadTime;
 
+    // apply dodge first if applicable
+    if (targetVeterancy) {
+      const targetVeterancyModifier =
+      VETERANCY_MODIFIERS_MAP[
+        targetVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
+      ];
+
+      accuracy = accuracy - (((targetVeterancyModifier?.dodgeBonus?.[1] || 0) * 100) || 0)
+    }
+
     if (sourceVeterancy) {
-      const veterancyModifier =
+      const sourceVeterancyModifier =
         VETERANCY_MODIFIERS_MAP[
           sourceVeterancy as keyof typeof VETERANCY_MODIFIERS_MAP
         ];
 
-      let accuracyModifier = veterancyModifier.staticAccuracy || ["+", 0];
+      let accuracyModifier = sourceVeterancyModifier.staticAccuracy || ["+", 0];
 
       if(isMoving) {
-        accuracyModifier = veterancyModifier.motionAccuracy || ["+", 0];
+        accuracyModifier = sourceVeterancyModifier.motionAccuracy || ["+", 0];
       }
-
-      // remove dodge bonus
-      accuracy = accuracy - (((veterancyModifier?.dodgeBonus?.[1] || 0) * 100) || 0)
 
       if(accuracyModifier[0] === "+") {
         accuracy = accuracy + (accuracyModifier[1] * 100);
@@ -542,8 +549,8 @@ export class DamageCalculator extends LitElement {
         accuracy = accuracy + (accuracyModifier[1] * 100);
       }
 
-      aimTime = aimTime * (veterancyModifier.aimTime || 1);
-      reloadTime = reloadTime * ( veterancyModifier.reloadTime || 1) ;
+      aimTime = aimTime * (sourceVeterancyModifier.aimTime || 1);
+      reloadTime = reloadTime * ( sourceVeterancyModifier.reloadTime || 1) ;
     }
 
     if (cohesion) {
