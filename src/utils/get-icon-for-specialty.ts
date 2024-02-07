@@ -20,6 +20,7 @@ export const iconMap: IconMap = {
   _sniper: 'trait-sniper',
   _era: 'trait-era',
   _falseflag: 'trait-false-flag',
+  _electronic_warfare: 'trait-ew',
   hq: 'command',
   hq_veh: 'command',
   hq_inf: 'command',
