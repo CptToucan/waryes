@@ -170,6 +170,7 @@ export class IndexRoute extends LitElement {
           >Read the rules</a
         >
         <a class="link-button" href="https://challonge.com/DEFCON2">Review the brackets</a>
+        <a class="link-button" href="https://matcherino.com/tournaments/109548/overview">Prize Pool</a>
         <a
           class="link-button"
           href="https://discord.com/invite/8vq6z3t"
