@@ -55,6 +55,11 @@ const defaultMenu: MenuDefinition = {
       icon: 'vaadin:clipboard-text',
       href: '/patch-notes',
     },
+    {
+      name: 'DEFCON 2',
+      icon: 'vaadin:shield',
+      href: '/defcon2',
+    },
 
     {
       name: 'Database',
@@ -159,6 +164,11 @@ const defaultMenu: MenuDefinition = {
       name: 'WARNO Patch Notes',
       icon: 'vaadin:clipboard-text',
       href: '/patch-notes',
+    },
+    {
+      name: 'DEFCON 2',
+      icon: 'vaadin:shield',
+      href: '/defcon2',
     },
     {
       name: 'Database',

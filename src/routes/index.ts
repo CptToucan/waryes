@@ -76,7 +76,7 @@ export class IndexRoute extends LitElement {
 
       .button-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: var(--lumo-space-xs);
         max-width: 800px;
         overflow: hidden;
@@ -246,6 +246,12 @@ export class IndexRoute extends LitElement {
 
     return html`
       <div class="button-grid">
+        <a class="choice-button" href="/defcon2">
+          <div class="headline">
+            <img style="width: 100%;" src="/defcon-2-tagline.png" />
+          </div>
+        </a>
+
         ${databaseChoices} ${deckChoices} ${inspectChoices}
       </div>
     `;
