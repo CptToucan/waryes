@@ -118,7 +118,7 @@ export class IndexRoute extends LitElement {
         padding-top: var(--lumo-space-s);
         padding-bottom: var(--lumo-space-s);
         height: 100%;
-        justify-content: space-around
+        justify-content: space-around;
       }
 
       .socials {
@@ -204,77 +204,50 @@ export class IndexRoute extends LitElement {
         <vaadin-icon icon="${icon}"></vaadin-icon>
         <h2>${headline}</h2>
       </div>
-
     </a>`;
   }
 
   renderSelectOrImportChoice() {
     const databaseChoices = [
-      this.renderChoiceButton(
-        '/units',
-        'waryes:soldier',
-        'Browse Units',
-      ),
-      this.renderChoiceButton(
-        '/weapons',
-        'waryes:gun',
-        'Browse Weapons',
-      ),
+      this.renderChoiceButton('/units', 'waryes:soldier', 'Browse Units'),
+      this.renderChoiceButton('/weapons', 'waryes:gun', 'Browse Weapons'),
       this.renderChoiceButton(
         '/damage-calculator',
         'waryes:calculator',
-        'Damage Calculator',
+        'Damage Calculator'
       ),
       this.renderChoiceButton(
         '/comparison',
         'vaadin:pie-bar-chart',
-        'Compare Units',
+        'Compare Units'
       ),
-      this.renderChoiceButton(
-        '/maps',
-        'vaadin:map-marker',
-        'Maps',
-      ),
+      this.renderChoiceButton('/maps', 'vaadin:map-marker', 'Maps'),
     ];
 
     const deckChoices = [
-      this.renderChoiceButton(
-        '/deck-drafter',
-        'vaadin:random',
-        'Deck Draft',
-      ),
-      this.renderChoiceButton(
-        '/deck-import',
-        'vaadin:code',
-        'Deck Import',
-      ),
-      this.renderChoiceButton(
-        '/deck-builder',
-        'vaadin:tools',
-        'Deck Build',
-      ),
-      this.renderChoiceButton(
-        '/deck-library',
-        'vaadin:book',
-        'Deck Library',
-      ),
+      this.renderChoiceButton('/deck-drafter', 'vaadin:random', 'Deck Draft'),
+      this.renderChoiceButton('/deck-import', 'vaadin:code', 'Deck Import'),
+      this.renderChoiceButton('/deck-builder', 'vaadin:tools', 'Deck Build'),
+      this.renderChoiceButton('/deck-library', 'vaadin:book', 'Deck Library'),
     ];
 
     const inspectChoices = [
       this.renderChoiceButton(
         '/patch-notes',
         'vaadin:clipboard-text',
-        'Patch Notes',
+        'Patch Notes'
       ),
       this.renderChoiceButton(
         '/division-analysis',
         'vaadin:chart',
-        'Division Analysis',
+        'Division Analysis'
       ),
     ];
 
     return html`
-      <div class="button-grid">${databaseChoices} ${deckChoices} ${inspectChoices}</div>
+      <div class="button-grid">
+        ${databaseChoices} ${deckChoices} ${inspectChoices}
+      </div>
     `;
   }
 
@@ -283,8 +256,13 @@ export class IndexRoute extends LitElement {
       <div class="background">
         <div class="container">
           <div class="splash">
-            <img height="100" src=${WaryesImage} />
-
+            <a href="/defcon2">
+              <img
+                height="100"
+                src="/defcon-2-tagline-invitation.png"
+                style="margin-top: 20px;"
+              />
+            </a>
             <div>
               <div class="search">
                 <unit-search @unit-selected=${this.unitSelected}></unit-search>
