@@ -60,7 +60,7 @@ export const VETERANCY_MODIFIERS_MAP: {[key in Veterancy]: VeterancyModifier} = 
   },
   [Veterancy.VET_1]: {
     suppressionReceived: 0.86,
-    aimTime: 0.9,
+    aimTime: 0.96,
     motionAccuracy: ["+", 0.05],
     staticAccuracy: ["+", 0.05],
     reloadTime: 0.9,
@@ -93,7 +93,7 @@ export const VETERANCY_MODIFIERS_MAP: {[key in Veterancy]: VeterancyModifier} = 
   },
   [Veterancy.VET_2]: {
     suppressionReceived: 0.78,
-    aimTime: 0.85,
+    aimTime: 0.92,
     motionAccuracy: ["+", 0.1],
     staticAccuracy: ["+", 0.1],
     reloadTime: 0.85,
@@ -121,8 +121,8 @@ export const VETERANCY_MODIFIERS_MAP: {[key in Veterancy]: VeterancyModifier} = 
   [Veterancy.PLANE_VET_2]: {
     suppressionReceived: 0.8,
     dodgeBonus: ["+", 0.05],
-    aimTime: 0.84,
-    motionAccuracy: ["+", 0.06],
+    aimTime: 0.88,
+    motionAccuracy: ["+", 0.08],
     reloadTime: 0.8,
     suppressRegen: ["+", 2],
     veterancy: Veterancy.PLANE_VET_2,
@@ -159,7 +159,7 @@ export const VETERANCY_MODIFIERS_MAP: {[key in Veterancy]: VeterancyModifier} = 
     suppressionReceived: 0.6,
     dodgeBonus: ["+", 0.1],
     aimTime: 0.68,
-    motionAccuracy: ["+", 0.12],
+    motionAccuracy: ["+", 0.16],
     reloadTime: 0.6,
     suppressRegen: ["+", 3],
     veterancy: Veterancy.PLANE_VET_3,
