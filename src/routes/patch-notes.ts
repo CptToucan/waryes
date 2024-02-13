@@ -1,6 +1,6 @@
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, state} from 'lit/decorators.js';
-import {Alliance, UnitMap} from '../types/unit';
+import { css, html, LitElement, TemplateResult } from 'lit';
+import { customElement, state } from 'lit/decorators.js';
+import { Alliance, UnitMap } from '../types/unit';
 import '../components/unit-image';
 import '../components/country-flag';
 import '../components/division-flag';
@@ -8,9 +8,9 @@ import '../components/simple-chip';
 import '@vaadin/icon';
 import '@vaadin/button';
 import '@vaadin/details';
-import {PatchUnitRecord} from '../types/PatchUnitRecord';
-import {RecordField} from '../types/RecordField';
-import {getIconForTrait} from '../utils/get-icon-for-trait';
+import { PatchUnitRecord } from '../types/PatchUnitRecord';
+import { RecordField } from '../types/RecordField';
+import { getIconForTrait } from '../utils/get-icon-for-trait';
 import {
   collection,
   orderBy,
@@ -19,13 +19,13 @@ import {
   getDocs,
   Timestamp,
 } from 'firebase/firestore';
-import {FirebaseService} from '../services/firebase';
+import { FirebaseService } from '../services/firebase';
 import '@vaadin/combo-box';
-import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
-import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
-import {Division, DivisionsMap} from '../types/deck-builder';
-import {UnitRecord} from '../types/UnitRecord';
-import {Deck} from '../classes/deck';
+import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import { Division, DivisionsMap } from '../types/deck-builder';
+import { UnitRecord } from '../types/UnitRecord';
+import { Deck } from '../classes/deck';
 
 interface Diff {
   __old: unknown;
@@ -231,7 +231,7 @@ export class PatchNotesRoute extends LitElement {
   unitMap?: UnitMap;
 
   @state()
-  patchNotesByDivision?: {[key: string]: PatchNoteTypes};
+  patchNotesByDivision?: { [key: string]: PatchNoteTypes };
 
   @state()
   viewMode: ViewMode = ViewMode.DIVISION;
@@ -346,22 +346,24 @@ export class PatchNotesRoute extends LitElement {
     for (const patchNote of patchNotesUnitJson) {
       const unit = unitMap[patchNote.descriptorName];
 
-      const patchUnitRecord = new PatchUnitRecord(
-        patchNote,
-        patchNotesDivisionJson,
-        unit
-      );
+      if (unit) {
+        const patchUnitRecord = new PatchUnitRecord(
+          patchNote,
+          patchNotesDivisionJson,
+          unit
+        );
 
-      if (patchNote.new) {
-        patchNotes.added.push(patchUnitRecord);
-      } else if (patchNote.removed) {
-        patchNotes.removed.push(patchUnitRecord);
-      } else {
-        patchNotes.changed.push(patchUnitRecord);
+        if (patchNote.new) {
+          patchNotes.added.push(patchUnitRecord);
+        } else if (patchNote.removed) {
+          patchNotes.removed.push(patchUnitRecord);
+        } else {
+          patchNotes.changed.push(patchUnitRecord);
+        }
       }
     }
 
-    const divisionUnitMap: {[key: string]: PatchNoteTypes} = {};
+    const divisionUnitMap: { [key: string]: PatchNoteTypes } = {};
 
     for (const division of sortedDivisions) {
       // create map of arrays of units in divisions
@@ -487,35 +489,35 @@ export class PatchNotesRoute extends LitElement {
                 .items=${this.patches}
                 .selectedItem=${this.selectedPatch}
                 @selected-item-changed=${(
-                  e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
-                ) => {
-                  if (e.detail.value) {
-                    this.setupPatch(e.detail.value);
-                  }
-                }}
+        e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
+      ) => {
+          if (e.detail.value) {
+            this.setupPatch(e.detail.value);
+          }
+        }}
                 item-label-path="name"
               >
               </vaadin-combo-box>
 
               <vaadin-button
                 @click=${() => {
-                  if (this.viewMode === ViewMode.DIVISION) {
-                    this.viewMode = ViewMode.UNIT;
-                  } else {
-                    this.viewMode = ViewMode.DIVISION;
-                  }
-                }}
+          if (this.viewMode === ViewMode.DIVISION) {
+            this.viewMode = ViewMode.UNIT;
+          } else {
+            this.viewMode = ViewMode.DIVISION;
+          }
+        }}
               >
                 ${this.viewMode === ViewMode.DIVISION
-                  ? 'Division View'
-                  : 'Unit View'}
+          ? 'Division View'
+          : 'Unit View'}
               </vaadin-button>
             </div>
           </div>
 
           ${this.viewMode === ViewMode.DIVISION
-            ? this.renderDivisionView(this.patchNotesByDivision)
-            : this.renderUnitView(this.patchNotes)}
+          ? this.renderDivisionView(this.patchNotesByDivision)
+          : this.renderUnitView(this.patchNotes)}
         </div>
       `;
     }
@@ -523,10 +525,10 @@ export class PatchNotesRoute extends LitElement {
     return html``;
   }
 
-  renderDivisionView(patchNotes: {[key: string]: PatchNoteTypes}) {
+  renderDivisionView(patchNotes: { [key: string]: PatchNoteTypes }) {
     return html`
       ${Object.keys(patchNotes).map((division) => {
-        return html` <div class="division-container">
+      return html` <div class="division-container">
           <div class="division-header">
             <division-flag
               .division=${this.divisionsMap?.[division]}
@@ -537,7 +539,7 @@ export class PatchNotesRoute extends LitElement {
           </div>
           ${this.renderUnitView(patchNotes[division], division)}
         </div>`;
-      })}
+    })}
     `;
   }
 
@@ -547,16 +549,16 @@ export class PatchNotesRoute extends LitElement {
         <h3 slot="summary">${patchNotes.added.length} New Units</h3>
         <div class="grid">
           ${patchNotes.added.map((patchNote) => {
-            return this.renderPatchNote(patchNote, divisionDescriptor);
-          })}
+      return this.renderPatchNote(patchNote, divisionDescriptor);
+    })}
         </div>
       </vaadin-details>
       <vaadin-details>
         <h3 slot="summary">${patchNotes.changed.length} Changed Units</h3>
         <div class="grid">
           ${patchNotes.changed.map((patchNote) => {
-            return this.renderPatchNote(patchNote, divisionDescriptor);
-          })}
+      return this.renderPatchNote(patchNote, divisionDescriptor);
+    })}
         </div>
       </vaadin-details>
     `;
@@ -581,11 +583,11 @@ export class PatchNotesRoute extends LitElement {
           ></country-flag>
           <div class="division-flags">
             ${patchNote.unitRecord.unit.divisions?.map((division) => {
-              return html`<division-flag
+      return html`<division-flag
                 class="unit-division"
                 .divisionId=${division}
               ></division-flag>`;
-            })}
+    })}
           </div>
         </div>
       </div>
@@ -719,17 +721,17 @@ export class PatchNotesRoute extends LitElement {
           html` <div>
             ${field.getFieldNameDisplay()}:
             ${RecordField.getDisplayForValue(
-              diffForField.__old,
-              field.getFieldType()
-            )}
+            diffForField.__old,
+            field.getFieldType()
+          )}
             <vaadin-icon
               class="arrow-icon"
               .icon=${'vaadin:arrow-right'}
             ></vaadin-icon>
             ${RecordField.getDisplayForValue(
-              diffForField.__new,
-              field.getFieldType()
-            )}
+            diffForField.__new,
+            field.getFieldType()
+          )}
           </div>`
         );
       }
@@ -765,14 +767,14 @@ export class PatchNotesRoute extends LitElement {
           );
         }
 
-        if(weaponDiffRecord[1]?.traits) {
-          for(const traitDiff of weaponDiffRecord[1].traits) {
+        if (weaponDiffRecord[1]?.traits) {
+          for (const traitDiff of weaponDiffRecord[1].traits) {
             if (isArrayDiffAddedElement(traitDiff)) {
               outputHtml.push(
                 html`<div>Added: ${traitDiff[1]}</div>`
               );
             }
-    
+
             if (isArrayDiffRemovedElement(traitDiff)) {
               outputHtml.push(
                 html`<div>Removed: ${traitDiff[1]}</div>`
@@ -790,17 +792,17 @@ export class PatchNotesRoute extends LitElement {
               html`<div>
                 ${field.getFieldNameDisplay()}:
                 ${RecordField.getDisplayForValue(
-                  diff.__old,
-                  field.getFieldType()
-                )}
+                diff.__old,
+                field.getFieldType()
+              )}
                 <vaadin-icon
                   class="arrow-icon"
                   .icon=${'vaadin:arrow-right'}
                 ></vaadin-icon>
                 ${RecordField.getDisplayForValue(
-                  diff.__new,
-                  field.getFieldType()
-                )}
+                diff.__new,
+                field.getFieldType()
+              )}
               </div>`
             );
           }
