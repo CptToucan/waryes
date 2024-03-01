@@ -15,10 +15,10 @@ export class IndexRoute extends LitElement {
       }
 
       .defcon-image {
+        margin-top: var(--lumo-space-m);
+        margin-bottom: var(--lumo-space-s);
         max-width: 100%;
-        max-height: 400px;
-        border: 1px solid var(--lumo-contrast-80pct);
-        border-radius: var(--lumo-border-radius);
+        max-height: 100px;
       }
 
       .card {
@@ -139,11 +139,17 @@ export class IndexRoute extends LitElement {
         <div class="crawl"></div>
       </section>
       <div class="card">
-        <div>
-          <img class="defcon-image" src="/defcon-2-panel-small.png" />
-        </div>
 
-        <h2>MAN YOUR BATTLE STATIONS!</h2>
+        <iframe
+          src="https://challonge.com/DEFCON2/module"
+          width="100%"
+          height="500"
+          frameborder="0"
+          scrolling="auto"
+          allowtransparency="true"
+        ></iframe>
+        <img class="defcon-image" src="/defcon-2-tagline.png" />
+        
         <p>
           The WarYes DEFCON 2 Tournament is on the horizon! The 2v2 showdown of
           a lifetime, starting March 1st. The stage is set for a finale to
@@ -159,23 +165,28 @@ export class IndexRoute extends LitElement {
         </p>
 
         <div class="button-grid">
-        <a
-          class="link-button primary"
-          href="https://docs.google.com/forms/d/e/1FAIpQLSfNuhqxkOoxUKhMktGfdpzv9mdW05knfMIKum3eh70TYi9g-Q/viewform"
-          >Sign up here!</a
-        >
-        <a
-          class="link-button"
-          href="https://docs.google.com/document/d/1QsQJbBs7mO5OSvdxJ9e8Yuv8x5vp-_VspbsJVgUVJO0"
-          >Read the rules</a
-        >
-        <a class="link-button" href="https://challonge.com/DEFCON2">Review the brackets</a>
-        <a class="link-button" href="https://matcherino.com/tournaments/109548/overview">Prize Pool</a>
-        <a
-          class="link-button"
-          href="https://discord.com/invite/8vq6z3t"
-          >Join the Discord</a
-        ></div>
+          <a
+            class="link-button primary"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSfNuhqxkOoxUKhMktGfdpzv9mdW05knfMIKum3eh70TYi9g-Q/viewform"
+            >Sign up here!</a
+          >
+          <a
+            class="link-button"
+            href="https://docs.google.com/document/d/1QsQJbBs7mO5OSvdxJ9e8Yuv8x5vp-_VspbsJVgUVJO0"
+            >Read the rules</a
+          >
+          <a class="link-button" href="https://challonge.com/DEFCON2"
+            >Review the brackets</a
+          >
+          <a
+            class="link-button"
+            href="https://matcherino.com/tournaments/109548/overview"
+            >Prize Pool</a
+          >
+          <a class="link-button" href="https://discord.com/invite/8vq6z3t"
+            >Join the Discord</a
+          >
+        </div>
       </div>`;
   }
 }
