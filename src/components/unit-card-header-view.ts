@@ -12,6 +12,7 @@ import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
 import {router} from '../services/router';
 import "./unit-traits";
 import {isSpecialtyTrait} from '../utils/is-specialty-trait';
+import { getIconForVeterancy } from '../utils/get-icon-for-veterancy';
 
 /**
  * Component for rendering the details of a single unit
@@ -109,6 +110,9 @@ export class UnitCardHeaderView extends LitElement {
   expert = false;
 
   @property()
+  activeVeterancy = 0;
+
+  @property()
   hideExpertButton = false;
 
   render(): TemplateResult {
@@ -127,6 +131,7 @@ export class UnitCardHeaderView extends LitElement {
           </div>
 
           <div style="display: flex; gap: var(--lumo-space-xs);">
+          <div style="display: flex; align-items: center">${getIconForVeterancy(this.activeVeterancy)}</div>
             <a
               href=${router.urlForPath('/damage-calculator/:unitId', {
                 unitId: this.unit.descriptorName,

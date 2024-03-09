@@ -13,6 +13,7 @@ import '@vaadin/dialog';
 import '../unit-card';
 import "./../unit-traits";
 import {isSpecialtyTrait} from '../../utils/is-specialty-trait';
+import '../veterancy-button';
 
 export interface ArmouryCardOptions {
   unit: Unit;
@@ -115,7 +116,7 @@ export class ArmouryCard extends LitElement {
         <div class="top-section">
           ${this.renderButton(this.activeVeterancy, unit, pack, deck)}
           ${this.renderCommandPoints(unit, pack, deck)}
-          ${this.renderInfoIcon(unit, pack, deck)}
+          ${this.renderInfoIcon(unit, pack, deck, this.activeVeterancy)}
           ${this.renderUnitIcon(unit, pack, deck)}
           ${this.renderQuantity(
             this.activeVeterancy,
@@ -165,6 +166,7 @@ export class ArmouryCard extends LitElement {
     _unit: Unit,
     _pack: Pack,
     _deck: Deck,
+    activeVeterancy?: number,
     openCallback?: () => void
   ) {
     return html`
@@ -184,7 +186,7 @@ export class ArmouryCard extends LitElement {
         <vaadin-icon icon="vaadin:info-circle-o"></vaadin-icon
       ></vaadin-button>
 
-      ${openCallback ? `` : this.renderUnitModal(_unit)}
+      ${openCallback ? `` : this.renderUnitModal(_unit, activeVeterancy)}
     `;
   }
 
@@ -192,7 +194,7 @@ export class ArmouryCard extends LitElement {
     return html`<unit-image .unit=${unit}></unit-image>`;
   }
 
-  renderUnitModal(_unit: Unit) {
+  renderUnitModal(_unit: Unit, activeVeterancy?: number) {
     return html`<vaadin-dialog
       aria-label="Add note"
       draggable
@@ -213,8 +215,8 @@ export class ArmouryCard extends LitElement {
         []
       )}
       ${dialogRenderer(
-        () => html`<unit-card .unit=${_unit}></unit-card> `,
-        [_unit]
+        () => html`<unit-card .unit=${_unit} .activeVeterancy=${activeVeterancy}></unit-card> `,
+        [_unit, activeVeterancy]
       )}
     ></vaadin-dialog>`;
   }

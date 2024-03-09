@@ -48,6 +48,9 @@ export class UnitWeaponView extends LitElement {
   @property()
   selectedWeapon = 0;
 
+  @property()
+  activeVeterancy = 0;
+
   private selectedWeaponTabChanged(event: TabsSelectedChangedEvent) {
     this.selectedWeapon = event.detail.value;
     this.dispatchEvent(
@@ -67,10 +70,10 @@ export class UnitWeaponView extends LitElement {
     return tabs;
   }
 
-  renderWeaponStats(weapon: Weapon): TemplateResult {
+  renderWeaponStats(weapon: Weapon, activeVeterancy?: number): TemplateResult {
     return html`
       <div class="weapons-tab">
-        <individual-weapon-view .expert=${this.expert} .weapon=${weapon}></individual-weapon-view>
+        <individual-weapon-view .expert=${this.expert} .weapon=${weapon} .activeVeterancy=${activeVeterancy}></individual-weapon-view>
       </div>
     `;
   }
@@ -94,7 +97,7 @@ export class UnitWeaponView extends LitElement {
           ${this.renderWeaponTabs()}
         </vaadin-tabs>
 
-        ${weaponMetadata && this.renderWeaponStats(weaponMetadata)}
+        ${weaponMetadata && this.renderWeaponStats(weaponMetadata, this.activeVeterancy)}
       `;
     }
 

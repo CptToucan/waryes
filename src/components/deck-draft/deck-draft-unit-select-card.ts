@@ -237,7 +237,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
               >x${veterancyQuantities[this.activeVeterancy]}</div>
           </div>
           <div class="main">
-            ${this.renderUnitImageContainer(unit, this.pack, this.deck)}
+            ${this.renderUnitImageContainer(unit, this.pack, this.deck, this.activeVeterancy)}
             <unit-armor-view .unit=${unit}></unit-armor-view>
             <div class="bar space-evenly" style="height: 40px;">
               ${unit.weapons.map((weapon) => {
@@ -281,6 +281,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
             this.transport,
             this.pack,
             this.deck,
+            this.activeVeterancy,
             this.openTransport.bind(this),
             true
           )}
@@ -293,6 +294,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
     unit: Unit,
     pack: Pack,
     deck: Deck,
+    activeVeterancy: number,
     callback?: () => void,
     roundEdges = false
   ) {
@@ -307,7 +309,7 @@ export class DeckDraftUnitSelectCard extends ArmouryWithTransportCard {
         <div class="category-icon">
           <vaadin-icon icon=${icons.icon}></vaadin-icon>
         </div>
-        ${this.renderInfoIcon(unit, pack, deck, callback)}
+        ${this.renderInfoIcon(unit, pack, deck, activeVeterancy, callback)}
         <unit-image .unit=${unit}></unit-image>
       </div>
     `;

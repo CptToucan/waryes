@@ -26,7 +26,8 @@ const routes: Route[] = [
   {path: '/deck-drafter/:sessionId', component: 'deck-draft-route'},
   {path: '/damage-calculator/:unitId', component: 'damage-calculator-route'},
   {path: '/damage-calculator', component: 'damage-calculator-route'},
-  {path: '/defcon2', component: 'defcon2-route'}
+  {path: '/defcon2', component: 'defcon2-route'},
+  {path: '/units-table', component: 'units-table-route'},
 ];
 
 // Features.firebase_auth routes

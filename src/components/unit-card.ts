@@ -69,6 +69,9 @@ export class UnitCard extends LitElement {
   @property()
   selectedWeapon = 0;
 
+  @property()
+  activeVeterancy = 0;
+
   @property({type: Boolean})
   expert = false;
 
@@ -80,7 +83,10 @@ export class UnitCard extends LitElement {
 
   render(): TemplateResult {
     return html` <div class="unit-card">
-      <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${this.changeMode}></unit-card-header-view>
+
+
+
+      <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${this.changeMode} .activeVeterancy=${this.activeVeterancy}></unit-card-header-view>
       ${this.showImage ? html`<div class="image-container"><div class="border-radius"><unit-image .unit=${this.unit}></unit-image></div></div>` : html``}
       <unit-armor-view .unit=${this.unit}></unit-armor-view>
       <unit-weapon-view
@@ -88,6 +94,7 @@ export class UnitCard extends LitElement {
         .unit=${this.unit}
         ?expert=${this.expert}
         .selectedWeapon=${this.selectedWeapon}
+        .activeVeterancy=${this.activeVeterancy}
         @active-weapon-changed=${(e: CustomEvent) => {
           this.dispatchEvent(new CustomEvent('active-weapon-changed', {detail: e.detail}))
         }}
