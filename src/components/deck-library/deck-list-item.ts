@@ -8,7 +8,6 @@ import '../deck/summary-view';
 import {DivisionsMap} from '../../types/deck-builder';
 import {UnitMap} from '../../types/unit';
 import {Deck} from '../../classes/deck';
-import {QueryDocumentSnapshot, DocumentData} from 'firebase/firestore';
 import "@vaadin/tooltip";
 
 @customElement('deck-list-item')
@@ -189,7 +188,7 @@ export class DeckListItem extends LitElement {
       return true;
     },
   })
-  deck?: QueryDocumentSnapshot<DocumentData>;
+  deck?: any;
 
   @property()
   divisionsMap?: DivisionsMap;
@@ -208,13 +207,13 @@ export class DeckListItem extends LitElement {
 
   @state()
   get voteCount(): number {
-    return this.deck?.data()?.vote_count || 0;
+    return this.deck?.voteCount || 0;
   }
 
   render(): TemplateResult {
     if (!this.deck) return html``;
 
-    const deck = this.deck?.data();
+    const deck = this.deck;
     const unitMap = this.unitMap;
     const divisionsMap = this.divisionsMap;
 
@@ -233,7 +232,7 @@ export class DeckListItem extends LitElement {
       <div class="deck">
         <div class="headline-container">
           <div class="time">
-            ${this.deck.data().updated.toDate().toLocaleString()}
+            ${new Date(this.deck?.updatedAt).toLocaleString()}
           </div>
           <div class="left">
             ${!this.hideVotes
@@ -262,7 +261,7 @@ export class DeckListItem extends LitElement {
                   <country-flag .country=${deck.country}></country-flag>
                 </div>
                 <div class="tags">
-                  ${(deck.tags as string[]).map(
+                  ${(deck.tags as string[] || []).map(
                     (tag) => html`<simple-chip>${tag}</simple-chip>`
                   )}
                 </div>

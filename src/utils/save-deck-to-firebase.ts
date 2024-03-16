@@ -1,11 +1,9 @@
 import { getAuth } from "firebase/auth";
-import { addDoc, collection, DocumentReference, Timestamp } from "firebase/firestore";
 import { Deck } from "../classes/deck";
-import { FirebaseService } from "../services/firebase";
 import { notificationService } from "../services/notification";
 
 
-export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckRef?: DocumentReference, isPublic?: boolean) {
+export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckId?: number, isPublic?: boolean) {
   if(selectedTags.length > 5) {
     notificationService.instance?.addNotification({
       content: 'Too many tags',
@@ -28,20 +26,33 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
 
   if (deck) {
     try {
-      const doc = await addDoc(collection(FirebaseService.db, 'decks'), {
-        tags: selectedTags,
-        description: '',
+      const deckRecord = {
+        tags: selectedTags.toString(),
         division: deck.division.descriptor,
-        country: deck.division.country,
         code: deck.toDeckCode(),
         name: deckName,
-        vote_count: 0,
-        created: Timestamp.fromDate(new Date()),
-        updated: Timestamp.fromDate(new Date()),
-        created_by: getAuth().currentUser?.uid,
-        copied_from: copiedDeckRef,
+        creator: getAuth().currentUser?.uid,
+        copiedFrom: copiedDeckId,
         public: isPublic,
+      };
+
+      const user = getAuth().currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      const response = await fetch('http://localhost:8090/api/deck', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${await user.getIdToken()}`,
+        },
+        body: JSON.stringify(deckRecord),
       });
+
+      if (!response.ok) {
+        throw new Error('Error uploading deck');
+      }
 
       notificationService.instance?.addNotification({
         content: 'Deck uploaded successfully',
@@ -49,7 +60,8 @@ export async function saveDeckToFirebase(deck: Deck, deckName: string, selectedT
         duration: 5000,
       });
 
-      return doc;
+      const responseData = await response.json();
+      return responseData;
 
     } catch (e) {
       console.error('Error adding document: ', e);
