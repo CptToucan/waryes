@@ -12,7 +12,7 @@ import {Deck} from '../../classes/deck';
 import {getAuth} from 'firebase/auth';
 import type {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 import { tags } from '../../types/tags';
-import { saveDeckToFirebase } from '../../utils/save-deck-to-firebase';
+import { saveDeckToDatabase } from '../../utils/save-deck-to-firebase';
 import { Router } from '@vaadin/router';
 import "@vaadin/checkbox"
 import { CheckboxCheckedChangedEvent } from '@vaadin/checkbox';
@@ -51,14 +51,14 @@ export class UploadDeck extends LitElement {
 
     if(deck) {
       try {
-        const deckRef = await saveDeckToFirebase(
+        const deckRef = await saveDeckToDatabase(
           deck,
           deckName,
           selectedTags,
           undefined,
           this.public
         );
-        Router.go(`/deck/${deckRef?.id}`);
+        Router.go(`/deck/${deckRef?.data.id}`);
       }
       catch(err) {
         console.error(err);

@@ -3,19 +3,6 @@ import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {DivisionsMap} from '../types/deck-builder';
 import {UnitMap} from '../types/unit';
-import {
-  collection,
-  doc,
-  DocumentData,
-  DocumentReference,
-  getDoc,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  QueryDocumentSnapshot,
-  setDoc,
-} from 'firebase/firestore';
 import {FirebaseService} from '../services/firebase';
 import {Deck} from '../classes/deck';
 import '@vaadin/menu-bar';
@@ -23,7 +10,7 @@ import {notificationService} from '../services/notification';
 import {MenuBarItem, MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
 import {getAuth, User} from 'firebase/auth';
 import {exportDeckToCode} from '../utils/export-deck-to-code';
-import {saveDeckToFirebase} from '../utils/save-deck-to-firebase';
+import {saveDeckToDatabase} from '../utils/save-deck-to-firebase';
 import {viewDeckCode} from '../utils/view-deck-code';
 import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
 import '../components/intel-report';
@@ -33,7 +20,6 @@ import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
 import {TextFieldValueChangedEvent} from '@vaadin/text-field';
 import {DialogOpenedChangedEvent} from '@vaadin/dialog';
 import {dialogRenderer, dialogFooterRenderer} from '@vaadin/dialog/lit.js';
-import {FirebasePatchRecord} from './patch-notes';
 import '@vaadin/tooltip';
 
 const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
@@ -219,18 +205,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   selectedTabIndex = 0;
 
   async fetchLastPatch() {
-    const q = query(
-      collection(FirebaseService.db, 'patches'),
-      orderBy('created', 'desc'),
-      limit(1)
-    );
-
-    const querySnapshot = await getDocs(q);
-
-    const patchArray = querySnapshot.docs.map((doc) =>
-      doc.data()
-    ) as FirebasePatchRecord[];
-    return patchArray[0]?.created.toDate() || new Date();
+    return new Date();
   }
 
   async onBeforeEnter(location: RouterLocation) {
@@ -266,7 +241,8 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
   }
 
-  async fetchDeck(deckId: string) {
+  async fetchDeck(_deckId: string) {
+    /*
     const ref = doc(FirebaseService.db, 'decks', deckId);
     const deckSnap = await getDoc(ref);
     if (deckSnap.exists()) {
@@ -307,6 +283,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     });
 
     this.deck = deckFromString;
+    */
   }
 
   async fetchUnitMap() {
@@ -363,27 +340,32 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
   }
 
-  async copy(userDeck: DocumentData | undefined, deck: Deck | undefined) {
+  
+  async copy(_userDeck: any | undefined, _deck: Deck | undefined) {
+    /*
     this.actionHappening = true;
     if (userDeck && deck) {
       const auth = getAuth();
       const user = auth.currentUser;
 
       const deckName = `${user?.displayName}'s ${this.deck?.division.name}`;
-      const deckRef = await saveDeckToFirebase(
+      const deckRef = await saveDeckToDatabase(
         deck,
         deckName,
         userDeck.tags,
-        this.userDeckRef
+        // TODO: user deck primary 
+        //this.userDeckRef
       );
       Router.go(`/deck/${deckRef?.id}?copied=true`);
     }
     setTimeout(() => {
       this.actionHappening = false;
     }, 2000);
+    */
   }
 
-  async togglePublic(userDeck: DocumentData | undefined) {
+
+  async togglePublic(userDeck: any | undefined) {
     if (userDeck) {
       if (this.loggedInUser?.uid === userDeck.created_by) {
         await updateDeckToFirebase(userDeck.id, undefined, !userDeck.public);
@@ -394,6 +376,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         };
       }
     }
+    
   }
 
   async toolbarItemSelected(value: string) {
@@ -684,7 +667,8 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     this.actionHappening = false;
   }
 
-  async vote(itemId: string, userId: string): Promise<void> {
+  async vote(_itemId: string, _userId: string): Promise<void> {
+    /*
     const db = FirebaseService.db;
     this.actionHappening = true;
     try {
@@ -742,6 +726,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       }, 1000);
     }
   }
+  */
 }
 
 declare global {
