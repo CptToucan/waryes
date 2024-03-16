@@ -178,6 +178,14 @@ export class IndexRoute extends LitElement {
         border: 2px solid var(--lumo-primary-color-50pct);
       }
 
+      .bmc {
+        background-color: var(--lumo-contrast-5pct);
+        color: white;
+        border-radius: 8px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+
       h3 {
         margin: 0;
       }
@@ -276,7 +284,7 @@ export class IndexRoute extends LitElement {
             </div>
             ${this.renderSelectOrImportChoice()}
             <div class="socials">
-              <a class="social" href="https://discord.gg/gqBgvgGj8H">
+       <a class="social" href="https://discord.gg/gqBgvgGj8H">
                 <img style="height: 32px" src="/discord-logo-white.svg" />
                 <div>Feel free to join our Discord community.</div>
               </a>
@@ -284,6 +292,11 @@ export class IndexRoute extends LitElement {
               <a class="social" href="https://www.patreon.com/WarYes">
                 <img style="height: 32px" src="/patreon-logo-white.svg" />
                 <div>Support the project on Patreon.</div>
+              </a>
+              
+              <a class="social" href="https://www.buymeacoffee.com/captaintoucan">
+                <div><img  class="bmc" style="height: 32px" src="/bmc-logo.svg" /></div>
+                <div>Buy me a coffee.</div>
               </a>
             </div>
           </div>
