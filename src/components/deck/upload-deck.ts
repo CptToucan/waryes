@@ -12,7 +12,7 @@ import {Deck} from '../../classes/deck';
 import {getAuth} from 'firebase/auth';
 import type {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 import { tags } from '../../types/tags';
-import { saveDeckToDatabase } from '../../utils/save-deck-to-firebase';
+import { saveDeckToDatabase } from '../../utils/save-deck-to-database';
 import { Router } from '@vaadin/router';
 import "@vaadin/checkbox"
 import { CheckboxCheckedChangedEvent } from '@vaadin/checkbox';
@@ -84,8 +84,6 @@ export class UploadDeck extends LitElement {
     if(this.selectedTags.length < 1) {
       tagsErrorMessage = 'Please select at least one tag';
     }
-
-    console.log(tagsErrorMessage);
 
     return html`
       <vaadin-dialog

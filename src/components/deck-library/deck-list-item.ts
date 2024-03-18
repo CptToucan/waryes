@@ -57,16 +57,6 @@ export class DeckListItem extends LitElement {
         display: flex;
       }
 
-      .votes {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 48px;
-        font-size: var(--lumo-font-size-s);
-        padding-left: var(--lumo-space-xs);
-        padding-right: var(--lumo-space-xs);
-      }
-
       vaadin-details {
         // width: 100%;
         flex: 1 1 100%;
@@ -202,13 +192,6 @@ export class DeckListItem extends LitElement {
   @property()
   isOutdated = false;
 
-  @property()
-  hideVotes = false;
-
-  @state()
-  get voteCount(): number {
-    return this.deck?.voteCount || 0;
-  }
 
   render(): TemplateResult {
     if (!this.deck) return html``;
@@ -235,16 +218,12 @@ export class DeckListItem extends LitElement {
             ${new Date(this.deck?.updatedAt).toLocaleString()}
           </div>
           <div class="left">
-            ${!this.hideVotes
-              ? html`<div class="votes">${this.voteCount}</div>`
-              : ''}
-
             <div class="main-details">
               <div class="deck-title">
-                ${deck.is_pro_deck
+                ${deck.isPro
                   ? html`<simple-chip class="pro">PRO</simple-chip>`
                   : ''}
-                ${deck.is_content_creator_deck
+                ${deck.isContentCreator
                   ? html`<simple-chip class="pro">CC</simple-chip>`
                   : ''}
                 <slot name="name"> <div class="name">${deck.name}</div></slot>
@@ -279,7 +258,7 @@ export class DeckListItem extends LitElement {
                       position="top-end"
                     ></vaadin-tooltip>`
                 : ''}
-              ${deck.youtube_link
+              ${deck.youtubeLink
                 ? html` <vaadin-icon id="youtube-icon" icon="vaadin:youtube">
                     </vaadin-icon>
                     <vaadin-tooltip
@@ -316,8 +295,8 @@ export class DeckListItem extends LitElement {
         </div>
         ${this._expanded
           ? html` <div class="summary">
-              ${deck.youtube_link
-                ? this.renderEmbed(deck.youtube_link)
+              ${deck.youtubeLink
+                ? this.renderEmbed(deck.youtubeLink)
                 : html``}
               <summary-view .deck=${deckFromString}></summary-view>
             </div>`

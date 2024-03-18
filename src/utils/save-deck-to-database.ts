@@ -1,6 +1,6 @@
-import { getAuth } from "firebase/auth";
 import { Deck } from "../classes/deck";
 import { notificationService } from "../services/notification";
+import { DeckDatabaseAdapter } from "../classes/DeckDatabaseAdapter";
 
 
 export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckId?: number, isPublic?: boolean) {
@@ -31,28 +31,12 @@ export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedT
         division: deck.division.descriptor,
         code: deck.toDeckCode(),
         name: deckName,
-        creator: getAuth().currentUser?.uid,
-        copiedFrom: copiedDeckId,
-        public: isPublic,
+        copiedFrom: copiedDeckId || 0,
+        public: isPublic || false,
       };
 
-      const user = getAuth().currentUser;
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-
-      const response = await fetch('http://localhost:8090/api/deck', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${await user.getIdToken()}`,
-        },
-        body: JSON.stringify(deckRecord),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error uploading deck');
-      }
+      
+      const response = await DeckDatabaseAdapter.createDeck(deckRecord);
 
       notificationService.instance?.addNotification({
         content: 'Deck uploaded successfully',
@@ -60,8 +44,7 @@ export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedT
         duration: 5000,
       });
 
-      const responseData = await response.json();
-      return responseData;
+      return response;
 
     } catch (e) {
       console.error('Error adding document: ', e);

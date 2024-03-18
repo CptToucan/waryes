@@ -1,28 +1,27 @@
-import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
-import {DivisionsMap} from '../types/deck-builder';
-import {UnitMap} from '../types/unit';
-import {FirebaseService} from '../services/firebase';
-import {Deck} from '../classes/deck';
+import { BeforeEnterObserver, RouterLocation } from '@vaadin/router';
+import { css, html, LitElement, TemplateResult } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { DivisionsMap } from '../types/deck-builder';
+import { UnitMap } from '../types/unit';
+import { Deck } from '../classes/deck';
 import '@vaadin/menu-bar';
-import {notificationService} from '../services/notification';
-import {MenuBarItem, MenuBarItemSelectedEvent} from '@vaadin/menu-bar';
-import {getAuth, User} from 'firebase/auth';
-import {exportDeckToCode} from '../utils/export-deck-to-code';
-import {saveDeckToDatabase} from '../utils/save-deck-to-firebase';
-import {viewDeckCode} from '../utils/view-deck-code';
-import {updateDeckToFirebase} from '../utils/update-deck-to-firebase';
+import { notificationService } from '../services/notification';
+import { MenuBarItem, MenuBarItemSelectedEvent } from '@vaadin/menu-bar';
+import { User } from 'firebase/auth';
+import { exportDeckToCode } from '../utils/export-deck-to-code';
+import { viewDeckCode } from '../utils/view-deck-code';
 import '../components/intel-report';
 import '@vaadin/tabs';
-import {TabsSelectedChangedEvent} from '@vaadin/tabs';
-import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
-import {TextFieldValueChangedEvent} from '@vaadin/text-field';
-import {DialogOpenedChangedEvent} from '@vaadin/dialog';
-import {dialogRenderer, dialogFooterRenderer} from '@vaadin/dialog/lit.js';
+import { TabsSelectedChangedEvent } from '@vaadin/tabs';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import { TextFieldValueChangedEvent } from '@vaadin/text-field';
+import { DialogOpenedChangedEvent } from '@vaadin/dialog';
+import { dialogRenderer, dialogFooterRenderer } from '@vaadin/dialog/lit.js';
 import '@vaadin/tooltip';
+import { DeckDatabaseAdapter, DeckRecord } from '../classes/DeckDatabaseAdapter';
+import { FirebaseService } from '../services/firebase';
+import { updateDeckToDatabase } from '../utils/update-deck-to-database';
 
-const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
 @customElement('deck-view-route')
 export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   static get styles() {
@@ -81,16 +80,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     const items: MenuBarItem[] = [
       {
         component: this.createItem(
-          'plus',
-          `Vote (${this.voteCount})`,
-          false,
-          this.actionHappening
-        ),
-        text: 'Vote',
-        disabled: this.actionHappening,
-      },
-      {
-        component: this.createItem(
           'compile',
           'Export',
           false,
@@ -101,18 +90,11 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       },
     ];
 
-    if (this.loggedInUser?.uid) {
-      items.push({
-        component: this.createItem('copy', 'Copy', false, this.actionHappening),
-        text: 'Copy',
-        disabled: this.actionHappening,
-      });
-    }
     if (
       this.loggedInUser &&
-      this.userDeck?.created_by === this.loggedInUser?.uid
+      this.deckRecord?.creator === this.loggedInUser?.uid
     ) {
-      if (this.userInfo?.is_content_creator) {
+      if (this.contentCreator) {
         items.push({
           component: this.createItem(
             'link',
@@ -131,18 +113,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         disabled: this.actionHappening,
       });
 
-      if (this.userDeck?.public) {
-        items.push({
-          component: this.createItem(
-            'eye-slash',
-            'Private',
-            false,
-            this.actionHappening
-          ),
-          text: 'Private',
-          disabled: this.actionHappening,
-        });
-      } else {
+      if (this.deckRecord?.public) {
         items.push({
           component: this.createItem(
             'eye',
@@ -153,25 +124,25 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
           text: 'Public',
           disabled: this.actionHappening,
         });
+      } else {
+        items.push({
+          component: this.createItem(
+            'eye-slash',
+            'Private',
+            false,
+            this.actionHappening
+          ),
+          text: 'Private',
+          disabled: this.actionHappening,
+        });
+
       }
     }
 
     return items;
   }
 
-  @state()
-  get voteCount(): number {
-    return this._voteCount;
-  }
-
-  set voteCount(value: number) {
-    this._voteCount = value;
-  }
-
-  @state()
-  private _voteCount = 0;
-
-  deckId?: string;
+  deckId?: number;
   deck?: Deck;
 
   @state({
@@ -179,10 +150,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       return true;
     },
   })
-  userDeck?: DocumentData;
-  userDeckRef?: DocumentReference<DocumentData>;
+  deckRecord?: DeckRecord;
 
-  copyDeck?: DocumentData;
+  copyDeck?: any;
 
   @property()
   loggedInUser: User | null | undefined;
@@ -190,7 +160,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   youtubeLink?: string;
 
   @property()
-  userInfo: null | DocumentData = null;
+  contentCreator = false;
 
   @property()
   youtubeLinkDialogOpened = false;
@@ -209,82 +179,52 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   }
 
   async onBeforeEnter(location: RouterLocation) {
+
     try {
       this.youtubeLink = undefined;
-      this.deckId = location.params.deckId as string;
-      FirebaseService.auth?.onAuthStateChanged(async (user) => {
-        this.loggedInUser = user;
-        const ref = doc(
-          FirebaseService.db,
-          'users',
-          this.loggedInUser?.uid || ''
-        );
-        const userSnap = await getDoc(ref);
+      this.deckId = Number(location.params.deckId);
 
-        if (userSnap.exists()) {
-          this.userInfo = userSnap.data();
+      FirebaseService.auth?.onAuthStateChanged((user: User | null) => {
+        this.loggedInUser = user;
+        this.requestUpdate();
+      });
+
+      const [units, divisions] = await Promise.all([
+        this.fetchUnitMap(),
+        this.fetchDivisionMap(),
+      ]);
+
+      await this.fetchDeck(this.deckId, units, divisions);
+
+      FirebaseService.auth.onAuthStateChanged(async (user) => {
+        this.loggedInUser = user;
+        if (user) {
+          const tokenResult = await user.getIdTokenResult();
+          const contentCreator = tokenResult.claims.contentCreator;
+          this.contentCreator = contentCreator;
         }
       });
-      await this.fetchDeck(this.deckId);
-
-      const params = new URLSearchParams(location.search);
-      const copied = params.get('copied');
-      if (copied) {
-        this.actionHappening = true;
-        setTimeout(async () => {
-          this.actionHappening = false;
-        }, 5000);
-      }
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
       this.deckError = true;
     }
   }
 
-  async fetchDeck(_deckId: string) {
-    /*
-    const ref = doc(FirebaseService.db, 'decks', deckId);
-    const deckSnap = await getDoc(ref);
-    if (deckSnap.exists()) {
-      this.userDeck = {...deckSnap.data(), id: deckSnap.id};
-      this.userDeckRef = ref;
-
-      try {
-        if (this.userDeck?.copied_from) {
-          const copyDoc = await getDoc(deckSnap.data().copied_from);
-          this.copyDeck = copyDoc.exists()
-            ? {
-                ...(copyDoc as QueryDocumentSnapshot<DocumentData>).data(),
-                id: copyDoc.id,
-              }
-            : undefined;
-        } else {
-          this.copyDeck = undefined;
-        }
-
-        const lastPatch = await this.fetchLastPatch();
-        this.isOutdated = this.userDeck?.updated.toDate() < lastPatch;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    this.voteCount = this.userDeck?.vote_count || 0;
-
-    const [units, divisions] = await Promise.all([
-      this.fetchUnitMap(),
-      this.fetchDivisionMap(),
-    ]);
+  async fetchDeck(deckId: number, units: UnitMap, divisions: DivisionsMap) {
+    const deckResponse = await DeckDatabaseAdapter.getDeck(deckId);
+    const deck = deckResponse.data;
+    this.deckRecord = deck;
 
     const availableDivisions = Object.values(divisions);
-    const deckFromString = Deck.fromDeckCode(this.userDeck?.code as string, {
+    const deckFromString = Deck.fromDeckCode(deck.code as string, {
       unitMap: units,
       divisions: availableDivisions,
     });
 
     this.deck = deckFromString;
-    */
   }
+
 
   async fetchUnitMap() {
     const units = await BundleManagerService.getUnitsForBucket(
@@ -340,53 +280,20 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     }
   }
 
-  
-  async copy(_userDeck: any | undefined, _deck: Deck | undefined) {
-    /*
-    this.actionHappening = true;
-    if (userDeck && deck) {
-      const auth = getAuth();
-      const user = auth.currentUser;
 
-      const deckName = `${user?.displayName}'s ${this.deck?.division.name}`;
-      const deckRef = await saveDeckToDatabase(
-        deck,
-        deckName,
-        userDeck.tags,
-        // TODO: user deck primary 
-        //this.userDeckRef
-      );
-      Router.go(`/deck/${deckRef?.id}?copied=true`);
-    }
-    setTimeout(() => {
-      this.actionHappening = false;
-    }, 2000);
-    */
-  }
-
-
-  async togglePublic(userDeck: any | undefined) {
+  async togglePublic(userDeck: DeckRecord) {
     if (userDeck) {
-      if (this.loggedInUser?.uid === userDeck.created_by) {
-        await updateDeckToFirebase(userDeck.id, undefined, !userDeck.public);
-
-        this.userDeck = {
-          ...this.userDeck,
-          public: !userDeck.public,
-        };
+      if (this.loggedInUser?.uid === userDeck.creator) {
+        await updateDeckToDatabase(userDeck.id, undefined, !userDeck.public);
+        await this.fetchDeck(userDeck.id, await this.fetchUnitMap(), await this.fetchDivisionMap());
       }
     }
-    
+
+
   }
 
   async toolbarItemSelected(value: string) {
     switch (value) {
-      case 'Vote':
-        this.vote(this.userDeck?.id, this.loggedInUser?.uid as string);
-        break;
-      case 'Copy':
-        this.copy(this.userDeck, this.deck);
-        break;
       case 'Export':
         this.actionHappening = true;
         await exportDeckToCode(this.deck);
@@ -400,7 +307,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       case 'Public':
       case 'Private':
         this.actionHappening = true;
-        await this.togglePublic(this.userDeck);
+        if (this.deckRecord) {
+          await this.togglePublic(this.deckRecord);
+        }
         setTimeout(() => {
           this.actionHappening = false;
         }, 1000);
@@ -411,7 +320,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
           viewDeckCode(
             this.deck.toDeckCode(),
             undefined,
-            this.userDeck?.id,
+            this.deckRecord?.id,
             true
           );
         } else {
@@ -486,22 +395,22 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                 slot="title"
                 style="display: flex; flex: 1 1 0; align-items: center;"
               >
-                ${this.userDeck?.is_pro_deck
-                  ? html`<simple-chip class="pro">PRO</simple-chip>`
-                  : ''}
-                ${this.userDeck?.is_content_creator_deck
-                  ? html`<simple-chip class="pro">CC</simple-chip>`
-                  : ''}
+                ${(this.deckRecord as any)?.isPro
+        ? html`<simple-chip class="pro">PRO</simple-chip>`
+        : ''}
+                ${(this.deckRecord as any)?.isContentCreator
+        ? html`<simple-chip class="pro">CC</simple-chip>`
+        : ''}
 
 
                 <div
                   style="display: flex; flex-direction: column; flex: 1 1 0; overflow: hidden;"
                 >
-                  <h2>${this.userDeck?.name}</h2>
+                  <h2>${this.deckRecord?.name}</h2>
                   
 
                   ${this.copyDeck
-                    ? html` <div
+        ? html` <div
                         style="display: flex; align-items: center; font-size: var(--lumo-font-size-s); overflow: hidden;"
                       >
                         Copied from:
@@ -514,17 +423,17 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                           ${this.copyDeck?.name}
                         </a>
                       </div>`
-                    : ''}
+        : ''}
                 </div>
                 ${this.isOutdated
-                  ? html` <vaadin-icon id="warning-icon" icon="vaadin:warning">
+        ? html` <vaadin-icon id="warning-icon" icon="vaadin:warning">
                       </vaadin-icon
                       ><vaadin-tooltip
                         for="warning-icon"
                         text=${"This deck hasn't been updated since the last patch and might not work anymore."}
                         position="top-end"
                       ></vaadin-tooltip>`
-                  : ''}
+        : ''}
               </div>
             </deck-title>
           </div>
@@ -532,19 +441,20 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
             <vaadin-menu-bar
               .items=${this.toolbarItems}
               @item-selected=${(event: MenuBarItemSelectedEvent) => {
-                this.toolbarItemSelected(event.detail?.value?.text || '');
-              }}
+        this.toolbarItemSelected(event.detail?.value?.text || '');
+      }}
             ></vaadin-menu-bar>
           </div>
         </deck-header>
-        ${this.userDeck?.youtube_link
-          ? this.renderEmbed(this.userDeck?.youtube_link)
-          : html``}
+        
+        ${this.deckRecord?.youtubeLink
+        ? this.renderEmbed(this.deckRecord?.youtubeLink as string)
+        : html``}
         <vaadin-tabs
           @selected-changed=${(e: TabsSelectedChangedEvent) => {
-            const tabIndex = e.detail.value;
-            this.selectedTabIndex = tabIndex;
-          }}
+        const tabIndex = e.detail.value;
+        this.selectedTabIndex = tabIndex;
+      }}
         >
           <vaadin-tab>Deck</vaadin-tab>
           <vaadin-tab>Report</vaadin-tab>
@@ -593,16 +503,16 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
         () =>
           html` <vaadin-button
               @click="${() => {
-                this.closeYoutubeDialog();
-              }}"
+              this.closeYoutubeDialog();
+            }}"
               .disabled="${this.actionHappening}"
               >Close</vaadin-button
             >
             <vaadin-button
               theme="primary"
               @click="${() => {
-                this.saveYoutubeLink(this.youtubeLink || '');
-              }}"
+              this.saveYoutubeLink(this.youtubeLink || '');
+            }}"
               .disabled="${this.actionHappening}"
               >Save</vaadin-button
             >`,
@@ -614,27 +524,10 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   async saveYoutubeLink(link: string) {
     try {
       this.actionHappening = true;
-      const user = this.loggedInUser;
 
-      if (!user) {
-        return;
-      }
-
-      const headers = new Headers();
-      headers.append('Authorization', `Bearer ${await user.getIdToken()}`);
-
-      const response = await fetch(`${BASE_URL}/setYoutubeLink`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          deckId: this.userDeck?.id,
-          youtubeLink: link,
-        }),
+      await DeckDatabaseAdapter.updateDeck(this.deckRecord?.id as number, {
+        youtubeLink: link
       });
-
-      if (!response?.ok) {
-        throw new Error('Error saving youtube link');
-      }
 
       notificationService.instance?.addNotification({
         content: 'Youtube link saved, refreshing...',
@@ -667,66 +560,7 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
     this.actionHappening = false;
   }
 
-  async vote(_itemId: string, _userId: string): Promise<void> {
-    /*
-    const db = FirebaseService.db;
-    this.actionHappening = true;
-    try {
-      // Check if the user has already voted on the item
-      const userVoteDoc = doc(db, `decks/${itemId}/user_votes/${userId}`);
 
-      if (!this.loggedInUser) {
-        console.log('User not logged in');
-        notificationService.instance?.addNotification({
-          content: 'Please log in to vote',
-          theme: 'error',
-          duration: 5000,
-        });
-        return;
-      }
-
-      const voteDocSnapshot = await getDoc(userVoteDoc);
-
-      if (voteDocSnapshot.exists()) {
-        console.log('User has already voted on this deck.');
-        notificationService.instance?.addNotification({
-          content: 'Already voted on this deck',
-          theme: 'error',
-          duration: 5000,
-        });
-        return;
-      }
-
-      await setDoc(userVoteDoc, {
-        voted: true,
-      });
-
-      console.log('Vote added successfully.');
-
-      this.voteCount += 1;
-
-      this.requestUpdate();
-
-      notificationService.instance?.addNotification({
-        content: 'Vote added successfully',
-        theme: 'success',
-        duration: 5000,
-      });
-    } catch (error) {
-      console.log(`Error voting: ${(error as any)?.message}`);
-
-      notificationService.instance?.addNotification({
-        content: 'Unable to add vote',
-        theme: 'error',
-        duration: 5000,
-      });
-    } finally {
-      setTimeout(() => {
-        this.actionHappening = false;
-      }, 1000);
-    }
-  }
-  */
 }
 
 declare global {
