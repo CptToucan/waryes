@@ -1,7 +1,7 @@
 import { Router } from "@vaadin/router";
 import { notificationService } from "../services/notification";
 
-export function viewDeckCode(deckCode: string, copiedFrom?: string, userDeckId?: string, edit?: boolean) {
+export function viewDeckCode(deckCode: string, copiedFrom?: string, userDeckId?: number, edit?: boolean) {
   if(deckCode) {
 
     let searchParams = `?code=${encodeURIComponent(deckCode)}`;

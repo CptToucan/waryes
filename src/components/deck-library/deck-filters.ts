@@ -1,14 +1,12 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import '@vaadin/multi-select-combo-box';
-import {Tag, tags} from '../../types/tags';
 import {Division} from '../../types/deck-builder';
 import type {ComboBoxLitRenderer} from '@vaadin/combo-box/lit.js';
 import {comboBoxRenderer} from '@vaadin/combo-box/lit.js';
 import '../division-flag';
 import type {FormLayoutResponsiveStep} from '@vaadin/form-layout';
 import '@vaadin/form-layout';
-import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
 import {ComboBoxValueChangedEvent} from '@vaadin/combo-box';
 import {CheckboxCheckedChangedEvent} from '@vaadin/checkbox';
 import { BucketFolder, BundleManagerService } from '../../services/bundle-manager';
@@ -40,8 +38,6 @@ export class DeckFilters extends LitElement {
   @state()
   private divisions: Division[] = [];
 
-  @property()
-  private selectedTags: Tag[] = [];
 
   @property()
   private selectedDivision?: Division | null;
@@ -87,7 +83,6 @@ export class DeckFilters extends LitElement {
     this.dispatchEvent(
       new CustomEvent('filters-changed', {
         detail: {
-          tags: this.selectedTags,
           division: this.selectedDivision,
           pro: this.pro,
         },
@@ -96,7 +91,6 @@ export class DeckFilters extends LitElement {
   }
 
   clear() {
-    this.selectedTags = [];
     this.selectedDivision = null;
     this.pro = false;
 
@@ -118,16 +112,6 @@ export class DeckFilters extends LitElement {
           .checked=${this.pro}
           label="Pro"
         ></vaadin-checkbox>
-        <vaadin-multi-select-combo-box
-          colspan="2"
-          label="Tags"
-          .items=${tags}
-          .clearButtonVisible=${true}
-          .selectedItems=${this.selectedTags}
-          @selected-items-changed=${(
-            e: MultiSelectComboBoxSelectedItemsChangedEvent<Tag>
-          ) => (this.selectedTags = e.detail.value)}
-        ></vaadin-multi-select-combo-box>
         <vaadin-combo-box
           colspan="2"
           label="Division"

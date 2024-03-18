@@ -13,7 +13,7 @@ import {getDeckShareUrl} from '../../utils/get-deck-share-url';
 import './upload-deck';
 import {exportDeckToCode} from '../../utils/export-deck-to-code';
 import {Router} from '@vaadin/router';
-import {updateDeckToFirebase} from '../../utils/update-deck-to-firebase';
+import {updateDeckToDatabase} from '../../utils/update-deck-to-database';
 import {DetailsOpenedChangedEvent} from '@vaadin/details';
 import {FirebaseService} from '../../services/firebase';
 import {User} from 'firebase/auth';
@@ -159,7 +159,7 @@ export class DeckView extends LitElement {
   uploading = false;
 
   @property()
-  userDeckId?: string;
+  userDeckId?: number;
 
   @state()
   openAreas: {
@@ -211,7 +211,7 @@ export class DeckView extends LitElement {
   async uploadDeck() {
     const deckCode = this.deck?.toDeckCode();
     if (this.userDeckId && deckCode) {
-      await updateDeckToFirebase(this.userDeckId, deckCode);
+      await updateDeckToDatabase(this.userDeckId, deckCode);
       Router.go(`/deck/${this.userDeckId}`);
     } else {
       try {

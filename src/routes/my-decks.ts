@@ -1,31 +1,24 @@
-import {User} from 'firebase/auth';
+import { User } from 'firebase/auth';
 import {
-  collection,
-  doc,
   DocumentData,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  updateDoc,
-  deleteDoc,
-  limit,
 } from 'firebase/firestore';
-import {css, html, LitElement, TemplateResult} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
-import {FirebaseService} from '../services/firebase';
-import {DivisionsMap} from '../types/deck-builder';
-import {UnitMap} from '../types/unit';
+import { css, html, LitElement, TemplateResult } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { FirebaseService } from '../services/firebase';
+import { DivisionsMap } from '../types/deck-builder';
+import { UnitMap } from '../types/unit';
 import '../components/deck-library/deck-list-item';
-import {TextFieldValueChangedEvent} from '@vaadin/text-field';
-import {Router} from '@vaadin/router';
+import { TextFieldValueChangedEvent } from '@vaadin/text-field';
+import { Router } from '@vaadin/router';
 import '@vaadin/confirm-dialog';
-import {ConfirmDialogOpenedChangedEvent} from '@vaadin/confirm-dialog';
-import {notificationService} from '../services/notification';
-import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
+import { ConfirmDialogOpenedChangedEvent } from '@vaadin/confirm-dialog';
+import { notificationService } from '../services/notification';
+import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import { DeckDatabaseAdapter, DeckRecord } from '../classes/DeckDatabaseAdapter';
 
-const TOTAL_ALLOWED_DECKS = 60;
-const BASE_URL = 'https://europe-west1-catur-11410.cloudfunctions.net';
+interface DecksByDivision {
+  [key: string]: DeckRecord[];
+}
 
 @customElement('my-decks-route')
 export class MyDecksRoute extends LitElement {
@@ -94,7 +87,6 @@ export class MyDecksRoute extends LitElement {
     `;
   }
 
-  @property()
   loggedInUser: User | null | undefined;
 
   userRecordData?: DocumentData | null;
@@ -102,10 +94,8 @@ export class MyDecksRoute extends LitElement {
   @property()
   decks: DocumentData[] | null = null;
 
-  @property()
-  decksByDivision?: {
-    [key: string]: DocumentData[];
-  };
+  @property({ type: Object })
+  decksByDivision?: DecksByDivision;
 
   @property()
   deckNames?: {
@@ -123,78 +113,28 @@ export class MyDecksRoute extends LitElement {
   };
 
   @state()
-  deckToDelete: DocumentData | null = null;
+  deckToDelete: DeckRecord | null = null;
 
   @state()
-  private _numberOfDecks = 0;
-  public get numberOfDecks() {
-    return this._numberOfDecks;
-  }
-  public set numberOfDecks(value) {
-    this._numberOfDecks = value;
-  }
+  private numberOfDecks = 0;
+
+  @state()
+  private totalAllowedDecks = 0;
+
 
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
 
+
+
+
+
   async onBeforeEnter() {
     FirebaseService.auth?.onAuthStateChanged(async (user) => {
       try {
-        
         this.loggedInUser = user;
+        await this.loadUserDecks();
 
-        if (
-          this.loggedInUser !== null &&
-          this.loggedInUser?.uid &&
-          !this.decksByDivision
-        ) {
-          
-          const deckCollection = collection(FirebaseService.db, 'decks');
-          const q =  query(deckCollection, where('created_by', '==', this.loggedInUser?.uid), limit(TOTAL_ALLOWED_DECKS));
-          const decksResponse = await getDocs(q); 
-          const decks:DocumentData[] = [];
-
-          decksResponse.forEach((deck) => {
-            const deckData = deck.data();
-            if (deckData) {
-              decks.push(deck);
-            }
-          });
-
-
-
-          this.decks = decks;
-          this.numberOfDecks = this.decks?.length || 0;
-
-          const userDeckCollection = collection(FirebaseService.db, 'user_decks');
-          const userDeckSnap = await getDoc(
-            doc(userDeckCollection, this.loggedInUser?.uid)
-          );
-
-          this.deckNames = userDeckSnap?.data()?.deckNames || {};
-
-          // group decks by division
-          this.decksByDivision = this.decks.reduce((acc, deck) => {
-            const division = deck.data()?.division;
-            if (!acc[division]) {
-              acc[division] = [];
-            }
-            acc[division].push(deck);
-            return acc;
-          }, {});
-
-          // get user record
-          const userRecord = await getDoc(
-            doc(FirebaseService.db, 'users', this.loggedInUser?.uid)
-          );
-           
-          // set the record if it exists
-          if (userRecord.exists()) {
-            this.userRecordData = userRecord.data();
-          }
-
-        }
-        
       } catch (error) {
         console.error(error);
       }
@@ -207,6 +147,23 @@ export class MyDecksRoute extends LitElement {
 
     this.unitMap = units;
     this.divisionsMap = divisions;
+  }
+
+  private async loadUserDecks() {
+    const response = await DeckDatabaseAdapter.getUserDecks();
+    this.totalAllowedDecks = response.meta.totalAllowedDecks;
+    this.numberOfDecks = response.meta.totalDecks;
+
+    const decksByDivision: DecksByDivision = {};
+    for (const deck of response.data) {
+      const division = deck.division;
+      if (!decksByDivision[division]) {
+        decksByDivision[division] = [];
+      }
+      decksByDivision[division].push(deck);
+    }
+
+    this.decksByDivision = decksByDivision;
   }
 
   /**
@@ -247,58 +204,25 @@ export class MyDecksRoute extends LitElement {
     return divisionMap;
   }
 
-  async saveDeckName(deckId: string, name = '') {
+  async saveDeckName(_deckId: number, _name = '') {
     // Saves the deck name to the user's deck names
 
-    const deckCollection = collection(FirebaseService.db, 'user_decks');
-    const deckDoc = doc(deckCollection, this.loggedInUser?.uid);
-    const deckSnap = await getDoc(deckDoc);
-    const userDeckData = deckSnap.data();
-    const deckNames = userDeckData?.deckNames || {};
-
-    const headers = new Headers();
-    headers.append('Authorization', `Bearer ${await this.loggedInUser?.getIdToken()}`);
-
-    const promisesToWaitFor = [];
-
-    // if user is content creator or pro
-    if(this.userRecordData?.is_content_creator || this.userRecordData?.is_pro) {
-      const cloudFunctionResponse = await fetch(`${BASE_URL}/editDeckName`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          deckId,
-          name
-        }),
-      });
-
-      promisesToWaitFor.push(cloudFunctionResponse);
-    }
-
-
-    const updateDocResponse = await updateDoc(deckDoc, {
-      deckNames: {
-        ...deckNames,
-        [deckId]: name,
-      },
+    await DeckDatabaseAdapter.updateDeck(_deckId, {
+      name: _name,
     });
-
-    promisesToWaitFor.push(updateDocResponse);
-
-    deckNames[deckId] = name;
 
     this.nameStates = {
       ...this.nameStates,
-      [deckId]: name,
+      [_deckId]: _name,
     };
 
     this.editStates = {
       ...this.editStates,
-      [deckId]: false,
+      [_deckId]: false,
     };
   }
 
-  editDeckName(deckId: string) {
+  editDeckName(deckId: number) {
     this.editStates = {
       ...this.editStates,
       [deckId]: true,
@@ -310,31 +234,18 @@ export class MyDecksRoute extends LitElement {
    * @param deckId
    * @returns
    */
-  async deleteDeck(deckId: string) {
+  async deleteDeck(_deckId: number) {
     try {
-      const deckCollection = collection(FirebaseService.db, 'decks');
-      const deckDoc = doc(deckCollection, deckId);
-      await deleteDoc(deckDoc);
+      await DeckDatabaseAdapter.deleteDeck(_deckId);
+      await this.loadUserDecks();
 
       notificationService.instance?.addNotification({
         duration: 3000,
         content: 'Deck deleted',
         theme: '',
       });
-
-      for (const division in this.decksByDivision) {
-        const divisionDecks = this.decksByDivision[division];
-
-        // remove the deck with the id from the divisionDecks
-        const newDivisionDecks = divisionDecks.filter(
-          (deck) => deck.id !== deckId
-        );
-        this.decksByDivision[division] = newDivisionDecks;
-      }
-
-      this.numberOfDecks--;
-      this.requestUpdate();
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
       notificationService.instance?.addNotification({
         duration: 3000,
@@ -359,27 +270,27 @@ export class MyDecksRoute extends LitElement {
 
     return html`
       <div class="page">
-        <h2>My Decks ${this.numberOfDecks}/${TOTAL_ALLOWED_DECKS}</h2>
+        <h2>My Decks ${this.numberOfDecks}/${this.totalAllowedDecks}</h2>
         <div
           >Changed deck names will only be visible to you for organisation
           purposes, this is to prevent abuse.</div>
         <div class="categories">
           ${divisionKeys.length === 0
-            ? html`<div style="margin: var(--lumo-space-l);">
+        ? html`<div style="margin: var(--lumo-space-l);">
                 No decks found, create one here:
                 <vaadin-button
                   theme="primary"
                   @click=${() => {
-                    Router.go('/deck-builder');
-                  }}
+            Router.go('/deck-builder');
+          }}
                   >Build deck</vaadin-button
                 >
               </div>`
-            : ''}
+        : ''}
           ${divisionKeys.map((divisionDescriptor) => {
-            const division = this.divisionsMap?.[divisionDescriptor];
+          const division = this.divisionsMap?.[divisionDescriptor];
 
-            return html`
+          return html`
               <div class="division">
                 <div class="division-title">
                   <division-flag .division=${division}></division-flag>
@@ -387,11 +298,10 @@ export class MyDecksRoute extends LitElement {
                 </div>
 
                 ${this.decksByDivision?.[divisionDescriptor].map((deck) => {
-                  const name = this.deckNames?.[deck.id] || deck.data().name;
+            const name = this.deckNames?.[deck.id] || deck.name;
 
-                  return html`
+            return html`
                     <deck-list-item
-                      .hideVotes=${true}
                       .deck=${deck}
                       .unitMap=${this.unitMap}
                       .divisionsMap=${this.divisionsMap}
@@ -401,43 +311,43 @@ export class MyDecksRoute extends LitElement {
                         style="width: 100%; display: flex; gap: var(--lumo-space-s); align-items: center;"
                       >
                         ${this.editStates?.[deck.id]
-                          ? html`<vaadin-text-field
+                ? html`<vaadin-text-field
                               theme="small"
                               value=${this.nameStates?.[deck.id] || name}
                               autofocus
                               @value-changed=${(
-                                e: TextFieldValueChangedEvent
-                              ) => {
-                                this.nameStates = {
-                                  ...this.nameStates,
-                                  [deck.id]: e.detail.value,
-                                };
-                              }}
+                  e: TextFieldValueChangedEvent
+                ) => {
+                    this.nameStates = {
+                      ...this.nameStates,
+                      [deck.id]: e.detail.value,
+                    };
+                  }}
                               @keydown=${(e: KeyboardEvent) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  this.saveDeckName(
-                                    deck.id,
-                                    this.nameStates?.[deck.id]
-                                  );
-                                }
-                              }}
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      this.saveDeckName(
+                        deck.id,
+                        this.nameStates?.[deck.id]
+                      );
+                    }
+                  }}
                             ></vaadin-text-field>`
-                          : html`<div
+                : html`<div
                               style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex: 1 1 auto;"
-                              >${deck.data().public ? 'PUBLIC ' : ''}${this
-                                .nameStates?.[deck.id] || name}</div>`}
+                              >${deck.public ? 'PUBLIC ' : ''}${this
+                    .nameStates?.[deck.id] || name}</div>`}
                         ${this?.editStates?.[deck.id]
-                          ? html`<vaadin-button
+                ? html`<vaadin-button
                               theme="icon small tertiary"
                               @click=${() =>
-                                this.saveDeckName(
-                                  deck.id,
-                                  this.nameStates?.[deck.id]
-                                )}
+                    this.saveDeckName(
+                      deck.id,
+                      this.nameStates?.[deck.id]
+                    )}
                               ><vaadin-icon icon="lumo:checkmark"></vaadin-icon
                             ></vaadin-button>`
-                          : html`<vaadin-button
+                : html`<vaadin-button
                               theme="icon small tertiary"
                               @click=${() => this.editDeckName(deck.id)}
                               ><vaadin-icon icon="vaadin:edit"></vaadin-icon
@@ -447,18 +357,18 @@ export class MyDecksRoute extends LitElement {
                         slot="buttons"
                         theme="primary small error"
                         @click=${() => {
-                          this.deckToDelete = deck;
-                        }}
+                this.deckToDelete = deck;
+              }}
                       >
                         Delete
                       </vaadin-button>
                     </deck-list-item>
                   `;
-                })}
+          })}
               </div>
             </div>
           `;
-          })}
+        })}
         </div>
       </div>
 
@@ -469,19 +379,19 @@ export class MyDecksRoute extends LitElement {
         confirm-theme="error primary"
         .opened=${this.deckToDelete != null}
         @opened-changed=${(e: ConfirmDialogOpenedChangedEvent) => {
-          if (!e.detail.value) {
-            this.deckToDelete = null;
-          }
-        }}
-        @confirm="${() => {
-          this.deleteDeck(this.deckToDelete?.id);
-        }}"
-        @cancel="${() => {
+        if (!e.detail.value) {
           this.deckToDelete = null;
-        }}"
+        }
+      }}
+        @confirm="${() => {
+        this.deleteDeck(this?.deckToDelete!.id);
+      }}"
+        @cancel="${() => {
+        this.deckToDelete = null;
+      }}"
       >
         Are you sure you want to delete
-        ${this?.deckToDelete?.data().name || 'this deck'}?
+        ${this?.deckToDelete?.name || 'this deck'}?
       </vaadin-confirm-dialog>
     `;
   }

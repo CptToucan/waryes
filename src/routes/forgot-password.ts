@@ -56,7 +56,7 @@ export class ForgotPasswordRoute extends LitElement {
       });
     }
     catch(err) {
-      console.log(err);
+      console.error(err);
       notificationService.instance?.addNotification({
         content: "Unable to reset password",
         theme: "error",

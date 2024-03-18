@@ -60,7 +60,7 @@ export class ProgressBar extends LitElement {
 
   render() {
     const band = this.banding.find(b => this.percent >= b.percent);
-    // console.log(this.percent);
+
     return html`
       <div class="progress ${band?.class}" style="width: calc(${this.percent}% - 4px);}"></div>
     `;

@@ -1,17 +1,12 @@
-import { doc, Timestamp, updateDoc} from 'firebase/firestore';
-import { FirebaseService } from "../services/firebase";
+import { DeckDatabaseAdapter } from "../classes/DeckDatabaseAdapter";
 import { notificationService } from '../services/notification';
 
-export async function updateDeckToFirebase(deckId: string, newDeckCode?: string, isPublic?: boolean) {
-  const deckRef = doc(FirebaseService.db, 'decks', deckId);
+export async function updateDeckToDatabase(deckId: number, newDeckCode?: string, isPublic?: boolean) {
 
   const updateProperties: {
-    updated: Timestamp,
     code?: string,
     public?: boolean,
-  } = {
-    updated: Timestamp.fromDate(new Date()),
-  }
+  } = {};
 
   if(newDeckCode) {
     updateProperties['code'] = newDeckCode;
@@ -21,9 +16,8 @@ export async function updateDeckToFirebase(deckId: string, newDeckCode?: string,
     updateProperties['public'] = isPublic;
   }
 
-
   try {
-    await updateDoc(deckRef, updateProperties);
+    await DeckDatabaseAdapter.updateDeck(deckId, updateProperties);
     
     notificationService.instance?.addNotification({
       content: 'Deck updated successfully',
