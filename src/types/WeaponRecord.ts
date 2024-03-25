@@ -247,6 +247,20 @@ export class WeaponRecord {
       weapon.smokeProperties?.radius,
       FieldType.DISTANCE
     );
+
+    this.dispersionAtMinRange = new RecordField(
+      'dispersionAtMinRange',
+      'Dispersion at min range',
+      weapon.dispersionAtMinRange,
+      FieldType.DISTANCE
+    );
+
+    this.dispersionAtMaxRange = new RecordField(
+      'dispersionAtMaxRange',
+      'Dispersion at max range',
+      weapon.dispersionAtMaxRange,
+      FieldType.DISTANCE
+    );
     
   }
 
@@ -290,6 +304,8 @@ export class WeaponRecord {
   smokeAltitude: RecordField<number | undefined>;
   smokeLifeSpan: RecordField<number | undefined>;
   smokeRadius: RecordField<number | undefined>;
+  dispersionAtMaxRange: RecordField<number| undefined>;
+  dispersionAtMinRange: RecordField<number | undefined>;
 
   getFields(): RecordField<unknown>[] {
     const fields: string[] = Object.getOwnPropertyNames(this);
