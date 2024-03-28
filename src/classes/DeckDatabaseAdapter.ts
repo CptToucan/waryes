@@ -74,7 +74,7 @@ export interface DeckUpdateRequestBody {
 }
 
 export class DeckDatabaseAdapter {
-  static apiUrl: string = "http://localhost:8090/api";
+  static apiUrl: string = `${process.env.API_URL}`;
 
   static async createDeck(deckData: DeckCreateRequestBody): Promise<DeckCreateApiResponse> {
 

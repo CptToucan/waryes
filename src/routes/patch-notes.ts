@@ -12,20 +12,15 @@ import { PatchUnitRecord } from '../types/PatchUnitRecord';
 import { RecordField } from '../types/RecordField';
 import { getIconForTrait } from '../utils/get-icon-for-trait';
 import {
-  collection,
-  orderBy,
-  limit,
-  query,
-  getDocs,
   Timestamp,
 } from 'firebase/firestore';
-import { FirebaseService } from '../services/firebase';
 import '@vaadin/combo-box';
 import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
 import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 import { Division, DivisionsMap } from '../types/deck-builder';
 import { UnitRecord } from '../types/UnitRecord';
 import { Deck } from '../classes/deck';
+import { PatchDatabaseAdapter, PatchRecord } from '../classes/PatchDatabaseAdapter';
 
 interface Diff {
   __old: unknown;
@@ -222,7 +217,7 @@ export class PatchNotesRoute extends LitElement {
   patchNotes?: PatchNoteTypes;
 
   @state()
-  patches?: FirebasePatchRecord[];
+  patches?: PatchRecord[];
 
   @state()
   divisionsMap?: DivisionsMap;
@@ -237,42 +232,26 @@ export class PatchNotesRoute extends LitElement {
   viewMode: ViewMode = ViewMode.DIVISION;
 
   @state()
-  selectedPatch?: FirebasePatchRecord;
+  selectedPatch?: PatchRecord;
 
   async onBeforeEnter() {
     // fetch patch notes from host
-
-    // query firebase for patch
-    const q = query(
-      collection(FirebaseService.db, 'patches'),
-      orderBy('created', 'desc'),
-      limit(10)
-    );
-
-    const querySnapshot = await getDocs(q);
-
-    const patches = (
-      querySnapshot.docs.map((doc) => doc.data()) as FirebasePatchRecord[]
-    ).filter((patch) => patch.hidden !== true);
-
+    const patches = await PatchDatabaseAdapter.findAll();
     this.patches = patches;
-
+    const latestPatch = patches[0];
+    this.selectedPatch = latestPatch;
     await this.setupPatch(patches[0]);
   }
 
-  async setupPatch(firebasePatchRecord: FirebasePatchRecord) {
+  async setupPatch(patchRecord: PatchRecord) {
     let patchNotesUnitJson;
     let patchNotesDivisionJson;
 
-    if (firebasePatchRecord.path) {
-      const result = await BundleManagerService.getJsonFromStoragePath<any>(
-        firebasePatchRecord.path
-      );
-      patchNotesUnitJson = result.unitStats;
-      patchNotesDivisionJson = result.unitAvailability;
-    } else if (firebasePatchRecord.data) {
-      patchNotesUnitJson = JSON.parse(firebasePatchRecord.data);
-    }
+    // parse blob to json
+    const patchRecordJson = await PatchDatabaseAdapter.fetchPatchFile(patchRecord.name);
+
+    patchNotesUnitJson = patchRecordJson.unitStats;
+    patchNotesDivisionJson = patchRecordJson.unitAvailability;
 
     const units = await BundleManagerService.getUnitsForBucket(
       BucketFolder.WARNO
@@ -458,7 +437,7 @@ export class PatchNotesRoute extends LitElement {
       return -1;
     });
 
-    this.selectedPatch = firebasePatchRecord;
+    this.selectedPatch = patchRecord;
     this.patchNotes = patchNotes;
     this.patchNotesByDivision = divisionUnitMap;
   }
@@ -489,7 +468,7 @@ export class PatchNotesRoute extends LitElement {
                 .items=${this.patches}
                 .selectedItem=${this.selectedPatch}
                 @selected-item-changed=${(
-        e: ComboBoxSelectedItemChangedEvent<FirebasePatchRecord>
+        e: ComboBoxSelectedItemChangedEvent<PatchRecord>
       ) => {
           if (e.detail.value) {
             this.setupPatch(e.detail.value);

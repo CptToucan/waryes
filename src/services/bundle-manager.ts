@@ -1,19 +1,16 @@
-import {getStorage, ref, getBlob} from 'firebase/storage';
-import {Division} from '../types/deck-builder';
-import {Unit, Weapon} from '../types/unit';
-import {FirebaseService} from './firebase';
-import {isSpecialtyCommand} from '../utils/is-specialty-command';
-import {isSpecialtyRecon} from '../utils/is-specialty-recon';
-import {FamilyIndexTuple, TerrainResistance} from '../types/damageTable';
+import { Division } from '../types/deck-builder';
+import { Unit, Weapon } from '../types/unit';
+import { isSpecialtyCommand } from '../utils/is-specialty-command';
+import { isSpecialtyRecon } from '../utils/is-specialty-recon';
+import { FamilyIndexTuple, TerrainResistance } from '../types/damageTable';
+import { PatchDatabaseAdapter, PatchRecord } from '../classes/PatchDatabaseAdapter';
 
 export enum BucketFolder {
-  WARNO = 'warno',
-  FRAGO = 'frago',
-  WARNO_LET_LOOSE = 'warno-let-loose',
+  WARNO = 'warno'
 }
 
 export enum BucketType {
-  UNITS_AND_DIVISIONS = 'units-and-divisions.json',
+  UNITS_AND_DIVISIONS = 'warno.json',
   DAMAGE_TABLE = 'damageTable.json',
 }
 
@@ -22,15 +19,15 @@ export type DamageTable = {
   resistanceFamilyWithIndexes: FamilyIndexTuple[] | null;
   damageTable: number[][] | null;
   terrainResistances:
-    | {
-        name: string;
-        damageFamilies: TerrainResistance[];
-      }[]
-    | null;
+  | {
+    name: string;
+    damageFamilies: TerrainResistance[];
+  }[]
+  | null;
   defaultSuppressDamage: FamilyIndexTuple | null;
   suppressionDamageExceptions:
-    | {exception: string; suppression: FamilyIndexTuple}[]
-    | null;
+  | { exception: string; suppression: FamilyIndexTuple }[]
+  | null;
   armorToignoreForDamageFamilies: string[] | null;
 };
 
@@ -43,20 +40,6 @@ type BundleMap = {
     };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [BucketType.DAMAGE_TABLE]: DamageTable;
-  };
-  [BucketFolder.FRAGO]: {
-    [BucketType.UNITS_AND_DIVISIONS]: {
-      units: Unit[] | null;
-      divisions: Division[] | null;
-      weapons: Weapon[] | null;
-    };
-  };
-  [BucketFolder.WARNO_LET_LOOSE]: {
-    [BucketType.UNITS_AND_DIVISIONS]: {
-      units: Unit[] | null;
-      divisions: Division[] | null;
-      weapons: Weapon[] | null;
-    };
   };
 };
 
@@ -71,7 +54,9 @@ type UnitDivisionJsonBundle = {
 class BundleManager {
   initialised = false;
 
-  config: {[key in BucketFolder]: boolean} | null = null;
+  latestPatch?: PatchRecord;
+
+  config: { [key in BucketFolder]: boolean } | null = null;
 
   setConfig(mod: BucketFolder, enabled: boolean): void {
     const currentMods = localStorage.getItem('mods');
@@ -82,8 +67,6 @@ class BundleManager {
     } else {
       const mods = {
         [BucketFolder.WARNO]: true,
-        [BucketFolder.FRAGO]: false,
-        [BucketFolder.WARNO_LET_LOOSE]: false,
       };
       mods[mod] = enabled;
       localStorage.setItem('mods', JSON.stringify(mods));
@@ -101,8 +84,6 @@ class BundleManager {
   public loadConfig() {
     this.config = {
       [BucketFolder.WARNO]: true,
-      [BucketFolder.FRAGO]: false,
-      [BucketFolder.WARNO_LET_LOOSE]: false,
     };
 
     localStorage.setItem('mods', JSON.stringify(this.config));
@@ -114,38 +95,40 @@ class BundleManager {
     }
     this.loadConfig();
 
-    const unitDivisions = await Promise.all([
-      this.getBundleFor<UnitDivisionJsonBundle>(
+    try {
+      const latestPatch = await PatchDatabaseAdapter.latest();
+      console.log(latestPatch);
+
+      if(!latestPatch) {
+        throw new Error('No latest patch found');
+      }
+
+      this.latestPatch = latestPatch;
+
+      const latestPatchName = latestPatch.name;
+
+      const unitDivisions = await this.getBundleFor<UnitDivisionJsonBundle>(
         BucketFolder.WARNO,
-        BucketType.UNITS_AND_DIVISIONS
-      ),
-      this.getBundleFor<UnitDivisionJsonBundle>(
-        BucketFolder.FRAGO,
-        BucketType.UNITS_AND_DIVISIONS
-      ),
-      this.getBundleFor<UnitDivisionJsonBundle>(
-        BucketFolder.WARNO_LET_LOOSE,
-        BucketType.UNITS_AND_DIVISIONS
-      ),
-    ]);
+        BucketType.UNITS_AND_DIVISIONS,
+        latestPatchName
+      );
 
-    const damageTable = await this.getBundleFor<DamageTable>(
-      BucketFolder.WARNO,
-      BucketType.DAMAGE_TABLE
-    );
-    this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
-    // Warno
-    this.initialiseBucket(unitDivisions[0], BucketFolder.WARNO);
+      const damageTable = await this.getBundleFor<DamageTable>(
+        BucketFolder.WARNO,
+        BucketType.DAMAGE_TABLE,
+        latestPatchName
+      );
 
-    if (this.config?.[BucketFolder.FRAGO]) {
-      this.initialiseBucket(unitDivisions[1], BucketFolder.FRAGO);
+      this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
+      // Warno
+      this.initialiseBucket(unitDivisions, BucketFolder.WARNO);
+
+      this.initialised = true;
+    }
+    catch (err) {
+      console.error(err);
     }
 
-    if (this.config?.[BucketFolder.WARNO_LET_LOOSE]) {
-      this.initialiseBucket(unitDivisions[2], BucketFolder.WARNO_LET_LOOSE);
-    }
-
-    this.initialised = true;
   }
 
   initialiseBucket(
@@ -201,12 +184,7 @@ class BundleManager {
     await this.initialise();
     return [
       ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
-        .units || []),
-      ...(this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS]
-        .units || []),
-      ...(this.bundles[BucketFolder.WARNO_LET_LOOSE][
-        BucketType.UNITS_AND_DIVISIONS
-      ].units || []),
+        .units || [])
     ];
   }
 
@@ -220,11 +198,6 @@ class BundleManager {
     return [
       ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
         .divisions || []),
-      ...(this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS]
-        .divisions || []),
-      ...(this.bundles[BucketFolder.WARNO_LET_LOOSE][
-        BucketType.UNITS_AND_DIVISIONS
-      ].divisions || []),
     ];
   }
 
@@ -237,12 +210,7 @@ class BundleManager {
     await this.initialise();
     return [
       ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
-        .weapons || []),
-      ...(this.bundles[BucketFolder.FRAGO][BucketType.UNITS_AND_DIVISIONS]
-        .weapons || []),
-      ...(this.bundles[BucketFolder.WARNO_LET_LOOSE][
-        BucketType.UNITS_AND_DIVISIONS
-      ].weapons || []),
+        .weapons || [])
     ];
   }
 
@@ -252,24 +220,18 @@ class BundleManager {
   }
 
   async getBundleFor<T>(
-    bundleFolder: BucketFolder,
-    bundleType: BucketType
+    _bundleFolder: BucketFolder,
+    bundleType: BucketType,
+    version: string
   ): Promise<T> {
-    const storage = getStorage(FirebaseService.app);
-    const jsonBlob = await getBlob(
-      ref(storage, `${bundleFolder}/${bundleType}`)
-    );
-    const jsonBlobStr = await jsonBlob.text();
-    const jsonData = JSON.parse(jsonBlobStr);
 
-    return jsonData;
+    return await this.getJsonFromStoragePath<T>(`${version}/${bundleType}`);
   }
 
   async getJsonFromStoragePath<T>(path: string): Promise<T> {
-    const storage = getStorage(FirebaseService.app);
-    const jsonBlob = await getBlob(ref(storage, path));
-    const jsonBlobStr = await jsonBlob.text();
-    const jsonData = JSON.parse(jsonBlobStr);
+
+    const response = await fetch(`${process.env.STATIC_URL}/${path}`);
+    const jsonData = await response.json();
     return jsonData;
   }
 
@@ -363,20 +325,6 @@ class BundleManager {
         defaultSuppressDamage: null,
         suppressionDamageExceptions: null,
         armorToignoreForDamageFamilies: null,
-      },
-    },
-    [BucketFolder.FRAGO]: {
-      [BucketType.UNITS_AND_DIVISIONS]: {
-        units: null,
-        divisions: null,
-        weapons: null,
-      },
-    },
-    [BucketFolder.WARNO_LET_LOOSE]: {
-      [BucketType.UNITS_AND_DIVISIONS]: {
-        units: null,
-        divisions: null,
-        weapons: null,
       },
     },
   };

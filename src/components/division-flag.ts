@@ -26,7 +26,6 @@ import ICON_SOV_27_YA from '../../images/divisions/27-ya.png';
 
 
 import { Division } from '../types/deck-builder';
-import { getDescriptorWithoutMod } from '../utils/get-descriptor-without-mod';
 
 const ICONS_DIVISION_MAP: {[key: string]: any} = {
     'Descriptor_Deck_Division_RDA_7_Panzer_multi': ICON_DDR_7_MOT,
@@ -81,13 +80,13 @@ export class DivisionFlag extends LitElement {
     let icon;
     let displayName;
     if (this.divisionId) {
-      const divisionId = getDescriptorWithoutMod(this.divisionId);
+      const divisionId = this.divisionId;
       icon = ICONS_DIVISION_MAP[divisionId];
       displayName = divisionId;
     }
 
     if(this.division) {
-      const divisionDescriptor = getDescriptorWithoutMod(this.division.descriptor);
+      const divisionDescriptor = this.division.descriptor;
       icon = divisionDescriptor ? ICONS_DIVISION_MAP[divisionDescriptor] : '';
       displayName = this.division?.name ?? this.division?.descriptor ?? 'invalid division'
     }

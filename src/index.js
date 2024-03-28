@@ -34,6 +34,7 @@ import "./routes/deck-drafter";
 import "./routes/deck-draft";
 import "./routes/damage-calculator";
 import "./routes/defcon2";
+import "./routes/upload-bundle";
 
 /** Components */
 import "./components/unit-card";

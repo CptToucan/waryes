@@ -34,10 +34,6 @@ export class ModImage extends LitElement {
       switch (mod) {
         case BucketFolder.WARNO:
           return WarnoImage;
-        case BucketFolder.FRAGO:
-          return FragoImage;
-        case BucketFolder.WARNO_LET_LOOSE:
-          return WarnoLetLooseImage;
         default:
           return '';
       }

@@ -17,7 +17,6 @@ import '../components/mod-image';
 import '../components/unit-search';
 import {Unit} from '../types/unit';
 import {Router} from '@vaadin/router';
-import '../components/mod-selector';
 
 @customElement('index-route')
 export class IndexRoute extends LitElement {

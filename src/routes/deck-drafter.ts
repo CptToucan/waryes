@@ -216,8 +216,6 @@ export class DeckDrafterRoute
   }
 
   render(): TemplateResult {
-    const serverSideDisabledButton =
-      this.disableDraftButton || !this.loggedInUser;
     const clientSideDisabledButton = this.disableDraftButton;
 
     let serverButtonText = 'Marshal Your Forces';
@@ -240,7 +238,7 @@ export class DeckDrafterRoute
       <div class="card center">
         <div class="header">
           <img src=${WaryesImage} alt="WarYes Logo" />
-          <div>Deck Draft <simple-chip>BETA</simple-chip></div>
+          <h2 style="margin: 0">Deck Draft</h2>
         </div>
         <div>
           <p>
@@ -257,18 +255,9 @@ export class DeckDrafterRoute
             Once you are done, you will be given the deck code which you can
             import in to the game.
           </p>
-          <p>
-            There are now 2 ways to run your draft, one is locally on your
-            computer (client side), the other is on a server (server side). The
-            client side mode is much faster than the server side mode, and you
-            do not need to be logged in to use it. There currently isn't really
-            any reason to use the server side mode, but it is there if you want
-            to.
-          </p>
         </div>
         <div class="button-container">
           <div class="button-with-label">
-            <div class="label">Client Side <simple-chip>NEW</simple-chip></div>
             <vaadin-button
               theme="primary large"
               ?disabled="${clientSideDisabledButton}"
@@ -277,18 +266,6 @@ export class DeckDrafterRoute
               }}"
             >
               ${clientButtonText}
-            </vaadin-button>
-          </div>
-          <div class="button-with-label">
-            Server Side
-            <vaadin-button
-              theme="large"
-              ?disabled="${serverSideDisabledButton}"
-              @click="${() => {
-                this.startServerDraft();
-              }}"
-            >
-              ${serverButtonText}
             </vaadin-button>
           </div>
         </div>

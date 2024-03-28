@@ -7,3 +7,4 @@ custom-elements.json
 dist
 .parcel-cache
 build
+.env

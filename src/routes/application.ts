@@ -11,11 +11,17 @@ import '@vaadin/icons';
 import '@vaadin/tabs';
 import '../components/notification-manager';
 import '../components/authenticated-menu';
+import { BeforeEnterObserver } from '@vaadin/router';
+import { BundleManagerService } from '../services/bundle-manager';
 
 @customElement('application-route')
-export class Application extends LitElement {
+export class Application extends LitElement implements BeforeEnterObserver {
 
   firebase: FirebaseServiceClass = FirebaseService;
+
+  async onBeforeEnter() {
+    await BundleManagerService.initialise();
+  }
   
 
   /**

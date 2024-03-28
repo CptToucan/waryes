@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const FileManagerPlugin = require('filemanager-webpack-plugin');
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const DotenvWebpackPlugin = require('dotenv-webpack');
 
 module.exports = {
   mode: 'development',
@@ -35,6 +36,7 @@ module.exports = {
   },
 
   plugins: [
+    new DotenvWebpackPlugin(),
     new NodePolyfillPlugin(),
     new HtmlWebpackPlugin({template: './src/index.html', hash: true, publicPath: '/'}),
     new CopyPlugin({patterns: [{from: "site-meta", to: "."}, {from: "images/units", to: "images/units/"}, {from: "images/weapons", to: "images/weapons/"}, {from: "images/maps", to: "images/maps/"}]}),
