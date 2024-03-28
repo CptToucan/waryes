@@ -1,7 +1,6 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
 import {Unit} from '../types/unit';
-import { getDescriptorWithoutMod } from '../utils/get-descriptor-without-mod';
 import { getIconsWithFallback } from '../utils/get-icons-with-fallback';
 
 @customElement('unit-image')
@@ -108,10 +107,7 @@ export class UnitImage extends LitElement {
   }
 
   generateSrc() {
-    let descriptorName = this._unit?.descriptorName || "";
-
-    descriptorName = getDescriptorWithoutMod(descriptorName)
-   
+    const descriptorName = this._unit?.descriptorName || "";
     return `/images/units/${descriptorName}.png`
   }
 }
