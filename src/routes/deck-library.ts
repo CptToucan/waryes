@@ -8,6 +8,7 @@ import '../components/deck-library/deck-filters';
 import '../components/pagination-controls';
 import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 import { DeckDatabaseAdapter } from '../classes/DeckDatabaseAdapter';
+import { LastPatchMixin } from '../mixins/last-patch';
 
 
 export type DeckLibraryItem = {
@@ -21,7 +22,7 @@ export type DeckLibraryItem = {
 };
 
 @customElement('deck-library-route')
-export class DeckLibraryRoute extends LitElement {
+export class DeckLibraryRoute extends LastPatchMixin(LitElement) {
   static get styles() {
     return css`
       .container {
@@ -110,7 +111,6 @@ export class DeckLibraryRoute extends LitElement {
 
   unitMap?: UnitMap;
   divisionsMap?: DivisionsMap;
-  lastPatchDate?: Date;
 
   @state()
   selectedTags: string[] = [];
@@ -162,15 +162,14 @@ export class DeckLibraryRoute extends LitElement {
   async onBeforeEnter() {
     this.unitMap = await this.fetchUnitMap();
 
-    const [units, divisions, lastPatch] = await Promise.all([
+    const [units, divisions] = await Promise.all([
       this.fetchUnitMap(),
       this.fetchDivisionMap(),
-      this.fetchLastPatch(),
+      this.fetchLastPatchDate(),
     ]);
 
     this.unitMap = units;
     this.divisionsMap = divisions;
-    this.lastPatchDate = lastPatch;
   }
 
 
@@ -209,9 +208,6 @@ export class DeckLibraryRoute extends LitElement {
     return divisionMap;
   }
 
-  async fetchLastPatch() {
-    return new Date();
-  }
 
   /**
    * Queries the database for decks based on the provided parameters.

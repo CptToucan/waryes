@@ -8,6 +8,7 @@ import {dialogRenderer} from '@vaadin/dialog/lit.js';
 import {LoginFormLoginEvent} from '@vaadin/login/vaadin-login-form';
 import { notificationService } from '../services/notification';
 import { Router } from '@vaadin/router';
+import { DeckDatabaseAdapter } from '../classes/DeckDatabaseAdapter';
 
 @customElement('user-settings-route')
 export class UserSettingsRoute extends LitElement {
@@ -61,6 +62,8 @@ export class UserSettingsRoute extends LitElement {
         event.detail.username,
         event.detail.password
       );
+
+      await DeckDatabaseAdapter.deleteUserDecks();
       await signInResponse.user.delete();
 
       notificationService.instance?.addNotification({
