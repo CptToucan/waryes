@@ -19,7 +19,6 @@ jobs:
       env:
         API_URL: https://war-yes.com/api
         STATIC_URL: https://war-yes.com/static
-    - run: npm run build
     - run: tar -czvf site.tar.gz dist/
 
     - name: Install SSH Key
