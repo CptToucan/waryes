@@ -139,6 +139,20 @@ export class DeckDatabaseAdapter {
     }
   }
 
+  static async deleteUserDecks(): Promise<void> {
+    const response = await fetch(`${DeckDatabaseAdapter.apiUrl}/deck/user/delete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${await getAuth().currentUser?.getIdToken()}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to delete user decks');
+    }
+  }
+
   static async getDecks(page: number, limit: number, query?: DeckQueryBody): Promise<DeckCollectionApiResponse> {
     let queryString = '';
     if (query) {

@@ -21,9 +21,10 @@ import '@vaadin/tooltip';
 import { DeckDatabaseAdapter, DeckRecord } from '../classes/DeckDatabaseAdapter';
 import { FirebaseService } from '../services/firebase';
 import { updateDeckToDatabase } from '../utils/update-deck-to-database';
+import { LastPatchMixin } from '../mixins/last-patch';
 
 @customElement('deck-view-route')
-export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
+export class DeckViewRoute extends LastPatchMixin(LitElement) implements BeforeEnterObserver {
   static get styles() {
     return css`
       .container {
@@ -152,8 +153,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   })
   deckRecord?: DeckRecord;
 
-  copyDeck?: any;
-
   @property()
   loggedInUser: User | null | undefined;
 
@@ -166,17 +165,13 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
   youtubeLinkDialogOpened = false;
 
   @property()
-  isOutdated = false;
+  isOutdated = true;
 
   @state()
   deckError = false;
 
   @state()
   selectedTabIndex = 0;
-
-  async fetchLastPatch() {
-    return new Date();
-  }
 
   async onBeforeEnter(location: RouterLocation) {
 
@@ -221,6 +216,9 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
       unitMap: units,
       divisions: availableDivisions,
     });
+
+    const lastPatchDate = await this.getLastPatchDate();
+    this.isOutdated = lastPatchDate > new Date(deck.updatedAt);
 
     this.deck = deckFromString;
   }
@@ -408,22 +406,6 @@ export class DeckViewRoute extends LitElement implements BeforeEnterObserver {
                 >
                   <h2>${this.deckRecord?.name}</h2>
                   
-
-                  ${this.copyDeck
-        ? html` <div
-                        style="display: flex; align-items: center; font-size: var(--lumo-font-size-s); overflow: hidden;"
-                      >
-                        Copied from:
-
-                        <a
-                          style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"
-                          href="/deck/${this.copyDeck?.id}"
-                          target="_blank"
-                        >
-                          ${this.copyDeck?.name}
-                        </a>
-                      </div>`
-        : ''}
                 </div>
                 ${this.isOutdated
         ? html` <vaadin-icon id="warning-icon" icon="vaadin:warning">
