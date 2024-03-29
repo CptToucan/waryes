@@ -298,7 +298,7 @@ export class MyDecksRoute extends LitElement {
                 </div>
 
                 ${this.decksByDivision?.[divisionDescriptor].map((deck) => {
-            const name = this.deckNames?.[deck.id] || deck.name;
+            const name = this.deckNames?.[deck.id] || deck.privateName;
 
             return html`
                     <deck-list-item
@@ -335,7 +335,7 @@ export class MyDecksRoute extends LitElement {
                             ></vaadin-text-field>`
                 : html`<div
                               style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden; flex: 1 1 auto;"
-                              >${deck.public ? 'PUBLIC ' : ''}${this
+                              >${deck.public ? 'PUBLIC ' : 'PRIVATE'}${this
                     .nameStates?.[deck.id] || name}</div>`}
                         ${this?.editStates?.[deck.id]
                 ? html`<vaadin-button

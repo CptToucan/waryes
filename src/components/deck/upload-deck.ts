@@ -45,7 +45,7 @@ export class UploadDeck extends LitElement {
     {minWidth: 0, columns: 1},
   ];
 
-  private async _uploadDeck(deckName: string) {
+  private async _uploadDeck() {
     const deck = this.deck;
     const selectedTags = this.selectedTags;
 
@@ -53,9 +53,7 @@ export class UploadDeck extends LitElement {
       try {
         const deckRef = await saveDeckToDatabase(
           deck,
-          deckName,
           selectedTags,
-          undefined,
           this.public
         );
         Router.go(`/deck/${deckRef?.data.id}`);
@@ -134,7 +132,7 @@ export class UploadDeck extends LitElement {
               >Cancel</vaadin-button
             ><vaadin-button
               theme="primary"
-              @click="${() => this._uploadDeck(deckName)}"
+              @click="${() => this._uploadDeck()}"
               .disabled=${tagsErrorMessage !== undefined}
               >Upload</vaadin-button
             >`,

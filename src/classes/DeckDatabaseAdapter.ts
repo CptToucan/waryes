@@ -3,6 +3,7 @@ import { getAuth } from "firebase/auth";
 export interface DeckRecord {
   id: number;
   name: string;
+  privateName?: string;
   code: string;
   public: boolean;
   tags: string | null;
@@ -15,20 +16,8 @@ export interface DeckRecord {
 }
 
 export interface DeckCreateRequestBody {
-  /*
-  tags: selectedTags.toString(),
-  division: deck.division.descriptor,
-  code: deck.toDeckCode(),
-  name: deckName,
-  creator: getAuth().currentUser?.uid,
-  copiedFrom: copiedDeckId,
-  public: isPublic,
-  */
-
   tags: string;
   code: string,
-  name: string;
-  copiedFrom: number;
   public: boolean;
 }
 
