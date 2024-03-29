@@ -3,7 +3,7 @@ import { notificationService } from "../services/notification";
 import { DeckDatabaseAdapter } from "../classes/DeckDatabaseAdapter";
 
 
-export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedTags: string[], copiedDeckId?: number, isPublic?: boolean) {
+export async function saveDeckToDatabase(deck: Deck, selectedTags: string[], isPublic?: boolean) {
   if(selectedTags.length > 5) {
     notificationService.instance?.addNotification({
       content: 'Too many tags',
@@ -30,8 +30,6 @@ export async function saveDeckToDatabase(deck: Deck, deckName: string, selectedT
         tags: selectedTags.toString(),
         division: deck.division.descriptor,
         code: deck.toDeckCode(),
-        name: deckName,
-        copiedFrom: copiedDeckId || 0,
         public: isPublic || false,
       };
 
