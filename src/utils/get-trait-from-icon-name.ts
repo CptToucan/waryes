@@ -55,10 +55,10 @@ const iconTraitMap: IconTraitMap = {
         name: "Reservist", range: 'N/A', 
         activationCondition: 'N/A', 
         effects: [
-            '+33% suppression',
-            '+10% aimtime',
-            '-10% static & motion accuracy',
-            '+10% reload time'
+            '+50% suppression',
+            '+20% aimtime',
+            '-5% static & motion accuracy',
+            '+15% reload time'
         ]
     },
     'trait-cqc':
@@ -142,6 +142,23 @@ const iconTraitMap: IconTraitMap = {
         name: "False-Flag", range: 'N/A', 
         activationCondition: 'N/A', 
         effects: ['dangerousness is 0, will be last unit auto-targeted']
+    },
+    'trait-ew':
+    {
+        icon: 'trait-ew',
+        name: "Electronic Warfare", range: '3533m', 
+        activationCondition: 'Artillery or recon with exceptional optics in range', 
+        effects: [
+            '-43 optical strength and removes GSR bonus if unit is recon',
+            '+50% dispersion if unit is artillery'
+        ]
+    },
+    'trait-jammer':
+    {
+        icon: 'trait-jammer',
+        name: "Jammer", range: '3533m', 
+        activationCondition: 'N/A', 
+        effects: ['-20% accuracy to enemy radar anti-air units'] 
     }
 }
 
