@@ -120,7 +120,7 @@ const iconTraitMap: IconTraitMap = {
         name: "Sniper", range: 'N/A', 
         activationCondition: 'Immobile for 10 seconds', 
         effects: [
-            '+0.5 dissimulation',
+            '+0.5 stealth',
             '+20% static accuracy',
             '+500% damage inflicted'
         ]
