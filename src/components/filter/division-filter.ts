@@ -108,6 +108,7 @@ export class DivisionFilter extends LitElement {
        <vaadin-combo-box
         .items=${this.divisions}
         .label=${this.showLabel ? 'Division' : ''}
+        placeholder=${this.showLabel ? "" : 'Select a division' }
         .itemLabelPath=${'name'}
         .itemValuePath=${'id'}
         .clearButtonVisible=${true}
@@ -123,6 +124,7 @@ export class DivisionFilter extends LitElement {
         colspan="2"
         .items=${this.divisions}
         .label=${this.showLabel ? 'Division' : ''}
+        placeholder=${this.showLabel ? "" : 'Select one or more divisions' }
         .itemLabelPath=${'name'}
         .itemValuePath=${'id'}
         .clearButtonVisible=${true}
