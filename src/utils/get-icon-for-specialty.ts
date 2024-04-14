@@ -21,6 +21,7 @@ export const iconMap: IconMap = {
   _era: 'trait-era',
   _falseflag: 'trait-false-flag',
   _electronic_warfare: 'trait-ew',
+  _jammer: 'trait-jammer',
   hq: 'command',
   hq_veh: 'command',
   hq_inf: 'command',

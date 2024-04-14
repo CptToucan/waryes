@@ -11,6 +11,8 @@ export function getIconForTrait(trait: string): TemplateResult {
 
   const tooltip = getTraitFromIconName(speciality)?.name; // will be null if not a trait
 
+  console.log(speciality);
+
   return html` <vaadin-icon
       id="${elementId}"
       icon="waryes:${icon}"
