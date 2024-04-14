@@ -28,7 +28,7 @@ const DROP_OFF = {
   DamageTypeEvolutionOverRangeDescriptor_DCA: 700,
 };
 
-const EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE = 20;
+const EXTRA_SUPPRESSION_DAMAGE_PER_DAMAGE = 0;
 const MAX_SUPPRESSION = 500;
 
 // bidirectional map

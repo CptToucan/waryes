@@ -424,7 +424,6 @@ export class DamageCalculatorRoute
           <div class="note">
             It DOES include:
             <ul>
-              <li>+20 suppression damage per HP loss.</li>
               <li>Missile travel time (only for missiles)</li>
             </ul>
           </div>
