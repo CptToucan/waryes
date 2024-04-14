@@ -67,6 +67,12 @@ export class DivisionAnalysisDisplay extends LitElement {
         gap: var(--lumo-space-m);
       }
 
+      @media (max-width: 800px) {
+        .side-by-side {
+          flex-direction: column;
+        }
+      }
+
       .side-by-side .section {
         flex: 1;
       }

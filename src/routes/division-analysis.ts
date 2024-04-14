@@ -153,8 +153,7 @@ export class DivisionAnalysisRoute
   availableDivisions: Division[] = [];
 
   @state()
-  selectedDivisionDescriptor?: string =
-    'Descriptor_Deck_Division_NATO_Garnison_Berlin_multi';
+  selectedDivisionDescriptor?: string;
 
   get selectedDivision() {
     return this.divisionsMap[this.selectedDivisionDescriptor ?? ''];
