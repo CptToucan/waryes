@@ -27,19 +27,26 @@ export class DivisionAnalysisRoute
       :host {
         display: flex;
         flex-direction: column;
-        gap: var(--lumo-space-m);
         position: relative;
         height: 100%;
         overflow: hidden;
+      }
+
+      h1,h2,h3 {
+        margin-top: var(--lumo-space-m);
+        margin-bottom: var(--lumo-space-m);
+        padding-left: var(--lumo-space-m);
+        padding-right: var(--lumo-space-m);
       }
 
       .container {
         display: grid;
         grid-template-columns: 40% 60%;
         justify-content: center;
-        height: 100%;
         box-sizing: border-box;
-        padding: var(--lumo-space-m);
+        padding-left: var(--lumo-space-m);
+        padding-right: var(--lumo-space-m);
+        padding-bottom: var(--lumo-space-m);
       }
 
       .division-selection {
@@ -71,6 +78,8 @@ export class DivisionAnalysisRoute
 
       .map-and-filter {
         margin-right: var(--lumo-space-m);
+        display: flex;
+        flex-direction: column;
       }
 
       button:hover {
@@ -120,7 +129,9 @@ export class DivisionAnalysisRoute
         overflow: auto;
       }
 
-
+      division-filter {
+        margin-bottom: var(--lumo-space-s);
+      }
 
       .mobile-only {
         display: none;
@@ -135,16 +146,12 @@ export class DivisionAnalysisRoute
           display: flex;
           flex-direction: column;
           justify-content: flex-start;
-
         }
 
         .mobile-only {
           display: block;
         }
-
       }
-
-
     `;
   }
 
@@ -209,6 +216,7 @@ export class DivisionAnalysisRoute
 
   render(): TemplateResult {
     return html`
+      <h1>Division Analysis</h1>
       <div class="container">
         <div class="map-and-filter">
           ${this.renderDivisionSelection()}

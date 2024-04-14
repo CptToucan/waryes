@@ -156,7 +156,7 @@ export class DivisionAnalysisDisplay extends LitElement {
       this.divisionAnalysis?.attributes.DivisionDescriptor;
 
     if (!divisionDescriptor) {
-      return html`<div>No division selected</div>`;
+      return html`<h3 class="section">Please select a division</h3>`;
     }
 
     const division = this.divisionsMap?.[divisionDescriptor];
