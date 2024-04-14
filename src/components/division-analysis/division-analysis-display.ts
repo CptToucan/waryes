@@ -81,6 +81,8 @@ export class DivisionAnalysisDisplay extends LitElement {
         display: flex;
         flex-direction: column;
         align-items: center;
+        text-decoration: none;
+        color: inherit;
       }
 
       .unit-container .information {
@@ -203,14 +205,14 @@ export class DivisionAnalysisDisplay extends LitElement {
           ${this.divisionAnalysis?.attributes.UnitDescriptors.map(
             (unitDescriptor) => {
               return html`
-                <div class="unit-container">
+                <a class="unit-container" href="/unit/${unitDescriptor.DescriptorId}">
                   <unit-image
                     .unit=${this.unitMap?.[unitDescriptor.DescriptorId]}
                   ></unit-image>
                   <div class="information">
                     <h5>${this.unitMap?.[unitDescriptor.DescriptorId].name}</h5>
                   </div>
-                </div>
+                </a>
               `;
             }
           )}
