@@ -32,14 +32,23 @@ html[theme~='dark'] {
   
   --warno-exceptional: rgb(117, 255, 255);
   --warno-exceptional-40pct: rgba(117, 255, 255, 0.4);
+  --warno-exceptional-20pct: rgba(117, 255, 255, 0.2);
+  
   --warno-good: rgb(127, 255, 117);
   --warno-good-40pct: rgba(127, 255, 117, 0.4);
+  --warno-good-20pct: rgba(127, 255, 117, 0.2);
+  
   --warno-average: rgb(233, 255, 117);
   --warno-average-40pct: rgba(233, 255, 117, 0.4);
+  --warno-average-20pct: rgba(233, 255, 117, 0.2);
+  
   --warno-bad: rgb(255, 168, 69);
   --warno-bad-40pct: rgba(255, 168, 69, 0.4);
+  --warno-bad-20pct: rgba(255, 168, 69, 0.2);
+  
   --warno-very-bad: #ff5454;
   --warno-very-bad-40pct: rgba(255, 84, 84, 0.4);
+  --warno-very-bad-20pct: rgba(255, 84, 84, 0.2);
   
 }
 

@@ -1,14 +1,13 @@
 import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
-import { Country, Division, DivisionsMap } from '../types/deck-builder';
+import { Country, Division } from '../types/deck-builder';
 import '../components/deck-library/deck-list-item';
-import { UnitMap } from '../types/unit';
 import { dialogRenderer } from '@vaadin/dialog/lit.js';
 import '../components/deck-library/deck-filters';
 import '../components/pagination-controls';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 import { DeckDatabaseAdapter } from '../classes/DeckDatabaseAdapter';
 import { LastPatchMixin } from '../mixins/last-patch';
+import { LoadUnitsAndDivisionsMixin } from '../mixins/load-units-and-divisions';
 
 
 export type DeckLibraryItem = {
@@ -22,7 +21,7 @@ export type DeckLibraryItem = {
 };
 
 @customElement('deck-library-route')
-export class DeckLibraryRoute extends LastPatchMixin(LitElement) {
+export class DeckLibraryRoute extends LoadUnitsAndDivisionsMixin(LastPatchMixin(LitElement)) {
   static get styles() {
     return css`
       .container {
@@ -109,9 +108,6 @@ export class DeckLibraryRoute extends LastPatchMixin(LitElement) {
     this.filtersDialogOpen = !this.filtersDialogOpen;
   }
 
-  unitMap?: UnitMap;
-  divisionsMap?: DivisionsMap;
-
   @state()
   selectedTags: string[] = [];
 
@@ -160,54 +156,9 @@ export class DeckLibraryRoute extends LastPatchMixin(LitElement) {
    * Updates the unit map, divisions map, and last patch date properties.
    */
   async onBeforeEnter() {
-    this.unitMap = await this.fetchUnitMap();
-
-    const [units, divisions] = await Promise.all([
-      this.fetchUnitMap(),
-      this.fetchDivisionMap(),
-      this.fetchLastPatchDate(),
-    ]);
-
-    this.unitMap = units;
-    this.divisionsMap = divisions;
+    await this.loadUnitsAndDivisions();
+    await this.fetchLastPatchDate();
   }
-
-
-  /**
-   * Fetches the unit map by calling the `getUnitsForBucket` method of the `BundleManagerService` class.
-   * The unit map is a dictionary where the keys are the descriptor names of the units and the values are the units themselves.
-   * @returns The unit map.
-   */
-  async fetchUnitMap() {
-    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
-    const unitMap: UnitMap = {};
-
-    if (units) {
-      for (const unit of units) {
-        unitMap[unit.descriptorName] = unit;
-      }
-    }
-
-    return unitMap;
-  }
-
-  /**
-   * Returns a map of division descriptors to division objects
-   * @returns A map of division descriptors to division objects
-   */
-  async fetchDivisionMap() {
-    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
-    const divisionMap: DivisionsMap = {};
-
-    if (divisions) {
-      for (const division of divisions) {
-        divisionMap[division.descriptor] = division;
-      }
-    }
-
-    return divisionMap;
-  }
-
 
   /**
    * Queries the database for decks based on the provided parameters.

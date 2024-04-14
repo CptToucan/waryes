@@ -3,20 +3,18 @@ import {customElement, state} from 'lit/decorators.js';
 import '../components/deck/edit-deck';
 import '@vaadin/scroller';
 import {BeforeEnterObserver, Router, RouterLocation} from '@vaadin/router';
-// import { decodeDeckString, Deck } from '@izohek/warno-deck-utils';
 import {getAllianceNameFromDescriptor} from '../utils/get-alliance-name-from-descriptor';
-import {Division, DivisionsMap} from '../types/deck-builder';
-import {UnitMap} from '../types/unit';
+import {Division} from '../types/deck-builder';
 import {Deck} from '../classes/deck';
 import '../components/country-flag';
 import '../components/division-flag';
 import '../components/deck/summary-view';
 import {notificationService} from '../services/notification';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
+import {LoadUnitsAndDivisionsMixin} from '../mixins/load-units-and-divisions';
 
 @customElement('deck-builder-route')
 export class DeckBuilderRoute
-  extends LitElement
+  extends LoadUnitsAndDivisionsMixin(LitElement)
   implements BeforeEnterObserver
 {
   static get styles() {
@@ -141,9 +139,6 @@ export class DeckBuilderRoute
     `;
   }
 
-  unitMap?: UnitMap;
-  divisionsMap?: DivisionsMap;
-
   @state()
   userDeckId?: string;
 
@@ -171,15 +166,7 @@ export class DeckBuilderRoute
    * Converts unit array in to a map to be used by the edit-deck component
    */
   async onBeforeEnter(location: RouterLocation) {
-    this.unitMap = await this.fetchUnitMap();
-
-    const [units, divisions] = await Promise.all([
-      this.fetchUnitMap(),
-      this.fetchDivisionMap(),
-    ]);
-
-    this.unitMap = units;
-    this.divisionsMap = divisions;
+    await this.loadUnitsAndDivisions();
 
     this.availableDivisions = Object.values(this.divisionsMap).sort(
       alphabeticalCompare
@@ -190,57 +177,43 @@ export class DeckBuilderRoute
     const shouldStartEditing = params.get('edit') === 'true';
     const userDeckId = params.get('ud') || undefined;
 
-    if (deckCode) {
-      try {
-        const deckFromString = Deck.fromDeckCode(deckCode, {
-          unitMap: units,
-          divisions: this.availableDivisions,
-        });
+    const divisionId = location.params.divisionId as string;
 
-        this.selectedDivision = deckFromString.division;
-        this.deckToEdit = deckFromString;
-        this.displayMode = shouldStartEditing ? false : true;
-        this.userDeckId = userDeckId;
-      } catch (err) {
-        console.error(err);
-        setTimeout(
-          () =>
-            notificationService.instance?.addNotification({
-              duration: 10000,
-              content:
-                'Unable to load deck code, please report this deck code on the WarYes discord.',
-              theme: 'error',
-            }),
-          1000
-        );
+    if (divisionId) {
+      
+      const division = this.divisionsMap[divisionId];
+      if(division) {
+        this.selectedDivision = division;
+        this.selectDivision(division);
       }
-    }
-  }
+      
+    }  
+      if (deckCode) {
+        try {
+          const deckFromString = Deck.fromDeckCode(deckCode, {
+            unitMap: this.unitMap,
+            divisions: this.availableDivisions,
+          });
 
-  async fetchUnitMap() {
-    const units = await BundleManagerService.getUnitsForBucket(BucketFolder.WARNO);
-    const unitMap: UnitMap = {};
-
-    if (units) {
-      for (const unit of units) {
-        unitMap[unit.descriptorName] = unit;
+          this.selectedDivision = deckFromString.division;
+          this.deckToEdit = deckFromString;
+          this.displayMode = shouldStartEditing ? false : true;
+          this.userDeckId = userDeckId;
+        } catch (err) {
+          console.error(err);
+          setTimeout(
+            () =>
+              notificationService.instance?.addNotification({
+                duration: 10000,
+                content:
+                  'Unable to load deck code, please report this deck code on the WarYes discord.',
+                theme: 'error',
+              }),
+            1000
+          );
+        }
       }
-    }
-
-    return unitMap;
-  }
-
-  async fetchDivisionMap() {
-    const divisions = await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO);
-    const divisionMap: DivisionsMap = {};
-
-    if (divisions) {
-      for (const division of divisions) {
-        divisionMap[division.descriptor] = division;
-      }
-    }
-
-    return divisionMap;
+    
   }
 
   clearDeckParameters() {
@@ -309,9 +282,10 @@ export class DeckBuilderRoute
           >
             <country-flag .country=${div.country}></country-flag>
             <division-flag .division=${div}></division-flag>
-            <div
-              >${getAllianceNameFromDescriptor(div.alliance)} -
-              ${div.name ?? div.descriptor}</div>
+            <div>
+              ${getAllianceNameFromDescriptor(div.alliance)} -
+              ${div.name ?? div.descriptor}
+            </div>
           </button>`;
         })}
       </div>

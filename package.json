@@ -1,5 +1,5 @@
 {
-  "name": "@lit/lit-starter-ts",
+  "name": "waryes",
   "private": true,
   "version": "1.0.2",
   "description": "A simple web component",
@@ -21,6 +21,8 @@
   "dependencies": {
     "@izohek/warno-deck-utils": "^1.1.0",
     "@lit-labs/motion": "^1.0.2",
+    "@svgdotjs/svg.js": "^3.2.0",
+    "@svgdotjs/svg.panzoom.js": "^2.1.2",
     "@vaadin/accordion": "23.3.12",
     "@vaadin/app-layout": "23.3.12",
     "@vaadin/avatar": "23.3.12",
