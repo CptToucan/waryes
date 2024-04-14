@@ -58,10 +58,7 @@ export class DivisionAnalysisDisplay extends LitElement {
         display: flex;
         flex-direction: row;
         justify-content: space-evenly;
-      }
-
-      .important-units .unit-container {
-        flex: 1 1 100%;
+        flex-wrap: wrap;
       }
 
       .side-by-side {
