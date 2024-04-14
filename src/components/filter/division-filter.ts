@@ -1,9 +1,16 @@
-import {css, html, LitElement} from 'lit';
-import {customElement, property, state} from 'lit/decorators.js';
-import {Division} from '../../types/deck-builder';
+import { css, html, LitElement } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { Division } from '../../types/deck-builder';
 import '@vaadin/combo-box';
-import {ComboBoxLitRenderer, comboBoxRenderer} from '@vaadin/combo-box/lit';
-import {MultiSelectComboBoxSelectedItemsChangedEvent} from '@vaadin/multi-select-combo-box';
+import "../division-flag";
+import { ComboBoxLitRenderer, comboBoxRenderer } from '@vaadin/combo-box/lit';
+import { MultiSelectComboBoxSelectedItemsChangedEvent } from '@vaadin/multi-select-combo-box';
+import { ComboBoxSelectedItemChangedEvent } from '@vaadin/combo-box';
+
+export enum DivisionFilterMode {
+  MULTI = 'multi',
+  SINGLE = 'single',
+}
 
 @customElement('division-filter')
 export class DivisionFilter extends LitElement {
@@ -12,13 +19,26 @@ export class DivisionFilter extends LitElement {
       vaadin-multi-select-combo-box {
         width: 100%;
       }
+      vaadin-combo-box {
+        width: 100%;
+      }
+
+      vaadin-combo-box::before {
+        margin-top: 0em;
+      }
+
+      vaadin-multi-select-combo-box::before {
+        margin-top: 0em;
+      }
+
+
       h3 {
         margin: 0;
       }
     `;
   }
 
-  divisionSelected(
+  multipleDivisionSelected(
     e: MultiSelectComboBoxSelectedItemsChangedEvent<Division>
   ) {
 
@@ -31,16 +51,33 @@ export class DivisionFilter extends LitElement {
         },
       })
     );
-    
+
+  }
+
+  singleDivisionSelected(e: ComboBoxSelectedItemChangedEvent<Division>) {
+    this.selectedDivisions = e.detail.value ? [e.detail.value] : [];
+    this.dispatchEvent(
+      new CustomEvent('division-filter-changed', {
+        detail: {
+          divisions: this.selectedDivisions,
+        },
+      })
+    );
   }
 
   @property()
+  public mode = DivisionFilterMode.MULTI;
+
+  @property({ type: Array })
   public divisions: Division[] = [];
 
+  @property()
+  showLabel = true;
 
 
-  @state()
-  private selectedDivisions?: Division[] = [];
+
+  @property()
+  public selectedDivisions?: Division[] = [];
 
   /**
    *
@@ -64,20 +101,36 @@ export class DivisionFilter extends LitElement {
     const selectedDivisions = this.selectedDivisions;
 
 
-    if(!selectedDivisions) return html`<div>Loading...</div>`;
+    if (!selectedDivisions) return html`<div>Loading...</div>`;
 
-    return html`
-      <vaadin-multi-select-combo-box
-        colspan="2"
-        label="Divisions"
+    if (this.mode === DivisionFilterMode.SINGLE) {
+      return html`
+       <vaadin-combo-box
         .items=${this.divisions}
+        .label=${this.showLabel ? 'Division' : ''}
         .itemLabelPath=${'name'}
         .itemValuePath=${'id'}
         .clearButtonVisible=${true}
         ${comboBoxRenderer(this.divisionRenderer, [])}
-        @selected-items-changed=${this.divisionSelected}
+        @selected-item-changed=${this.singleDivisionSelected}
+        .selectedItem=${selectedDivisions[0]}
+      ></vaadin-combo-box>`;
+    }
+    else {
+
+      return html`
+      <vaadin-multi-select-combo-box
+        colspan="2"
+        .items=${this.divisions}
+        .label=${this.showLabel ? 'Division' : ''}
+        .itemLabelPath=${'name'}
+        .itemValuePath=${'id'}
+        .clearButtonVisible=${true}
+        ${comboBoxRenderer(this.divisionRenderer, [])}
+        @selected-items-changed=${this.multipleDivisionSelected}
       ></vaadin-multi-select-combo-box>
     `;
+    }
   }
 }
 declare global {

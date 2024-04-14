@@ -6,6 +6,7 @@ import {Division} from '../types/deck-builder';
 import {Unit} from '../types/unit';
 import {getIconsWithFallback} from '../utils/get-icons-with-fallback';
 import {dialogRenderer, dialogFooterRenderer} from '@vaadin/dialog/lit.js';
+import "../components/filter/division-filter";
 
 @customElement('units-route')
 export class UnitsRoute extends LitElement implements BeforeEnterObserver {

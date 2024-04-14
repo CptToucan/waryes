@@ -5,23 +5,21 @@ import {
 import { css, html, LitElement, TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { FirebaseService } from '../services/firebase';
-import { DivisionsMap } from '../types/deck-builder';
-import { UnitMap } from '../types/unit';
 import '../components/deck-library/deck-list-item';
 import { TextFieldValueChangedEvent } from '@vaadin/text-field';
 import { Router } from '@vaadin/router';
 import '@vaadin/confirm-dialog';
 import { ConfirmDialogOpenedChangedEvent } from '@vaadin/confirm-dialog';
 import { notificationService } from '../services/notification';
-import { BucketFolder, BundleManagerService } from '../services/bundle-manager';
 import { DeckDatabaseAdapter, DeckRecord } from '../classes/DeckDatabaseAdapter';
+import { LoadUnitsAndDivisionsMixin } from '../mixins/load-units-and-divisions';
 
 interface DecksByDivision {
   [key: string]: DeckRecord[];
 }
 
 @customElement('my-decks-route')
-export class MyDecksRoute extends LitElement {
+export class MyDecksRoute extends LoadUnitsAndDivisionsMixin(LitElement) {
   static get styles() {
     return css`
       :host {
@@ -122,13 +120,6 @@ export class MyDecksRoute extends LitElement {
   private totalAllowedDecks = 0;
 
 
-  unitMap?: UnitMap;
-  divisionsMap?: DivisionsMap;
-
-
-
-
-
   async onBeforeEnter() {
     FirebaseService.auth?.onAuthStateChanged(async (user) => {
       try {
@@ -140,13 +131,8 @@ export class MyDecksRoute extends LitElement {
       }
     });
 
-    const [units, divisions] = await Promise.all([
-      this.fetchUnitMap(),
-      this.fetchDivisionMap(),
-    ]);
+    await this.loadUnitsAndDivisions();
 
-    this.unitMap = units;
-    this.divisionsMap = divisions;
   }
 
   private async loadUserDecks() {
@@ -164,44 +150,6 @@ export class MyDecksRoute extends LitElement {
     }
 
     this.decksByDivision = decksByDivision;
-  }
-
-  /**
-   * Returns a map of unit descriptors to unit objects
-   * @returns A map of unit descriptors to unit objects
-   */
-  async fetchUnitMap() {
-    const units = await BundleManagerService.getUnitsForBucket(
-      BucketFolder.WARNO
-    );
-    const unitMap: UnitMap = {};
-
-    if (units) {
-      for (const unit of units) {
-        unitMap[unit.descriptorName] = unit;
-      }
-    }
-
-    return unitMap;
-  }
-
-  /**
-   * Returns a map of division descriptors to division objects
-   * @returns A map of division descriptors to division objects
-   */
-  async fetchDivisionMap() {
-    const divisions = await BundleManagerService.getDivisionsForBucket(
-      BucketFolder.WARNO
-    );
-    const divisionMap: DivisionsMap = {};
-
-    if (divisions) {
-      for (const division of divisions) {
-        divisionMap[division.descriptor] = division;
-      }
-    }
-
-    return divisionMap;
   }
 
   async saveDeckName(_deckId: number, _name = '') {

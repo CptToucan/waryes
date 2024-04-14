@@ -1,17 +1,25 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {BeforeEnterObserver} from '@vaadin/router';
 import {customElement, state} from 'lit/decorators.js';
-import '../components/division-analysis/division-analysis';
-import {collection, getDocs, limit, query} from 'firebase/firestore';
-import {FirebaseService} from '../services/firebase';
-import {DivisionAnalysis} from '../components/division-analysis/division-analysis';
-import {BucketFolder, BundleManagerService} from '../services/bundle-manager';
+
+import '../components/division-analysis/division-analysis-map';
+import '../components/division-analysis/division-analysis-display';
+
+import {
+  DivisionAnalysisAdapter,
+  DivisionAnalysisDivision,
+} from '../classes/DivisionAnalysisAdapter';
+import {LoadUnitsAndDivisionsMixin} from '../mixins/load-units-and-divisions';
 import {Division} from '../types/deck-builder';
-import '../components/filter/division-filter';
+import {DivisionFilterMode} from '../components/filter/division-filter';
+
+export type DivisonAnalysisMap = {
+  [key: string]: DivisionAnalysisDivision;
+};
 
 @customElement('division-analysis-route')
 export class DivisionAnalysisRoute
-  extends LitElement
+  extends LoadUnitsAndDivisionsMixin(LitElement)
   implements BeforeEnterObserver
 {
   static get styles() {
@@ -19,146 +27,218 @@ export class DivisionAnalysisRoute
       :host {
         display: flex;
         flex-direction: column;
-        padding: var(--lumo-space-s);
         gap: var(--lumo-space-m);
         position: relative;
+        height: 100%;
+        overflow: hidden;
       }
 
-      .header {
-        display: flex;
-        flex-direction: row;
-      }
-
-      .grid {
+      .container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        flex-wrap: wrap;
-        gap: var(--lumo-space-m);
+        grid-template-columns: 40% 60%;
+        justify-content: center;
+        height: 100%;
+        box-sizing: border-box;
+        padding: var(--lumo-space-m);
       }
 
-      .card {
+      .division-selection {
         display: flex;
-        background-color: var(--lumo-contrast-5pct);
-        font-size: var(--lumo-font-size-s);
-        border-radius: var(--lumo-border-radius);
-        padding: var(--lumo-space-s);
         flex-direction: column;
       }
 
-      a {
-        text-decoration: underline;
-        color: var(--lumo-primary-text-color);
+      button.division-selector {
+        border-radius: var(--lumo-border-radius-m);
+        padding: var(--lumo-space-xs);
+        background-color: var(--lumo-contrast-5pct);
+        display: flex;
+        align-items: center;
+        color: var(--lumo-contrast-80pct);
+        border: 2px solid transparent;
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        overflow-y: hidden;
+        white-space: nowrap;
+        box-sizing: content-box;
+        cursor: pointer;
       }
 
-      .filter-container {
+      button.division-selector span {
+        text-overflow: ellipsis;
+        overflow-x: hidden;
+        white-space: nowrap;
+      }
+
+      .map-and-filter {
+        margin-right: var(--lumo-space-m);
+      }
+
+      button:hover {
+        background-color: var(--lumo-contrast-10pct);
+      }
+
+      button:focus {
+        border: 2px solid var(--lumo-primary-color-50pct);
+      }
+
+      .button-content {
+        flex: 1 1 100%;
         display: flex;
-        position: sticky;
-        top: 0px;
-        background-color: var(--lumo-base-color);
-        padding: var(--lumo-space-s);
-        z-index: 1;
-      }
-      division-filter {
+        flex-direction: row;
         width: 100%;
+        align-items: center;
+        justify-content: space-between;
       }
+
+      .button-content > span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      button > span {
+        display: flex;
+        flex: 1 1 0%;
+      }
+
+      country-flag {
+        margin-right: var(--lumo-space-s);
+        max-height: 24px;
+        max-width: 24px;
+      }
+
+      division-flag {
+        margin: 0 var(--lumo-space-s);
+        max-height: 24px;
+        max-width: 24px;
+      }
+      summary-view {
+        flex: 1 1 100%;
+      }
+
+      division-analysis-display {
+        overflow: auto;
+      }
+
+
+
+      .mobile-only {
+        display: none;
+      }
+
+      @media (max-width: 1000px) {
+        .map-and-filter {
+          display: none;
+        }
+
+        .container {
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+
+        }
+
+        .mobile-only {
+          display: block;
+        }
+
+      }
+
+
     `;
   }
 
-  @state()
-  divisionAnalysis: DivisionAnalysis[] | null = null;
+  divisionAnalysis?: DivisonAnalysisMap;
+
+  availableDivisions: Division[] = [];
 
   @state()
-  divisions: Division[] | null = null;
+  selectedDivisionDescriptor?: string =
+    'Descriptor_Deck_Division_NATO_Garnison_Berlin_multi';
 
-  @state()
-  selectedDivisions: Division[] = [];
+  get selectedDivision() {
+    return this.divisionsMap[this.selectedDivisionDescriptor ?? ''];
+  }
+
+  get selectedDivisionAnalysis() {
+    return this.divisionAnalysis?.[this.selectedDivisionDescriptor ?? ''];
+  }
 
   async onBeforeEnter(): Promise<void> {
-    // fetch divisionAnalysis from firebase
+    const response = await DivisionAnalysisAdapter.getPage();
+    await this.loadUnitsAndDivisions();
 
-    const q = query(
-      collection(FirebaseService.db, 'division_analysis'),
-      limit(1)
+    this.availableDivisions = Object.values(this.divisionsMap).sort(
+      alphabeticalCompare
     );
 
-    const divisions =
-      (await BundleManagerService.getDivisionsForBucket(BucketFolder.WARNO)) ||
-      [];
+    // Convert divisionAnalysis to a mapped object
+    const mappedDivisionAnalysis: DivisonAnalysisMap = {};
 
-    const querySnapshot = await getDocs(q);
-    const divisionAnalysisRecord = querySnapshot.docs[0].data();
+    if (response) {
+      for (const division of response.data) {
+        mappedDivisionAnalysis[division.attributes.DivisionDescriptor] =
+          division;
+      }
+    }
+    this.divisionAnalysis = mappedDivisionAnalysis;
+  }
 
-    const divisionAnalysis = JSON.parse(divisionAnalysisRecord.data);
+  updateSelectedDivision(selectedDivisionDescriptor: string) {
+    this.selectedDivisionDescriptor = selectedDivisionDescriptor;
+  }
 
-    this.divisionAnalysis = divisionAnalysis as DivisionAnalysis[];
-    this.divisions = divisions;
+  renderDivisionSelection(): TemplateResult {
+    const divisions = [];
+
+    for (const division in this.divisionsMap) {
+      divisions.push(this.divisionsMap[division]);
+    }
+
+    return html`
+      <division-filter
+        .mode=${DivisionFilterMode.SINGLE}
+        .divisions=${divisions}
+        .showLabel=${false}
+        .selectedDivisions=${[this.selectedDivision]}
+        @division-filter-changed=${(e: CustomEvent) => {
+          this.updateSelectedDivision(e.detail.divisions[0]?.descriptor);
+        }}
+      ></division-filter>
+    `;
   }
 
   render(): TemplateResult {
     return html`
-      <div class="header">
-        <div class="card">
-          This division analysis feature is designed to help you understand the
-          strengths and weaknesses of each division. The numbers were calculated
-          by taking the feedback of many of the top players in the community.
-          The numbers are not perfect, but they are a good starting point for
-          understanding the divisions. Thank you for your contributions:
-          <ul>
-            <li>Tiberius-Rancor</li>
-            <li>Sotek</li>
-            <li>Dar_rick_s</li>
-            <li>P.Uri.Tanner</li>
-            <li>Nalyd</li>
-            <li><a href="https://www.twitch.tv/awoodenbox96">awoodenbox</a></li>
-            <li>
-              <a href="https://www.youtube.com/@tmanplays69">tmanplays</a>
-            </li>
-            <li>Darkneutron</li>
-            <li>
-              <a href="https://www.youtube.com/@onoez2k/videos">Integer</a>
-            </li>
-            <li><a href="https://www.twitch.tv/xlathans">Lathans</a></li>
-          </ul>
+      <div class="container">
+        <div class="map-and-filter">
+          ${this.renderDivisionSelection()}
+          <division-analysis-map
+            @division-clicked=${(e: CustomEvent) => {
+              this.updateSelectedDivision(e.detail.division);
+            }}
+            .selectedDivisionDescriptor=${this.selectedDivisionDescriptor}
+          ></division-analysis-map>
         </div>
-      </div>
-      <div class="filter-container">
-        ${(this.divisions?.length || 0) > 0
-          ? html`<division-filter
-              @division-filter-changed=${(e: CustomEvent) =>
-                (this.selectedDivisions = e.detail?.divisions)}
-              .divisions=${this.divisions}
-            ></division-filter>`
-          : html``}
-      </div>
-      <div class="grid">
-        ${this.divisions?.map((division) => {
-          const divisionAnalysis = this.divisionAnalysis?.find(
-            (divisionAnalysis) =>
-              divisionAnalysis.descriptor === division.descriptor
-          );
-
-          const isSelected = this.selectedDivisions.find(
-            (selectedDivision) => selectedDivision.descriptor ===
-            division.descriptor);
-          if(
-            isSelected || this.selectedDivisions.length === 0
-          ) {
-            return html`
-            <div class="card">
-              <division-analysis-display
-                .divisionName=${division.name}
-                .divisionAnalysis=${divisionAnalysis}
-              ></division-analysis-display>
-            </div>
-          `;
-          }
-
-          return html``;
-
-        })}
+        <div class="mobile-only">${this.renderDivisionSelection()}</div>
+        <division-analysis-display
+          .divisionAnalysis=${this.selectedDivisionAnalysis}
+          .divisionsMap=${this.divisionsMap}
+          .unitMap=${this.unitMap}
+        ></division-analysis-display>
       </div>
     `;
   }
+}
+
+function alphabeticalCompare(a: Division, b: Division) {
+  if (a.alliance < b.alliance) {
+    return -1;
+  }
+  if (a.alliance > b.alliance) {
+    return 1;
+  }
+  return 0;
 }
 
 declare global {

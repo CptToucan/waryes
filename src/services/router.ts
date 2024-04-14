@@ -12,6 +12,7 @@ const routes: Route[] = [
   {path: '/deck/:deckId', component: 'deck-view-route'},
   {path: '/comparison', component: 'comparison-route'},
   {path: '/deck-builder', component: 'deck-builder-route'},
+  {path: '/deck-builder/:divisionId', component: 'deck-builder-route'},
   {path: '/deck-import', component: 'deck-import-route'},
   {path: '/deck-library', component: 'deck-library-route'},
   {path: '/forgot-password', component: 'forgot-password-route'},
