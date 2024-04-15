@@ -29,7 +29,6 @@ export class DivisionAnalysisRoute
         flex-direction: column;
         position: relative;
         height: 100%;
-        overflow: hidden;
       }
 
       h1,h2,h3 {
