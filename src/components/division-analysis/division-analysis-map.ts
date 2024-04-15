@@ -74,6 +74,7 @@ export class DivisionAnalysisMap extends LitElement {
 
   protected firstUpdated(): void {
     this.renderSvg();
+
   }
 
   protected willUpdate(
@@ -82,32 +83,36 @@ export class DivisionAnalysisMap extends LitElement {
     super.willUpdate(_changedProperties);
 
     if (_changedProperties.has('selectedDivisionDescriptor')) {
-      const divisionId = this.selectedDivisionDescriptor as string | undefined;
+      this.updateSvg();
+    }
+  }
 
-      const allDivisions = this.svgInterface?.find('image[data-divisionId]');
-      const targetDivision = this.svgInterface?.findOne(
-        `image[data-divisionId=${divisionId}]`
-      ) as any;
+  private updateSvg() {
+    const divisionId = this.selectedDivisionDescriptor as string | undefined;
 
-      allDivisions?.forEach((division) => {
-        const originalCenterX = division.cx();
-        const originalCenterY = division.cy();
-        division.size(64, 64);
-        division.center(originalCenterX, originalCenterY);
-        if (division !== targetDivision) {
-          division.opacity(0.5);
-        }
-        else {
-          division.opacity(1);
-        }
-      })
+    const allDivisions = this.svgInterface?.find('image[data-divisionId]');
+    const targetDivision = this.svgInterface?.findOne(
+      `image[data-divisionId=${divisionId}]`
+    ) as any;
 
-
-      if (targetDivision) {
-        const imageRect = targetDivision.bbox();
-        // Increase the size of the targetDivision image element
-        targetDivision.size(imageRect.width * 1.5, imageRect.height * 1.5).center(imageRect.cx, imageRect.cy);
+    allDivisions?.forEach((division) => {
+      const originalCenterX = division.cx();
+      const originalCenterY = division.cy();
+      division.size(64, 64);
+      division.center(originalCenterX, originalCenterY);
+      if (division !== targetDivision) {
+        division.opacity(0.5);
       }
+      else {
+        division.opacity(1);
+      }
+    });
+
+
+    if (targetDivision) {
+      const imageRect = targetDivision.bbox();
+      // Increase the size of the targetDivision image element
+      targetDivision.size(imageRect.width * 1.5, imageRect.height * 1.5).center(imageRect.cx, imageRect.cy);
     }
   }
 
@@ -137,6 +142,7 @@ export class DivisionAnalysisMap extends LitElement {
     this.applySvgPanZoom();
     this.addGrid(gridSize);
     this.animateSvg(gridSize);
+    this.updateSvg();
   }
 
   private async loadSvgContent() {

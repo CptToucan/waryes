@@ -170,6 +170,7 @@ export class DivisionAnalysisRoute
   }
 
   async onBeforeEnter(): Promise<void> {
+    console.log("before enter");
     const response = await DivisionAnalysisAdapter.getPage();
     await this.loadUnitsAndDivisions();
 
@@ -187,10 +188,20 @@ export class DivisionAnalysisRoute
       }
     }
     this.divisionAnalysis = mappedDivisionAnalysis;
+
+    const params = new URLSearchParams(window.location.search);
+    const division = params.get('division');
+    if (division) {
+      this.selectedDivisionDescriptor = decodeURIComponent(division);
+    }
   }
 
   updateSelectedDivision(selectedDivisionDescriptor: string) {
     this.selectedDivisionDescriptor = selectedDivisionDescriptor;
+    
+    const url = new URL(window.location.href);
+    url.searchParams.set('division', selectedDivisionDescriptor);
+    history.replaceState({}, '', url.toString());
   }
 
   renderDivisionSelection(): TemplateResult {
