@@ -170,7 +170,6 @@ export class DivisionAnalysisRoute
   }
 
   async onBeforeEnter(): Promise<void> {
-    console.log("before enter");
     const response = await DivisionAnalysisAdapter.getPage();
     await this.loadUnitsAndDivisions();
 
@@ -198,9 +197,15 @@ export class DivisionAnalysisRoute
 
   updateSelectedDivision(selectedDivisionDescriptor: string) {
     this.selectedDivisionDescriptor = selectedDivisionDescriptor;
-    
     const url = new URL(window.location.href);
-    url.searchParams.set('division', selectedDivisionDescriptor);
+
+    if(url.searchParams.has('division') && selectedDivisionDescriptor === undefined) {
+      url.searchParams.delete('division');
+    }
+    else {
+      url.searchParams.set('division', selectedDivisionDescriptor);
+    }
+
     history.replaceState({}, '', url.toString());
   }
 
