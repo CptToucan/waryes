@@ -19,7 +19,7 @@ jobs:
       run: |
         echo API_URL=https://war-yes.com/api >> .env
         echo STATIC_URL=https://war-yes.com/static >> .env
-        echo STRAPI_URL=https://war-yes.com/strapi/api >> .env
+        echo STRAPI_URL=https://war-yes.com/strapi >> .env
     - run: npm run build
     - run: tar -czvf site.tar.gz dist/
 
