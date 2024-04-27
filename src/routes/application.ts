@@ -1,5 +1,5 @@
 import { html, LitElement, TemplateResult} from 'lit';
-import {customElement, property} from 'lit/decorators.js';
+import {customElement, property, state} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
 import {FirebaseService, FirebaseServiceClass} from '../services/firebase';
@@ -13,14 +13,40 @@ import '../components/notification-manager';
 import '../components/authenticated-menu';
 import { BeforeEnterObserver } from '@vaadin/router';
 import { BundleManagerService } from '../services/bundle-manager';
+import { StrapiAdapter } from '../classes/StrapiAdapter';
+import { MenuGroup } from './index';
 
 @customElement('application-route')
 export class Application extends LitElement implements BeforeEnterObserver {
 
   firebase: FirebaseServiceClass = FirebaseService;
 
+  @state() 
+  menuGroups: MenuGroup[] = [];
+
   async onBeforeEnter() {
     await BundleManagerService.initialise();
+    const menu = await StrapiAdapter.getSideMenu();
+    const menuGroups = menu?.data.attributes.MenuGroup;
+
+    if (!menuGroups) {
+      return;
+    }
+
+    this.menuGroups = menuGroups.map((menuGroup) => {
+      return {
+        title: menuGroup.Display,
+        items: menuGroup.menu_items.data.map((menuItem) => {
+          return {
+            title: menuItem.attributes.Display,
+            logo: menuItem.attributes.Logo,
+            link: menuItem.attributes.URL,
+            authenticated: menuItem.attributes.Authenticated || false,
+          };
+        }),
+      };
+    }) as MenuGroup[];
+    
   }
   
 
@@ -46,7 +72,7 @@ export class Application extends LitElement implements BeforeEnterObserver {
     <notification-manager></notification-manager>
     
     ${ this.loggedInUser !== undefined ? html`
-        <authenticated-menu .user=${ this.loggedInUser }>
+        <authenticated-menu .user=${ this.loggedInUser } .menu=${this.menuGroups}>
           <slot></slot>
         </authenticated-menu>` 
         : null

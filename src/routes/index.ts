@@ -1,5 +1,5 @@
 import {css, html, LitElement, TemplateResult /*, unsafeCSS*/} from 'lit';
-import {customElement} from 'lit/decorators.js';
+import {customElement, state} from 'lit/decorators.js';
 // @ts-ignore
 import WaryesImage from '../../images/waryes-transparent.png';
 // @ts-ignore
@@ -16,10 +16,26 @@ import '../components/mod-image';
 
 import '../components/unit-search';
 import {Unit} from '../types/unit';
-import {Router} from '@vaadin/router';
+import {BeforeEnterObserver, Router} from '@vaadin/router';
+import {StrapiAdapter} from '../classes/StrapiAdapter';
+import {ifDefined} from 'lit/directives/if-defined.js';
+
+export interface MenuItem {
+  title: string;
+  logo: string;
+  link: string;
+  authenticated: boolean;
+  imageUrl?: string;
+  imageAlt?: string;
+}
+
+export interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
 
 @customElement('index-route')
-export class IndexRoute extends LitElement {
+export class IndexRoute extends LitElement implements BeforeEnterObserver {
   static get styles() {
     return css`
       :host {
@@ -191,77 +207,109 @@ export class IndexRoute extends LitElement {
     `;
   }
 
+  @state()
+  private menuGroups: MenuGroup[] = [];
+
+  @state()
+  private homepageLogoDetails?: {
+    link: string;
+    url: string;
+    alt: string;
+  };
+
+  async onBeforeEnter() {
+    const homepageMenu = await StrapiAdapter.getHomePageMenu();
+    const homepage = await StrapiAdapter.getHomePage();
+    const link = homepage?.data.attributes.Link || '';
+    const url =
+      `${StrapiAdapter.baseUrl}${homepage?.data.attributes.Logo.data.attributes.url}` ||
+      '';
+    const alt =
+      homepage?.data.attributes.Logo.data.attributes.alternativeText || '';
+
+    const homepageLogoDetails = {
+      link,
+      url,
+      alt,
+    };
+
+    this.homepageLogoDetails = homepageLogoDetails;
+
+    const menuGroups = homepageMenu?.data.attributes.MenuGroup;
+
+    if (menuGroups === undefined) {
+      return;
+    }
+
+    this.menuGroups = menuGroups.map((menuGroup) => {
+      return {
+        title: menuGroup.Display,
+        items: menuGroup.menu_items.data.map((menuItem) => {
+          return {
+            title: menuItem.attributes.Display,
+            logo: menuItem.attributes.Logo,
+            link: menuItem.attributes.URL,
+            authenticated: menuItem.attributes.Authenticated || false,
+            imageUrl: menuItem.attributes.Image?.data?.attributes.url,
+          };
+        }),
+      };
+    });
+  }
+
   unitSelected(event: CustomEvent) {
     if (event.detail.value as Unit) {
       Router.go(`/unit/${event.detail.value?.descriptorName}`);
     }
   }
 
-  renderChoiceButton(
+  renderMenuItem(
     href: string,
     icon: string,
     headline: string,
-    disabled = false
+    disabled = false,
+    imageUrl?: string
   ) {
+    let menuContent;
+
+    if (imageUrl) {
+      menuContent = html`<img
+        style="width: 100%;"
+        src="/defcon-2-tagline.png"
+      />`;
+    } else {
+      menuContent = html` <vaadin-icon icon="${icon}"></vaadin-icon>
+        <h2>${headline}</h2>`;
+    }
+
     return html` <a
       class="choice-button ${disabled ? 'disabled' : ''}"
       href="${href}"
     >
       <div class="headline">
-        <vaadin-icon icon="${icon}"></vaadin-icon>
-        <h2>${headline}</h2>
+        ${menuContent}
       </div>
     </a>`;
   }
 
-  renderSelectOrImportChoice() {
-    const databaseChoices = [
-      this.renderChoiceButton('/units', 'waryes:soldier', 'Browse Units'),
-      this.renderChoiceButton('/weapons', 'waryes:gun', 'Browse Weapons'),
-      this.renderChoiceButton(
-        '/damage-calculator',
-        'waryes:calculator',
-        'Damage Calculator'
-      ),
-      this.renderChoiceButton(
-        '/comparison',
-        'vaadin:pie-bar-chart',
-        'Compare Units'
-      ),
-      this.renderChoiceButton('/maps', 'vaadin:map-marker', 'Maps'),
-    ];
+  renderMenuEntries(menuGroups: MenuGroup[]) {
+    const menuEntries: TemplateResult<1>[] = [];
 
-    const deckChoices = [
-      this.renderChoiceButton('/deck-drafter', 'vaadin:random', 'Deck Draft'),
-      this.renderChoiceButton('/deck-import', 'vaadin:code', 'Deck Import'),
-      this.renderChoiceButton('/deck-builder', 'vaadin:tools', 'Deck Build'),
-      this.renderChoiceButton('/deck-library', 'vaadin:book', 'Deck Library'),
-    ];
+    for (const menuGroup of menuGroups) {
+      for (const menuItem of menuGroup.items) {
+        menuEntries.push(
+          this.renderMenuItem(
+            menuItem.link,
+            menuItem.logo,
+            menuItem.title,
+            false,
+            menuItem.imageUrl
+          )
+        );
+      }
+    }
 
-    const inspectChoices = [
-      this.renderChoiceButton(
-        '/patch-notes',
-        'vaadin:clipboard-text',
-        'Patch Notes'
-      ),
-      this.renderChoiceButton(
-        '/division-analysis',
-        'vaadin:chart',
-        'Division Analysis'
-      ),
-    ];
-
-    return html`
-      <div class="button-grid">
-        <a class="choice-button" href="/defcon2">
-          <div class="headline">
-            <img style="width: 100%;" src="/defcon-2-tagline.png" />
-          </div>
-        </a>
-
-        ${databaseChoices} ${deckChoices} ${inspectChoices}
-      </div>
-    `;
+    return html` <div class="button-grid">${menuEntries}</div> `;
   }
 
   render(): TemplateResult {
@@ -269,11 +317,12 @@ export class IndexRoute extends LitElement {
       <div class="background">
         <div class="container">
           <div class="splash">
-            <a href="/defcon2">
+            <a href="${ifDefined(this.homepageLogoDetails?.link)}">
               <img
                 height="100"
-                src="/defcon-2-tagline-invitation.png"
+                src="${ifDefined(this.homepageLogoDetails?.url)}"
                 style="margin-top: 20px;"
+                alt="${ifDefined(this.homepageLogoDetails?.alt)}"
               />
             </a>
             <div>
@@ -281,9 +330,9 @@ export class IndexRoute extends LitElement {
                 <unit-search @unit-selected=${this.unitSelected}></unit-search>
               </div>
             </div>
-            ${this.renderSelectOrImportChoice()}
+            ${this.renderMenuEntries(this.menuGroups)}
             <div class="socials">
-       <a class="social" href="https://discord.gg/gqBgvgGj8H">
+              <a class="social" href="https://discord.gg/gqBgvgGj8H">
                 <img style="height: 32px" src="/discord-logo-white.svg" />
                 <div>Feel free to join our Discord community.</div>
               </a>
@@ -292,9 +341,14 @@ export class IndexRoute extends LitElement {
                 <img style="height: 32px" src="/patreon-logo-white.svg" />
                 <div>Support the project on Patreon.</div>
               </a>
-              
-              <a class="social" href="https://www.buymeacoffee.com/captaintoucan">
-                <div><img  class="bmc" style="height: 32px" src="/bmc-logo.svg" /></div>
+
+              <a
+                class="social"
+                href="https://www.buymeacoffee.com/captaintoucan"
+              >
+                <div>
+                  <img class="bmc" style="height: 32px" src="/bmc-logo.svg" />
+                </div>
                 <div>Buy me a coffee.</div>
               </a>
             </div>

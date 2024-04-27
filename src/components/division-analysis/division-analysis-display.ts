@@ -1,7 +1,7 @@
 import {LitElement, html, css, TemplateResult} from 'lit';
 
 import {customElement, property} from 'lit/decorators.js';
-import {DivisionAnalysisDivision} from '../../classes/DivisionAnalysisAdapter';
+import {DivisionAnalysisDivision} from '../../types/DivisionAnalysisTypes';
 import {DivisionsMap} from '../../types/deck-builder';
 import {UnitMap} from '../../types/unit';
 

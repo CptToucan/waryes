@@ -6,12 +6,12 @@ import '../components/division-analysis/division-analysis-map';
 import '../components/division-analysis/division-analysis-display';
 
 import {
-  DivisionAnalysisAdapter,
   DivisionAnalysisDivision,
-} from '../classes/DivisionAnalysisAdapter';
+} from '../types/DivisionAnalysisTypes';
 import {LoadUnitsAndDivisionsMixin} from '../mixins/load-units-and-divisions';
 import {Division} from '../types/deck-builder';
 import {DivisionFilterMode} from '../components/filter/division-filter';
+import { StrapiAdapter } from '../classes/StrapiAdapter';
 
 export type DivisonAnalysisMap = {
   [key: string]: DivisionAnalysisDivision;
@@ -170,7 +170,7 @@ export class DivisionAnalysisRoute
   }
 
   async onBeforeEnter(): Promise<void> {
-    const response = await DivisionAnalysisAdapter.getPage();
+    const response = await StrapiAdapter.getDivisionAnalysis();
     await this.loadUnitsAndDivisions();
 
     this.availableDivisions = Object.values(this.divisionsMap).sort(
