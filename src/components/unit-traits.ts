@@ -100,7 +100,6 @@ export class UnitTraits extends LitElement {
   }
 
   render(): TemplateResult {
-    console.log(this.traitNames);
     const traits = this.traitNames.map(n => getTraitFromIconName(getIconForSpecialty(n)));
     return html`<div class="icon-container">
       ${traits.map(t => (

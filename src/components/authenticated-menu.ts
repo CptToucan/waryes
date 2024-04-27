@@ -19,30 +19,15 @@ import {router} from '../services/router';
 import {Features, featureService} from '../services/features';
 import {Unit} from '../types/unit';
 import './verify-email';
-interface MenuItem {
-  name: string;
-  icon: string;
-  href: string;
-}
-
-interface MenuItemGroup {
-  name: string;
-  items: MenuItem[];
-}
+import { MenuItem, MenuGroup } from '../routes/index';
 
 /// Create a single menu item
 type MenuItemRenderer = (
-  menuItem: MenuItem | MenuItemGroup,
-  selected?: boolean
+  menuItem: MenuGroup | MenuItem
 ) => TemplateResult;
 
-/// Menu definition indicating an ordered list of items per user authentication type
-type MenuDefinition = {
-  user: (MenuItem | MenuItemGroup)[];
-  guest: (MenuItem | MenuItemGroup)[];
-};
-
 /// Default menu definitions per authentication level.
+/*
 const defaultMenu: MenuDefinition = {
   user: [
     {
@@ -262,6 +247,7 @@ const defaultMenu: MenuDefinition = {
     },
   ],
 };
+*/
 
 @customElement('authenticated-menu')
 export class AuthenticatedMenu extends LitElement {
@@ -373,11 +359,10 @@ export class AuthenticatedMenu extends LitElement {
   user?: User;
 
   /// Defines the content of the menu
+  
   @property()
-  menuDefinition: MenuDefinition = defaultMenu;
+  menu: MenuGroup[] = [];
 
-  @state()
-  selectedMenuItemIndex?: number;
 
   @state()
   activeUrl = '/';
@@ -388,19 +373,29 @@ export class AuthenticatedMenu extends LitElement {
     }
   }
 
-  renderMenuItem: MenuItemRenderer = (menuItem: MenuItem | MenuItemGroup) => {
+  renderMenuItem: MenuItemRenderer = (menuItem: MenuItem | MenuGroup) => {
+
+
     if (isMenuItemGroup(menuItem)) {
-      return html`<div class="menu-item-group">${menuItem.name}</div>
+      return html`<div class="menu-item-group">${menuItem.title}</div>
         ${menuItem.items.map((item) => this.renderMenuItem(item))}`;
     } else {
+
+      const isAuthenticated = this.user != undefined;
+      const menuItemRequiresAuth = menuItem.authenticated;
+
+      if (menuItemRequiresAuth && !isAuthenticated) {
+        return html``;
+      }
+
       const activePath = this.activeUrl;
-      const selected = activePath === menuItem.href;
+      const selected = activePath === menuItem.link;
       return html` <a
         class="tab ${selected ? 'selected' : ''}"
-        href=${menuItem.href}
+        href=${menuItem.link}
       >
-        <vaadin-icon class="drawer-icon" icon=${menuItem.icon}> </vaadin-icon>
-        <div class="menu-item">${menuItem.name}</div>
+        <vaadin-icon class="drawer-icon" icon=${menuItem.logo}> </vaadin-icon>
+        <div class="menu-item">${menuItem.title}</div>
       </a>`;
     }
   };
@@ -420,10 +415,6 @@ export class AuthenticatedMenu extends LitElement {
   handlePopState() {
     const activePath = router.location?.route?.path;
     this.activeUrl = activePath || '/';
-  }
-
-  items(): (MenuItem | MenuItemGroup)[] {
-    return this.user ? this.menuDefinition.user : this.menuDefinition.guest;
   }
 
   getLoggedInContextMenuItems(): ContextMenuItem[] {
@@ -505,13 +496,8 @@ export class AuthenticatedMenu extends LitElement {
   }
 
   render(): TemplateResult {
-    const menu: TemplateResult[] = this.items().map((item, index) => {
-      let selected = false;
-      if (index === this.selectedMenuItemIndex) {
-        selected = true;
-      }
-
-      return this.renderMenuItem(item, selected);
+    const menu: TemplateResult[] = this.menu.map((item) => {
+      return this.renderMenuItem(item);
     });
 
     const shouldMakeUserVerify =
@@ -554,7 +540,7 @@ declare global {
 }
 
 function isMenuItemGroup(
-  menuItem: MenuItem | MenuItemGroup
-): menuItem is MenuItemGroup {
-  return (menuItem as MenuItemGroup).items !== undefined;
+  menuItem: MenuItem | MenuGroup
+): menuItem is MenuGroup {
+  return (menuItem as MenuGroup).items !== undefined;
 }
