@@ -123,6 +123,7 @@ export class IndexRoute extends LitElement implements BeforeEnterObserver {
         user-select: none;
         flex: 1 1 100%;
         height: 110px;
+        transition: background-color 0.3s ease;
       }
 
       .headline {
@@ -184,6 +185,8 @@ export class IndexRoute extends LitElement implements BeforeEnterObserver {
       a.choice-button.disabled:hover {
         background-color: var(--lumo-contrast-5pct);
       }
+
+      
 
       a.choice-button:hover {
         background-color: var(--lumo-contrast-10pct);

@@ -1,7 +1,9 @@
 import { DivisionAnalysisResponse } from "../types/DivisionAnalysisTypes";
+import { GameKnowledgePageResponse, GameKnowledgeResponse, SingleGameKnowledgeResponse } from "../types/GameKnowledgeTypes";
 import { MenuResponse } from "../types/HomepageMenuTypes";
 import { HomepageResponse } from "../types/HomepageTypes";
-
+import { TooltipResponse } from "../types/TooltipTypes";
+import qs from "qs";
 export class StrapiAdapter {
   static baseUrl = process.env.STRAPI_URL;
   static apiUrl: string = `${StrapiAdapter.baseUrl}/api`;
@@ -21,7 +23,32 @@ export class StrapiAdapter {
   }
 
   static getDivisionAnalysisUrl() {
-    return `${StrapiAdapter.apiUrl}/division-analyses?populate[UnitDescriptors][populate][UnitWithDescription][fields][0]=UnitId&populate[UnitDescriptors][populate][UnitWithDescription][fields][1]=UnitDescription&populate[Pros][populate][fields][0]=BulletPoint&populate[Cons][populate][fields][0]=BulletPoint&pagination[pageSize]=50&pagination[page]=1`;
+    const queryParams = qs.stringify({
+      populate: {
+        "UnitDescriptors": {
+          populate: {
+            "UnitWithDescription": {
+              fields: ["UnitId", "UnitDescription"]
+            }
+          }
+        },
+        "Pros": {
+          populate: {
+            fields: ["BulletPoint"]
+          }
+        },
+        "Cons": {
+          populate: {
+            fields: ["BulletPoint"]
+          }
+        }
+      },
+      pagination: {
+        pageSize: 50,
+        page: 1
+      }
+    });
+    return `${StrapiAdapter.apiUrl}/division-analyses?${queryParams}`;
   }
 
   static async getHomePage(): Promise<HomepageResponse | null> {
@@ -58,7 +85,24 @@ export class StrapiAdapter {
   }
 
   static getHomePageMenuUrl() {
-    return `${StrapiAdapter.apiUrl}/homepage-menu?populate[MenuGroup][populate][menu_items][fields][0]=Display&populate[MenuGroup][populate][menu_items][fields][1]=Logo&populate[MenuGroup][populate][menu_items][fields][2]=URL&populate[MenuGroup][populate][menu_items][fields][3]=Image&populate[MenuGroup][populate][menu_items][populate][Image][fields][0]=url&populate[MenuGroup][populate][menu_items][fields][4]=Authenticated&populate[MenuGroup][fields][0]=Display`;
+    const queryParams = qs.stringify({
+      populate: {
+        "MenuGroup": {
+          populate: {
+            "menu_items": {
+              fields: ["Display", "Logo", "URL", "Image", "Authenticated"],
+              populate: {
+                "Image": {
+                  fields: ["url"]
+                }
+              }
+            }
+          },
+          fields: ["Display"]
+        }
+      }
+    });
+    return `${StrapiAdapter.apiUrl}/homepage-menu?${queryParams}`;
   }
 
   static async getSideMenu(): Promise<MenuResponse | null> {
@@ -76,6 +120,125 @@ export class StrapiAdapter {
   }
 
   static getSideMenuUrl() {
-    return `${StrapiAdapter.apiUrl}/side-menu?populate[MenuGroup][populate][menu_items][populate][Item][fields][0]=Display&populate[MenuGroup][populate][menu_items][populate][Item][fields][1]=Logo&populate[MenuGroup][populate][menu_items][populate][Item][fields][2]=URL&populate[MenuGroup][populate][menu_items][populate][Item][fields][3]=Image&populate[MenuGroup][populate][menu_items][populate][Item][fields][4]=Authenticated&populate[MenuGroup][fields][0]=Display`;
+    const queryParams = qs.stringify({
+      populate: {
+        "MenuGroup": {
+          populate: {
+            "menu_items": {
+              populate: {
+                "Item": {
+                  fields: ["Display", "Logo", "URL", "Image", "Authenticated"]
+                }
+              }
+            }
+          },
+          fields: ["Display"]
+        }
+      }
+    });
+    return `${StrapiAdapter.apiUrl}/side-menu?${queryParams}`;
   }
+
+  static async getGameKnowledges(page: number, pageSize: number): Promise<GameKnowledgeResponse | null>{
+    try {
+      const response = await fetch(StrapiAdapter.getGameKnowledgesUrl(page, pageSize));
+      if (!response.ok) {
+        throw new Error('Failed to fetch game guides');
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to fetch game guides');
+    }
+  }
+
+  static async getSingleGameKnowledge(slug: string): Promise<SingleGameKnowledgeResponse | null> {
+    try {
+      const response = await fetch(StrapiAdapter.getSingleGameKnowledgeUrl(slug));
+      if (!response.ok) {
+        throw new Error('Failed to fetch game guide');
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to fetch game guide');
+    }
+  }
+
+  static async getGameKnowledgePage(): Promise<GameKnowledgePageResponse | null> {
+    try {
+      const response = await fetch(StrapiAdapter.getGameKnowledgePageUrl());
+      if (!response.ok) {
+        throw new Error('Failed to fetch game knowledge page');
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to fetch game knowledge page');
+    }
+
+  }
+
+  static getGameKnowledgePageUrl() {
+    const queryParams = qs.stringify({
+      populate: {
+        GameKnowledgeGroup: {
+          fields: ["Title"],
+          populate: {
+            game_knowledges: {
+              fields: ["Title", "slug"]
+            }
+          }
+        }
+      }
+    });
+    return `${StrapiAdapter.apiUrl}/game-knowledge-page?${queryParams}`;
+  }
+
+  static getBaseGameKnowledgeUrl() {
+    return `${StrapiAdapter.apiUrl}/game-knowledges`;
+  }
+
+  static getSingleGameKnowledgeUrl(slug: string) {
+
+    
+    const queryParams = qs.stringify({
+      populate: {
+        related_game_knowledges: {
+          fields: ['Title', 'slug']
+        }
+      }
+    });
+    
+    return `${StrapiAdapter.getBaseGameKnowledgeUrl()}/${slug}?${queryParams}`;
+  }
+
+  static getGameKnowledgesUrl(page: number, pageSize: number) {
+    return `${StrapiAdapter.getBaseGameKnowledgeUrl()}?pagination[page]=${page}&pagination[pageSize]=${pageSize}`;
+  }
+
+  static async getTooltip(slug: string): Promise<TooltipResponse | null> {
+    try {
+      const response = await fetch(StrapiAdapter.getTooltipUrl(slug));
+      if (!response.ok) {
+        throw new Error('Failed to fetch tooltip');
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to fetch tooltip');
+    }
+  }
+
+  static getTooltipUrl(slug: string) {
+    return `${StrapiAdapter.apiUrl}/tooltips/${slug}`;
+  }
+
 }
+
+
+// http://localhost:1337/api/game-knowledge-page?populate[GameKnowledgeGroup][fields][0]=Title&populate[GameKnowledgeGroup][populate][game_knowledges][fields][0]=Title&populate[GameKnowledgeGroup][populate][game_knowledges][fields][1]=slug&populate[GameKnowledgeGroup][populate][game_knowledges][populate][game_knowledges][fields][0]=Title&populate[GameKnowledgeGroup][populate][game_knowledges][populate][game_knowledges][fields][1]=slug

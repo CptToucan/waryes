@@ -35,6 +35,8 @@ import "./routes/deck-draft";
 import "./routes/damage-calculator";
 import "./routes/defcon2";
 import "./routes/upload-bundle";
+import "./routes/game-knowledges";
+import "./routes/single-game-knowledge";
 
 /** Components */
 import "./components/unit-card";

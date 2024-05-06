@@ -32,6 +32,11 @@ export class UnitsRoute extends LitElement implements BeforeEnterObserver {
         height: 25px;
         align-items: center;
         overflow: hidden;
+        transition: background-color 0.3s ease;
+      }
+
+      .unit:hover {
+        background-color: var(--lumo-contrast-10pct);
       }
 
       a {

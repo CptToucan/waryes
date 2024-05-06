@@ -97,7 +97,6 @@ class BundleManager {
 
     try {
       const latestPatch = await PatchDatabaseAdapter.latest();
-      console.log(latestPatch);
 
       if(!latestPatch) {
         throw new Error('No latest patch found');
