@@ -76,6 +76,7 @@ export class MarkdownRenderer extends LitElement {
     };
 
     showdown.extension('myext', extension);
+    showdown.setOption('tables', true);
     const converter = new showdown.Converter({
       extensions: ['myext'],
     });
