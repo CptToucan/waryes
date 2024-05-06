@@ -29,6 +29,8 @@ const routes: Route[] = [
   {path: '/damage-calculator', component: 'damage-calculator-route'},
   {path: '/defcon2', component: 'defcon2-route'},
   {path: '/upload-bundle', component: 'upload-bundle-route'},
+  {path: '/game-knowledge', component: 'game-knowledge-route'},
+  {path: '/game-knowledge/:slug', component: 'single-knowledge-route'},
 ];
 
 // Features.firebase_auth routes

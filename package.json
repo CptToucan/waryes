@@ -23,6 +23,7 @@
     "@lit-labs/motion": "^1.0.2",
     "@svgdotjs/svg.js": "^3.2.0",
     "@svgdotjs/svg.panzoom.js": "^2.1.2",
+    "@types/showdown": "^2.0.6",
     "@vaadin/accordion": "23.3.12",
     "@vaadin/app-layout": "23.3.12",
     "@vaadin/avatar": "23.3.12",
@@ -72,6 +73,7 @@
     "firebase": "^9.9.4",
     "html-to-image": "^1.11.11",
     "lit": "^2.1.0",
+    "showdown": "^2.1.0",
     "side-drawer": "^3.1.0"
   },
   "devDependencies": {
