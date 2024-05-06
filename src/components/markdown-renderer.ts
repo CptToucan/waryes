@@ -47,6 +47,10 @@ export class MarkdownRenderer extends LitElement {
         color: var(--lumo-contrast-90pct);
       }
 
+      table {
+        margin-bottom: var(--lumo-space-m);
+      }
+
       p img {
         display: block;
         margin-left: auto;
@@ -93,8 +97,7 @@ export class MarkdownRenderer extends LitElement {
     });
     const text = this.markdown;
     const mdHtml = converter.makeHtml(text);
-const wrappedHtml = mdHtml.replace(/<table/g, '<div class="table-wrapper"><table').replace(/<\/table>/g, '</table></div>');
-    return html`${unsafeHTML(wrappedHtml)}`;
+    return html`${unsafeHTML(mdHtml)}`;
   }
 }
 
