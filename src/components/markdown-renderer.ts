@@ -15,7 +15,7 @@ export class MarkdownRenderer extends LitElement {
         justify-content: center;
         align-items: center;
       }
-      * {
+      p, ul, h1, h2, h3, h4, h5, h6 {
         width: 100%;
       }
 
@@ -57,6 +57,17 @@ export class MarkdownRenderer extends LitElement {
         margin: 0;
         margin-bottom: var(--lumo-space-m);
       }
+
+      th {
+        background-color: var(--lumo-contrast-10pct);
+        padding: var(--lumo-space-s);
+      }
+
+      td {
+        background-color: var(--lumo-contrast-5pct);
+        padding: var(--lumo-space-s);
+        font-size: var(--lumo-font-size-s);
+      }
     `;
   }
 
@@ -82,7 +93,8 @@ export class MarkdownRenderer extends LitElement {
     });
     const text = this.markdown;
     const mdHtml = converter.makeHtml(text);
-    return html`${unsafeHTML(mdHtml)}`;
+const wrappedHtml = mdHtml.replace(/<table/g, '<div class="table-wrapper"><table').replace(/<\/table>/g, '</table></div>');
+    return html`${unsafeHTML(wrappedHtml)}`;
   }
 }
 
