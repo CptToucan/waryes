@@ -289,7 +289,7 @@ export class AuthenticatedMenu extends LitElement {
       <div class="navbar-layout" slot="navbar">
         <div class="left-navbar">
           <a class="logo" href="/">
-            <img height="32" src=${WaryesImage} />
+            <img height="28" src="/waryes-2024-transparent.png" />
           </a>
 
           <unit-search @unit-selected=${this.unitSelected}></unit-search>

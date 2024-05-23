@@ -37,6 +37,8 @@ import "./routes/defcon2";
 import "./routes/upload-bundle";
 import "./routes/game-knowledges";
 import "./routes/single-game-knowledge";
+import "./routes/pick-ban-tool"
+import "./routes/pick-ban-session";
 
 /** Components */
 import "./components/unit-card";

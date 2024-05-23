@@ -238,6 +238,24 @@ export class StrapiAdapter {
     return `${StrapiAdapter.apiUrl}/tooltips/${slug}`;
   }
 
+  static async getPickBanConfigs(): Promise<any> {
+    try {
+      const response = await fetch(StrapiAdapter.getPickBanConfigsUrl());
+      if (!response.ok) {
+        throw new Error('Failed to fetch pick ban configs');
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Failed to fetch pick ban configs');
+    }
+  }
+
+  static getPickBanConfigsUrl() {
+    return `${StrapiAdapter.apiUrl}/pick-ban-configs`;
+  }
+
 }
 
 
