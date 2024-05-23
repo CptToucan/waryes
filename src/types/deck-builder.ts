@@ -5,7 +5,7 @@ enum UnitCategory {
   INF = 'EDefaultFactories/Infantry',
   ART = 'EDefaultFactories/Art',
   TNK = 'EDefaultFactories/Tanks',
-  AA = 'EDefaultFactories/AT',
+  AA = 'EDefaultFactories/DCA',
   HEL = 'EDefaultFactories/Helis',
   AIR = 'EDefaultFactories/Planes',
   DEFENSE = 'EDefaultFactories/Defense',
