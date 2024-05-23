@@ -3,7 +3,7 @@ enum UnitCategory {
   LOG = 'EDefaultFactories/Logistic',
   REC = 'EDefaultFactories/Recons',
   INF = 'EDefaultFactories/Infantry',
-  ART = 'EDefaultFactories/Support',
+  ART = 'EDefaultFactories/Art',
   TNK = 'EDefaultFactories/Tanks',
   AA = 'EDefaultFactories/AT',
   HEL = 'EDefaultFactories/Helis',
