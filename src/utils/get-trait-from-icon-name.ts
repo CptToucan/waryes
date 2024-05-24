@@ -145,17 +145,17 @@ const iconTraitMap: IconTraitMap = {
       icon: 'trait-ew',
       name: "Electronic Warfare", range: '3533m', 
       activationCondition: 'Artillery or recon with exceptional optics in range', 
-      effects: [
-          '-43 optical strength and removes GSR bonus if unit is recon',
-          '+50% dispersion if unit is artillery'
-      ]
+      effects: ['-20% accuracy to enemy radar anti-air units'] 
   },
   'trait-jammer':
   {
       icon: 'trait-jammer',
       name: "Jammer", range: '3533m', 
       activationCondition: 'N/A', 
-      effects: ['-20% accuracy to enemy radar anti-air units'] 
+      effects: [
+        '-43 optical strength and removes GSR bonus if unit is recon',
+        '+50% dispersion if unit is artillery'
+    ]
   }
 };
 
