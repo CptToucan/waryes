@@ -111,7 +111,7 @@ export class PickBanSessionRoute
     
     let output = html``;
     if(this.sessionController?.session?.session?.finished) {
-      output = html`<div>Session is finished</div>`;
+      output = html`${this.renderGame()}`;
     }
     else if (this.sessionController?.session?.session?.activeTeam === undefined) {
       output = this.renderLobby();

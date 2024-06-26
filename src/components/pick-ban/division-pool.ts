@@ -41,7 +41,7 @@ class PickBanDivisionPool extends LitElement {
         padding: var(--lumo-space-s);
         background-color: var(--lumo-contrast-5pct);
         border-radius: var(--lumo-border-radius);
-        max-width: 800px;
+        max-width: 1200px;
         flex: 1 1 100%;
         box-sizing: border-box;
         overflow: hidden;
@@ -49,9 +49,9 @@ class PickBanDivisionPool extends LitElement {
 
       .divisions {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
         grid-auto-rows: minmax(
-          80px,
+          60px,
           1fr
         ); /* Set row height to same as column width */
         gap: var(--lumo-space-xs);
@@ -104,7 +104,7 @@ class PickBanDivisionPool extends LitElement {
       .division-choice division-flag {
         width: unset;
         display: flex;
-        max-width: 60px;
+        max-width: 40px;
       }
     `;
   }
@@ -123,6 +123,9 @@ class PickBanDivisionPool extends LitElement {
 
   @property({type: Object})
   divisionsMap?: DivisionsMap;
+
+  @property()
+  interactable = true;
 
   renderDivision(
     divisionDescriptor: string,
@@ -153,8 +156,6 @@ class PickBanDivisionPool extends LitElement {
     const isUsersTurn = this.isUsersTurn;
 
     const isPoolActive = isActive && isUsersTurn;
-
-    console.log(isActive, isUsersTurn, isPoolActive);
 
     return html`<div class="card">
       <h3>${this.name}</h3>

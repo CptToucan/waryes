@@ -34,7 +34,7 @@ class PickBanActiveSession extends LitElement {
         box-sizing: border-box;
         width: 100%;
         height: 100%;
-        gap: var(--lumo-space-m);
+        gap: var(--lumo-space-xs);
       }
 
       h1,
@@ -108,6 +108,10 @@ class PickBanActiveSession extends LitElement {
     return null;
   }
 
+  get isFinished() {
+    return this.session?.session.finished;
+  }
+
   getPoolForStage(stage: PickBanStage) {
     const poolType = stage?.poolType;
 
@@ -152,6 +156,10 @@ class PickBanActiveSession extends LitElement {
   }
 
   get isUsersTurn() {
+    if (this.isFinished) {
+      return false;
+    }
+
     return this.activeUser?.id === this.user?.uid;
   }
 
@@ -175,292 +183,6 @@ class PickBanActiveSession extends LitElement {
     `;
   }
 
-  /*
-  renderPool(
-    pool: LivePool,
-    isActive: boolean,
-    isUsersTurn: boolean,
-    activeStage?: PickBanStage
-  ) {
-    if (!pool) {
-      return html`<div>No pool</div>`;
-    }
-
-    const canUserPick = isActive && isUsersTurn;
-
-    let isDivisionPool = false;
-
-    if (pool.type === 'DIVISION') {
-      isDivisionPool = true;
-    }
-
-    let choiceRenderer = this.renderChoices.bind(this);
-    let selectionRenderer = this.renderSelections.bind(this);
-
-    if (isDivisionPool) {
-      choiceRenderer = this.renderDivisionChoices.bind(this);
-      selectionRenderer = this.renderDivisionSelections.bind(this);
-    }
-
-    return html`
-      <div class="pool ${isActive ? 'active' : ''}">
-        <vaadin-details opened>
-          <h3 slot="summary">${pool.type}</h3>
-          <div class="pool-group">
-            <div class="pool-title">Available</div>
-            <div class="choices">
-              ${choiceRenderer(
-                pool.pool.available,
-                !canUserPick,
-                activeStage?.type
-              )}
-            </div>
-
-            <div class="pool-group">
-              <div class="pool-title">Picked</div>
-              <div class="choices">
-                ${selectionRenderer(pool.pool.selected)}
-              </div>
-            </div>
-
-            <div class="pool-group">
-              <div class="pool-title">Banned</div>
-              <div class="choices">${selectionRenderer(pool.pool.banned)}</div>
-            </div>
-          </div>
-        </vaadin-details>
-      </div>
-    `;
-  }
-  */
-
-  /*
-  renderSelections(choices: PickBanSelectedItem[]) {
-    return html`${choices.map((choice) => {
-      return html`<div>
-        <div>${choice.user.name}</div>
-        <div class="selection-item"><span>${choice.item}</span></div>
-      </div>`;
-    })}`;
-  }
-  */
-
-  /*
-  renderChoices(choices: string[], disabled: boolean, type?: string) {
-    let buttonTheme = 'contrast';
-
-    if (this.activeStage?.type === PICK_TYPE.BAN) {
-      buttonTheme = 'error';
-    } else if (this.activeStage?.type === PICK_TYPE.PICK) {
-      buttonTheme = 'success';
-    }
-
-    return html`${choices.map((choice: string, index: number) => {
-      return html`<vaadin-button
-        theme="${buttonTheme} small primary"
-        ?disabled=${this.requestMade || disabled}
-        @click=${() => {
-          this.dispatchEvent(
-            new CustomEvent('selection', {
-              detail: {
-                choice,
-                index,
-                type,
-              },
-            })
-          );
-          this.startTimer();
-        }}
-        >${choice}</vaadin-button
-      >`;
-    })}`;
-    
-  }
-  */
-
-  /*
-  renderDivisionChoices(choices: string[], disabled: boolean, type?: string) {
-    return html`${choices.map((choice: string, index: number) => {
-      const division = this.divisionsMap?.[choice];
-      const divisionName = division?.name ?? choice;
-
-      let buttonTheme = 'contrast';
-
-      if (this.activeStage?.type === PICK_TYPE.BAN) {
-        buttonTheme = 'error';
-      } else if (this.activeStage?.type === PICK_TYPE.PICK) {
-        buttonTheme = 'success';
-      }
-
-      return html`<vaadin-button
-        class="division"
-        theme="${buttonTheme} small primary"
-        ?disabled=${this.requestMade || disabled}
-        @click=${() => {
-          this.dispatchEvent(
-            new CustomEvent('selection', {
-              detail: {
-                choice,
-                index,
-                type,
-              },
-            })
-          );
-          this.startTimer();
-        }}
-        ><division-flag
-          slot="prefix"
-          style="width: 25px; min-width: 25px"
-          .divisionId=${choice}
-        ></division-flag>
-        ${divisionName}</vaadin-button
-      >`;
-    })}`;
-  }
-
-  renderDivisionSelections(choices: PickBanSelectedItem[]) {
-    return html`${choices.map((choice) => {
-      const division = this.divisionsMap?.[choice.item];
-      const divisionName = division?.name ?? choice.item;
-
-      return html`<div class="division-choice">
-        <div>${choice.user.name}</div>
-        <div class="selection-item">
-          <division-flag
-            slot="prefix"
-            .divisionId=${choice.item}
-          ></division-flag
-          ><span>${divisionName}</span>
-        </div>
-      </div>`;
-    })}`;
-  }
-  */
-
-  /*
-  renderPools(
-    pools:
-      | {
-          MAP: LivePool;
-          DIVISION: {
-            NATO: LivePool;
-            PACT: LivePool;
-            NEUTRAL: LivePool;
-          };
-        }
-      | undefined,
-    activePool: LivePool | null,
-    isUsersTurn: boolean,
-    activeStage?: PickBanStage
-  ) {
-    console.log(pools, activePool, isUsersTurn, activeStage);
-
-    if (!pools) {
-      return html`<div>No pools</div>`;
-    }
-
-    const mapPool = pools.MAP;
-    const divisionPool = pools.DIVISION;
-
-    const mapPoolOutput = html`
-      ${this.renderPool(
-        mapPool,
-        mapPool === activePool,
-        isUsersTurn,
-        activeStage
-      )}
-    `;
-
-    const natoOutput = html`
-      ${this.renderPool(
-        divisionPool.NATO,
-        divisionPool.NATO === activePool,
-        isUsersTurn,
-        activeStage
-      )}
-    `;
-
-    const pactOutput = html`
-      ${this.renderPool(
-        divisionPool.PACT,
-        divisionPool.PACT === activePool,
-        isUsersTurn,
-        activeStage
-      )}
-    `;
-
-    const neutralOutput = html`
-      ${this.renderPool(
-        divisionPool.NEUTRAL,
-        divisionPool.NEUTRAL === activePool,
-        isUsersTurn,
-        activeStage
-      )}
-    `;
-
-    const divisionOutput = [];
-    if (this.session?.session.config.mode === MODE.NATO_V_PACT) {
-      divisionOutput.push(natoOutput, pactOutput);
-    }
-    if (this.session?.session.config.mode === MODE.NATO_V_NATO) {
-      divisionOutput.push(natoOutput);
-    }
-    if (this.session?.session.config.mode === MODE.PACT_V_PACT) {
-      divisionOutput.push(pactOutput);
-    }
-    if (this.session?.session.config.mode === MODE.ALL_V_ALL) {
-      divisionOutput.push(neutralOutput);
-    }
-
-    return html`<div class="pools">
-      <div class="grouped-pools">${mapPoolOutput}</div>
-      <div class="grouped-pools">${divisionOutput}</div>
-    </div>`;
-  }
-
-  renderSideSelector(isUsersTurn: boolean) {
-    return html`
-      <div class="side-selector">
-        ${isUsersTurn
-          ? html`<h2>Pick an alliance</h2>`
-          : html`<h2>Opponent is picking an alliance</h2>`}
-        ${isUsersTurn
-          ? html` <div class="choices">
-              <vaadin-button
-                theme="contrast small primary"
-                @click=${() => {
-                  this.dispatchEvent(
-                    new CustomEvent('selection', {
-                      detail: {
-                        choice: 'NATO',
-                        type: 'PICK_SIDE',
-                      },
-                    })
-                  );
-                }}
-                >NATO</vaadin-button
-              >
-              <vaadin-button
-                theme="contrast small primary"
-                @click=${() => {
-                  this.dispatchEvent(
-                    new CustomEvent('selection', {
-                      detail: {
-                        choice: 'PACT',
-                        type: 'PICK_SIDE',
-                      },
-                    })
-                  );
-                }}
-                >PACT</vaadin-button
-              >
-            </div>`
-          : ''}
-      </div>
-    `;
-  }
-  */
-
   renderGameUsers() {
     return html`
       <div class="users">
@@ -481,12 +203,22 @@ class PickBanActiveSession extends LitElement {
         .gameSlots=${gameSlots}
         .stages=${stages}
         .history=${history}
+        .interactable=${this.isFinished ? false : this.isUsersTurn}
       ></pick-ban-game-area>
     `;
   }
 
   renderTitle(config: PickBanConfig) {
     return html` <h1>${config.name}</h1> `;
+  }
+
+  renderSideSelector() {
+    return html`
+      <div class="side-selector">
+        <vaadin-button @click=${() => this.startTimer()}>NATO</vaadin-button>
+        <vaadin-button @click=${() => this.startTimer()}>PACT</vaadin-button>
+      </div>
+    `;
   }
 
   renderDivisionPool(pool: LivePool | null, activeStage: PickBanStage | null) {
@@ -499,6 +231,7 @@ class PickBanActiveSession extends LitElement {
         .isActive=${pool === this.activePool}
         .isUsersTurn=${this.isUsersTurn}
         .divisionsMap=${this.divisionsMap}
+        .interactable=${this.isFinished ? false : this.isUsersTurn}
         @division-selected=${(event: CustomEvent) => {
           const {index} = event.detail;
           this.dispatchEvent(
@@ -523,10 +256,9 @@ class PickBanActiveSession extends LitElement {
         .pool=${pool}
         .isActive=${pool === this.activePool}
         .isUsersTurn=${this.isUsersTurn}
+        .interactable=${this.isFinished ? false : this.isUsersTurn}
         @map-selected=${(event: CustomEvent) => {
           const {index} = event.detail;
-
-          console.log(event.detail);
           this.dispatchEvent(
             new CustomEvent('selection', {
               detail: {
@@ -544,6 +276,14 @@ class PickBanActiveSession extends LitElement {
     let divisionPoolOutput = null;
 
     if (this.session?.session?.config?.mode === MODE.NATO_V_PACT) {
+      divisionPoolOutput = html`${this.renderDivisionPool(
+        this.pools?.DIVISION.NATO || null,
+        this.activeStage || null
+      )}
+      ${this.renderDivisionPool(
+        this.pools?.DIVISION.PACT || null,
+        this.activeStage || null
+      )}`;
     } else if (this.session?.session?.config?.mode === MODE.NATO_V_NATO) {
     } else if (this.session?.session?.config?.mode === MODE.PACT_V_PACT) {
     } else if (this.session?.session?.config?.mode === MODE.ALL_V_ALL) {
@@ -558,6 +298,7 @@ class PickBanActiveSession extends LitElement {
         ? this.renderTitle(this.session?.session?.config)
         : 'No config'}
       ${this.renderStages(this.stages || [], this.activeStageIndex || 0)}
+      ${this.renderSideSelector()}
       ${this.session?.session?.gameSlots && this.stages
         ? this.renderSelectionArea(
             this.session?.session?.gameSlots,
@@ -568,36 +309,6 @@ class PickBanActiveSession extends LitElement {
       ${this.renderMapPool(this.pools?.MAP || null, this.activeStage || null)}
       ${divisionPoolOutput}
     `;
-
-    /*
-    let renderSideSelector = false;
-
-    if (this.activeStage?.type === PICK_TYPE.SIDE_PICK) {
-      renderSideSelector = true;
-    }
-
-    return html`
-      <h1 class="instruction">
-        ${this.activeUser?.name} | ${this.activeStage?.type} |
-        ${this.activeStage?.poolType}
-      </h1>
-
-      ${this.renderGameUsers()}
-      ${renderSideSelector ? this.renderSideSelector(this.isUsersTurn) : ''}
-
-      <div class="layout">
-        ${!renderSideSelector
-          ? this.renderPools(
-              this.pools,
-              this.activePool,
-              this.isUsersTurn,
-              this.activeStage
-            )
-          : ''}
-        ${this.renderStages(this.stages || [], this.activeStageIndex || 0)}
-      </div>
-    `;
-    */
   }
 }
 
@@ -608,12 +319,3 @@ declare global {
 }
 
 export default PickBanActiveSession;
-
-/*
-        ${this.activePool ? this.renderPools(
-          this.pools || {}, // Add a default value of an empty object if `this.pools` is `undefined`
-          this.activePool,
-          this.isUsersTurn,
-          this.activeStage
-        ) : ''}
-        */

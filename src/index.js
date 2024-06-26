@@ -39,6 +39,8 @@ import "./routes/game-knowledges";
 import "./routes/single-game-knowledge";
 import "./routes/pick-ban-tool"
 import "./routes/pick-ban-session";
+import "./routes/pick-ban-sessions";
+import "./routes/finished-pick-ban-session";
 
 /** Components */
 import "./components/unit-card";

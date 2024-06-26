@@ -48,7 +48,7 @@ class PickBanMapPool extends LitElement {
 
       .maps {
         display: flex;
-
+        justify-content: center;
         gap: var(--lumo-space-xs);
       }
 
@@ -110,9 +110,12 @@ class PickBanMapPool extends LitElement {
   @property()
   isUsersTurn?: boolean;
 
+  @property()
+  interactable = true;
+
   renderMap(mapName: string, disabled: boolean, availableIndex?: number) {
     return html`<vaadin-button
-      theme="contrast"
+      theme="contrast small"
       ?disabled=${disabled}
       @click=${() => {
         this.dispatchEvent(
@@ -131,8 +134,6 @@ class PickBanMapPool extends LitElement {
     const isUsersTurn = this.isUsersTurn;
 
     const isPoolActive = isActive && isUsersTurn;
-
-    console.log(isActive, isUsersTurn, isPoolActive);
 
     return html`<div class="card">
       <h3>${this.name}</h3>

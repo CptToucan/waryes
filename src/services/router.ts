@@ -33,6 +33,8 @@ const routes: Route[] = [
   {path: '/game-knowledge/:slug', component: 'single-knowledge-route'},
   {path: '/pick-ban-tool', component: 'pick-ban-tool-route'},
   {path: '/pick-ban-tool/:sessionId', component: 'pick-ban-session-route'},
+  {path: '/pick-ban-sessions/', component: 'pick-ban-sessions-route'}, 
+  {path: '/pick-ban-session/:sessionId', component: 'finished-pick-ban-session-route'}, 
 ];
 
 // Features.firebase_auth routes

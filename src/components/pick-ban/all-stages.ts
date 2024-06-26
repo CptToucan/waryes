@@ -37,7 +37,7 @@ class PickBanAllStages extends LitElement {
         border-radius: var(--lumo-border-radius);
         font-size: var(--lumo-font-size-s);
         overflow: hidden;
-        width: 70px !important;
+        min-width: 70px !important;
         padding-right: var(--lumo-space-s);
       }
 
@@ -47,6 +47,10 @@ class PickBanAllStages extends LitElement {
 
       .ban {
         background-color: var(--warno-very-bad-40pct);
+      }
+
+      .side-pick {
+        background-color: var(--lumo-primary-color-10pct);
       }
 
       .team-indicator {
@@ -108,6 +112,10 @@ class PickBanAllStages extends LitElement {
         } else if (stage.type === PICK_TYPE.BAN) {
           pickOrBan = 'ban';
         }
+        else if(stage.type === PICK_TYPE.SIDE_PICK) {
+          pickOrBan = 'side-pick';
+        }
+
 
         return html`<div class="stage-wrapper">
           <div class="stage ${isActive ? 'active' : ''} ${pickOrBan}">
@@ -131,68 +139,3 @@ declare global {
 
 export default PickBanAllStages;
 
-/*
-
-renderStages(stages: PickBanStage[], activeStageIndex: number) {
-  console.log(stages, activeStageIndex);
-  
-
-  return html`
-
-  `;
-
-  /*
-  return html`
-    <div class="stages">
-      ${stages.map((stage, index) => {
-        let user = this.session?.session?.gameSlots[stage.team - 1];
-        const historyForStage = this.history?.[index];
-        const pool = this.getPoolForStage(stage);
-
-        if (!pool) {
-          return html`<div>No pool</div>`;
-        }
-
-        let itemName = historyForStage?.selectedItem?.item;
-
-        const isDivision = pool.type === POOL_TYPE.DIVISION;
-
-        let divisionDescriptor;
-
-        if (isDivision) {
-          divisionDescriptor = itemName;
-
-          if (divisionDescriptor) {
-            itemName =
-              this.divisionsMap?.[divisionDescriptor]?.name || itemName;
-          }
-        }
-
-        return html`
-          <div
-            class="stage ${stage.type?.toLowerCase()} ${index ===
-            activeStageIndex
-              ? 'active'
-              : ''}"
-          >
-            <div>${user?.name} | ${stage.type} | ${stage.poolType}</div>
-            ${historyForStage
-              ? html`<div class="selection-item">
-                  ${isDivision
-                    ? html`<division-flag
-                        .divisionId=${divisionDescriptor}
-                      ></division-flag>`
-                    : ''}
-                  <span style="color: var(--lumo-contrast-70pct)"
-                    >${itemName}</span
-                  >
-                </div>`
-              : ''}
-          </div>
-        `;
-      })}
-    </div>
-  `;
-  
-}
-*/

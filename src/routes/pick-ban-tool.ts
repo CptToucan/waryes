@@ -120,7 +120,7 @@ export class PickBanToolRoute
   }
 
   render(): TemplateResult {
-    const tabs = ['Welcome', 'Host', 'Join', 'Spectate'];
+    const tabs = ['Welcome', 'Host', 'Join', 'Spectate', 'View Old Sessions'];
 
     let tabContent = html``;
     switch (this.selectedTabIndex) {

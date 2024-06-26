@@ -3,6 +3,7 @@ import {
   PickBanConfig,
   PickBanConfigWithId,
   PickBanSession,
+  PickBanSessionResponse,
 } from '../types/PickBanTypes';
 import {StrapiAdapter} from './StrapiAdapter';
 
@@ -184,6 +185,7 @@ export class PickBanAdapter {
       }
 
       const json = await response.json();
+
       return json;
     } catch (error) {
       console.error('Error ending draft session:', error);
@@ -191,7 +193,7 @@ export class PickBanAdapter {
     }
   }
 
-  static async pick(sessionId: string, pick: number) {
+  static async pick(sessionId: string, pick: number): Promise<PickBanSessionResponse> {
     try {
       const user = FirebaseService.auth.currentUser;
 
@@ -218,11 +220,12 @@ export class PickBanAdapter {
       );
 
       if (!response.ok) {
-        const json = await response.json();
+        const json = await response.json() as PickBanSessionResponse;
         throw new Error(json.message);
       }
 
       const json = await response.json();
+      console.log(json);
       return json;
     } catch (error) {
       console.error('Error making draft pick:', error);
@@ -230,7 +233,7 @@ export class PickBanAdapter {
     }
   }
 
-  static async ban(sessionId: string, ban: number) {
+  static async ban(sessionId: string, ban: number): Promise<PickBanSessionResponse> {
     try {
       const user = FirebaseService.auth.currentUser;
 
@@ -261,7 +264,8 @@ export class PickBanAdapter {
         throw new Error(json.message);
       }
 
-      const json = await response.json();
+      const json = await response.json() as PickBanSessionResponse;
+      console.log(json);
       return json;
     } catch (error) {
       console.error('Error making draft ban:', error);
@@ -269,7 +273,7 @@ export class PickBanAdapter {
     }
   }
 
-  static async pickSide(sessionId: string, side: string) {
+  static async pickSide(sessionId: string, side: string): Promise<PickBanSessionResponse> {
     try {
       const user = FirebaseService.auth.currentUser;
 
@@ -306,7 +310,7 @@ export class PickBanAdapter {
     }
   }
 
-  static async getSession(sessionId: string) {
+  static async getSession(sessionId: string): Promise<PickBanSessionResponse> {
     try {
       const response = await fetch(
         `${PickBanAdapter.apiUrl}/pick-ban/session/${sessionId}`
@@ -317,7 +321,9 @@ export class PickBanAdapter {
         throw new Error(json.message);
       }
       
-      const json = await response.json();
+      const json = await response.json() as PickBanSessionResponse;
+
+      console.log(json);
       return json;
     } catch (error) {
       console.error('Error getting draft session:', error);

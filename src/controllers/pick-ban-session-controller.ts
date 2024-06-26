@@ -7,6 +7,7 @@ import {
   PICK_TYPE,
   WrappedPickBanSession,
   DIVISION_ALLIANCE,
+  PickBanSessionResponse,
 } from '../types/PickBanTypes';
 
 export class PickBanSessionController implements ReactiveController {
@@ -29,15 +30,18 @@ export class PickBanSessionController implements ReactiveController {
   }
 
   async hostConnected() {
-    await this.updateSession();
+    await this.refreshSession();
     this._intervalID = setInterval(async () => {
-      await this.updateSession();
+      await this.refreshSession();
     }, 5000) as unknown as number;
   }
 
-  private async updateSession() {
-    const session = await PickBanAdapter.getSession(this.sessionId);
+  private async refreshSession() {
+    const sessionResponse = await PickBanAdapter.getSession(this.sessionId);
+    await this.updateSession(sessionResponse);
+  }
 
+  private async updateSession(session: PickBanSessionResponse) {
     this.old_session = this.session;
     this.session = session.session;
 
@@ -82,9 +86,9 @@ export class PickBanSessionController implements ReactiveController {
         duration: 5000,
         theme: '',
       });
-    }
 
-    await this.host.requestUpdate();
+      await this.host.requestUpdate();
+    }
   }
 
   public async start() {
@@ -96,12 +100,29 @@ export class PickBanSessionController implements ReactiveController {
   }
 
   public async pick(pickIndex: number) {
-    await PickBanAdapter.pick(this.sessionId, pickIndex);
+    try {
+      const sessionResponse = await PickBanAdapter.pick(
+        this.sessionId,
+        pickIndex
+      );
+      await this.updateSession(sessionResponse);
+    } catch (error) {
+      console.error(error);
+      notificationService.instance?.addNotification({
+        content: `${error}`,
+        duration: 5000,
+        theme: 'error',
+      });
+    }
   }
 
   public async ban(banIndex: number) {
     try {
-      await PickBanAdapter.ban(this.sessionId, banIndex);
+      const sessionResponse = await PickBanAdapter.ban(
+        this.sessionId,
+        banIndex
+      );
+      await this.updateSession(sessionResponse);
     } catch (error) {
       console.error(error);
       notificationService.instance?.addNotification({
@@ -113,7 +134,20 @@ export class PickBanSessionController implements ReactiveController {
   }
 
   public async pickSide(side: DIVISION_ALLIANCE) {
-    await PickBanAdapter.pickSide(this.sessionId, side);
+    try {
+      const sessionResponse = await PickBanAdapter.pickSide(
+        this.sessionId,
+        side
+      );
+      await this.updateSession(sessionResponse);
+    } catch (error) {
+      console.error(error);
+      notificationService.instance?.addNotification({
+        content: `${error}`,
+        duration: 5000,
+        theme: 'error',
+      });
+    }
   }
 
   hostDisconnected(): void {

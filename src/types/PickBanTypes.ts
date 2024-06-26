@@ -24,6 +24,11 @@ export interface PickBanConfig {
   };
 }
 
+export interface PickBanSessionResponse {
+  message: string;
+  session: WrappedPickBanSession;
+}
+
 export interface LivePool {
   type: POOL_TYPE;
   pool: {
@@ -123,6 +128,7 @@ export interface PickBanSession {
 
 export interface WrappedPickBanSession {
   session: PickBanSession;
+  id?: string;
   code?: string;
 }
 
