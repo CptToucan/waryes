@@ -18,7 +18,8 @@ enum Country {
   RFA = "RFA",
   US = "US",
   SOV = "SOV",
-  DDR = "DDR"
+  DDR = "DDR",
+  POL = "POL"
 }
 
 interface CostMatrix {

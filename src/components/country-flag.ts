@@ -8,6 +8,7 @@ import SovietUnion from '../../images/flags/soviet-union.svg';
 import UK from '../../images/flags/uk.svg';
 import USA from '../../images/flags/usa.svg';
 import WestGermany from '../../images/flags/west-germany.svg';
+import Poland from '../../images/flags/poland.svg';
 import { Country } from '../types/deck-builder';
 
 @customElement('country-flag')
@@ -55,6 +56,8 @@ export class CountryFlag extends LitElement {
       case Country.RFA:
         image = WestGermany;
         break;
+      case Country.POL:
+        image = Poland
     }
     return html`<img src=${image} alt=${this.country} title=${this.country} />`;
   }
