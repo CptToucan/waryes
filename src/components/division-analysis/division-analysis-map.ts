@@ -172,7 +172,7 @@ export class DivisionAnalysisMap extends LitElement {
     // svg.setAttribute("width", this.container.clientWidth.toString());
     const zoomPoint = new Point(3500, 6600);
 
-    svgInterface.zoom(0.3, zoomPoint);
+    svgInterface.zoom(0.25, zoomPoint);
 
     const images = [
       {
@@ -296,6 +296,29 @@ export class DivisionAnalysisMap extends LitElement {
         position: {x: 3300, y: 6600},
         lateArrival: true,
       },
+      {
+        divisionId: 'Descriptor_Deck_Division_US_101st_Airmobile_multi',
+        size: {width: 64, height: 64},
+        position: {x: 3380, y: 6650},
+        lateArrival: true,
+      },
+      {
+        divisionId: 'Descriptor_Deck_Division_SOV_56_AirAslt_Brig_multi',
+        size: {width: 64, height: 64},
+        position: {x: 4280, y: 6050},
+        lateArrival: true
+      },
+      {
+        divisionId: 'Descriptor_Deck_Division_RDA_Rugen_Gruppierung',
+        size: {width: 64, height: 64},
+        position: {x: 4200, y: 5500},
+      },
+      {
+        divisionId: 'Descriptor_Deck_Division_US_35th_Inf_multi',
+        size: {width: 64, height: 64},
+        position: {x: 3460, y: 6600},
+        lateArrival: true
+      }
     ];
 
     const padding = 4;

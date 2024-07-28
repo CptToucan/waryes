@@ -144,19 +144,38 @@ const iconTraitMap: IconTraitMap = {
   {
       icon: 'trait-ew',
       name: "Electronic Warfare", range: '3533m', 
-      activationCondition: 'Artillery or recon with exceptional optics in range', 
+      activationCondition: 'N/A', 
       effects: ['-20% accuracy to enemy radar anti-air units'] 
   },
   'trait-jammer':
   {
       icon: 'trait-jammer',
       name: "Jammer", range: '3533m', 
-      activationCondition: 'N/A', 
+
+      activationCondition: 'Artillery or recon with exceptional optics in range', 
       effects: [
         '-43 optical strength and removes GSR bonus if unit is recon',
         '+50% dispersion if unit is artillery'
     ]
-  }
+  },
+  'trait-airlift':
+  {
+      icon: 'trait-airlift',
+      name: "Airlift", range: 'N/A', 
+      activationCondition: 'N/A', 
+      effects: [
+        'This vehicle or gun can be transported by helicopters, as long as it gets the AIRLIFTER trait'
+    ]
+  },
+  'trait-airlifter':
+  {
+      icon: 'trait-airlifter',
+      name: "Airlift", range: 'N/A', 
+      activationCondition: 'N/A', 
+      effects: [
+        'This helicopter can transport vehicles or guns with the AIRLIFT trait'
+    ]
+  },
 };
 
 export function getTraitFromIconName(icon: string): Trait {

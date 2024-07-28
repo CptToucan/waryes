@@ -27,6 +27,10 @@ interface Diff {
   __new: unknown;
 }
 
+interface NewDiff {
+  __new: unknown;
+}
+
 type ArrayDiffElement = ['~', any];
 
 type ArrayDiffRemovedElement = ['-', any];
@@ -870,16 +874,31 @@ export class PatchNotesRoute extends LitElement {
   renderTransportDiff(transportChanges: AnyDiffArrayElement[]) {
     const outputHtml: TemplateResult[] = [];
 
-    const addedTranports = transportChanges.filter((diff) => {
-      return isArrayDiffAddedElement(diff);
-    });
 
-    const removedTranports = transportChanges.filter((diff) => {
-      return isArrayDiffRemovedElement(diff);
-    });
+    const isNewTransport = isNewDiff(transportChanges);
+    console.log(isNewTransport);
+    
+    let addedTransports: any[] = [];
+    let removedTransports: any[] = [];
 
-    if (addedTranports.length > 0) {
-      const addedTransports = addedTranports.map((diff) => {
+    if(isNewTransport) {
+      console.log(transportChanges)
+      addedTransports = [...(transportChanges.__new as any)]
+    }
+    else {
+      addedTransports = transportChanges?.filter((diff) => {
+        return isArrayDiffAddedElement(diff);
+      });
+  
+      removedTransports = transportChanges?.filter((diff) => {
+        return isArrayDiffRemovedElement(diff);
+      });
+    }
+
+
+
+    if (addedTransports.length > 0) {
+      addedTransports = addedTransports.map((diff) => {
         const transport = diff[1] as string;
         return html` <div>
           ${this.unitMap?.[transport]?.name || transport}
@@ -893,8 +912,8 @@ export class PatchNotesRoute extends LitElement {
       );
     }
 
-    if (removedTranports.length > 0) {
-      const removedTransports = removedTranports.map((diff) => {
+    if (removedTransports.length > 0) {
+      removedTransports = removedTransports.map((diff) => {
         const transport = diff[1] as string;
         return html` <div>
           ${this.unitMap?.[transport]?.name || transport}
@@ -923,6 +942,13 @@ function isDiff(diff: unknown): diff is Diff {
     return false;
   }
   return '__old' in diff && '__new' in diff;
+}
+
+function isNewDiff(diff: unknown): diff is NewDiff {
+  if (typeof diff !== 'object' || diff === null) {
+    return false;
+  }
+  return '__new' in diff;
 }
 
 function isAnyDiffElementArray(diff: unknown): diff is AnyDiffArrayElement[] {
