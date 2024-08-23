@@ -176,6 +176,15 @@ const iconTraitMap: IconTraitMap = {
         'This helicopter can transport vehicles or guns with the AIRLIFT trait'
     ]
   },
+  'trait-dazzler':
+  {
+      icon: 'trait-dazzler',
+      name: "Electro-optical Dazzler", range: 'N/A', 
+      activationCondition: 'N/A', 
+      effects: [
+        'Vehicles equipped with an Electro-Optical Dazzler inflict a penalty on all guided missiles targeting it. It acts as 10% ECM for a ground unit.'
+    ]
+  },
 };
 
 export function getTraitFromIconName(icon: string): Trait {
