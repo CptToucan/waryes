@@ -185,6 +185,15 @@ const iconTraitMap: IconTraitMap = {
         'Vehicles equipped with an Electro-Optical Dazzler inflict a penalty on all guided missiles targeting it. It acts as 10% ECM for a ground unit.'
     ]
   },
+  'trait-smoke-launcher':
+  {
+      icon: 'trait-smoke-launcher',
+      name: "Smoke Launchers", range: 'N/A', 
+      activationCondition: 'Activated by player by pressing B or SMOKE in the order panel', 
+      effects: [
+        'This vehicle is equipped with smoke launchers to generate a smoke cover when attacked.'
+    ]
+  },
 };
 
 export function getTraitFromIconName(icon: string): Trait {

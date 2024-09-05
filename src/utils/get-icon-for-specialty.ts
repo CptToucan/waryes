@@ -25,6 +25,7 @@ export const iconMap: IconMap = {
   _airlift: 'trait-airlifter',
   _canBeAirlifted: 'trait-airlift',
   _eo_dazzler: 'trait-dazzler',
+  _smoke_launcher: 'trait-smoke-launcher',
   hq: 'command',
   hq_veh: 'command',
   hq_inf: 'command',
