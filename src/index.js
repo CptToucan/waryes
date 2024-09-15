@@ -37,6 +37,7 @@ import "./routes/defcon2";
 import "./routes/upload-bundle";
 import "./routes/game-knowledges";
 import "./routes/single-game-knowledge";
+import "./routes/play-the-game";
 
 /** Components */
 import "./components/unit-card";

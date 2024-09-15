@@ -31,6 +31,7 @@ const routes: Route[] = [
   {path: '/upload-bundle', component: 'upload-bundle-route'},
   {path: '/game-knowledge', component: 'game-knowledge-route'},
   {path: '/game-knowledge/:slug', component: 'single-knowledge-route'},
+  {path: '/play-the-game', component: 'play-the-game-route'},
 ];
 
 // Features.firebase_auth routes

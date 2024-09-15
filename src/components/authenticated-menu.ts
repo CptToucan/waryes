@@ -20,6 +20,7 @@ import {Features, featureService} from '../services/features';
 import {Unit} from '../types/unit';
 import './verify-email';
 import { MenuItem, MenuGroup } from '../routes/index';
+import { BundleManagerService } from '../services/bundle-manager';
 
 /// Create a single menu item
 type MenuItemRenderer = (
@@ -244,9 +245,17 @@ export class AuthenticatedMenu extends LitElement {
     }
   }
 
-  renderAccountButton(): TemplateResult {
+  renderAccountButton() {
+    const output = [];
+
+    if(BundleManagerService.override) {
+      output.push(html`<a href="/play-the-game">
+        SEKRIT
+      </a>`)
+    }
+
     if (this.user) {
-      return html` <vaadin-context-menu
+      output.push( html` <vaadin-context-menu
         @item-selected=${this.contextMenuItemSelected}
         open-on="click"
         .items=${this.getLoggedInContextMenuItems()}
@@ -258,9 +267,10 @@ export class AuthenticatedMenu extends LitElement {
 
           <vaadin-icon icon="vaadin:user"></vaadin-icon>
         </vaadin-button>
-      </vaadin-context-menu>`;
+      </vaadin-context-menu>`);
     } else {
-      return html` <vaadin-button
+      output.push(html`
+      <vaadin-button
         theme="tertiary"
         aria-label="Sign in"
         @click=${() => {
@@ -268,8 +278,10 @@ export class AuthenticatedMenu extends LitElement {
         }}
       >
         <vaadin-icon icon="vaadin:sign-in"></vaadin-icon>
-      </vaadin-button>`;
+      </vaadin-button>`);
     }
+
+    return output;
   }
 
   render(): TemplateResult {

@@ -1,3 +1,5 @@
+import { BundleManagerService } from "../services/bundle-manager";
+
 export interface PatchRecord {
   name: string;
   createdAt: string;
@@ -60,6 +62,9 @@ export class PatchDatabaseAdapter {
   }
 
   static async fetchPatchFile(patchName: string) {
+    if(BundleManagerService.override) {
+      return BundleManagerService.loadOverride('patch.json');
+    }
     const response = await fetch(`${PatchDatabaseAdapter.staticUrl}/${patchName}/patch.json`);
     if (!response.ok) {
       throw new Error('Patch file not found');

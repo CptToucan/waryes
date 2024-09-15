@@ -14,7 +14,8 @@ export class DivisionFlag extends LitElement {
       }
 
       img {
-        width: 100%
+        width: 100%;
+        overflow: hidden;
       }
     `;
   }

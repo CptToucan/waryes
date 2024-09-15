@@ -1,12 +1,15 @@
-import { Division } from '../types/deck-builder';
-import { Unit, Weapon } from '../types/unit';
-import { isSpecialtyCommand } from '../utils/is-specialty-command';
-import { isSpecialtyRecon } from '../utils/is-specialty-recon';
-import { FamilyIndexTuple, TerrainResistance } from '../types/damageTable';
-import { PatchDatabaseAdapter, PatchRecord } from '../classes/PatchDatabaseAdapter';
+import {Division} from '../types/deck-builder';
+import {Unit, Weapon} from '../types/unit';
+import {isSpecialtyCommand} from '../utils/is-specialty-command';
+import {isSpecialtyRecon} from '../utils/is-specialty-recon';
+import {FamilyIndexTuple, TerrainResistance} from '../types/damageTable';
+import {
+  PatchDatabaseAdapter,
+  PatchRecord,
+} from '../classes/PatchDatabaseAdapter';
 
 export enum BucketFolder {
-  WARNO = 'warno'
+  WARNO = 'warno',
 }
 
 export enum BucketType {
@@ -19,15 +22,15 @@ export type DamageTable = {
   resistanceFamilyWithIndexes: FamilyIndexTuple[] | null;
   damageTable: number[][] | null;
   terrainResistances:
-  | {
-    name: string;
-    damageFamilies: TerrainResistance[];
-  }[]
-  | null;
+    | {
+        name: string;
+        damageFamilies: TerrainResistance[];
+      }[]
+    | null;
   defaultSuppressDamage: FamilyIndexTuple | null;
   suppressionDamageExceptions:
-  | { exception: string; suppression: FamilyIndexTuple }[]
-  | null;
+    | {exception: string; suppression: FamilyIndexTuple}[]
+    | null;
   armorToignoreForDamageFamilies: string[] | null;
 };
 
@@ -56,49 +59,122 @@ class BundleManager {
 
   latestPatch?: PatchRecord;
 
-  config: { [key in BucketFolder]: boolean } | null = null;
+  override = false;
 
-  setConfig(mod: BucketFolder, enabled: boolean): void {
-    const currentMods = localStorage.getItem('mods');
-    if (currentMods) {
-      const mods = JSON.parse(currentMods);
-      mods[mod] = enabled;
-      localStorage.setItem('mods', JSON.stringify(mods));
-    } else {
-      const mods = {
-        [BucketFolder.WARNO]: true,
+  constructor() {
+    this.openOverrideDatabase();
+  }
+  async openOverrideDatabase(): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('override', 1);
+
+      request.onerror = () => {
+        reject(new Error('Error opening database'));
       };
-      mods[mod] = enabled;
-      localStorage.setItem('mods', JSON.stringify(mods));
-    }
 
-    this.config = JSON.parse(localStorage.getItem('mods') || '{}');
+      request.onsuccess = (event) => {
+        resolve((event.target as IDBOpenDBRequest).result);
+      };
 
-    // refresh window
-
-    setTimeout(() => {
-      window.location.reload();
-    }, 3000);
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        db.createObjectStore('overrides', {keyPath: 'key'});
+      };
+    });
   }
 
-  public loadConfig() {
-    this.config = {
-      [BucketFolder.WARNO]: true,
-    };
+  async setOverride(key: string, value: unknown) {
+    try {
+      const db = await this.openOverrideDatabase();
+      const transaction = db.transaction('overrides', 'readwrite');
+      const store = transaction.objectStore('overrides');
 
-    localStorage.setItem('mods', JSON.stringify(this.config));
+      store.put({key, value});
+
+      transaction.oncomplete = () => {
+        console.log('Override set successfully');
+      };
+
+      transaction.onerror = (event) => {
+        console.error('Error setting override', event);
+      };
+    } catch (error) {
+      console.error('Failed to set override:', error);
+    }
+  }
+
+  async loadOverride(key: string) {
+    const db = await this.openOverrideDatabase();
+    const transaction = db.transaction('overrides', 'readonly');
+    const store = transaction.objectStore('overrides');
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(key);
+      if (!request) {
+        reject(new Error('Error loading override'));
+      }
+
+      request.onsuccess = () => {
+        try {
+          if (!request.result) {
+            throw new Error('No override found');
+          }
+          const jsonResponse = JSON.parse(request?.result?.value);
+          resolve(jsonResponse);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      request.onerror = () => {
+        reject(new Error('Error loading override'));
+      };
+    });
+  }
+
+  async clearOverrides() {
+    const db = await this.openOverrideDatabase();
+    const transaction = db.transaction('overrides', 'readwrite');
+    const store = transaction.objectStore('overrides');
+
+    store.clear();
   }
 
   async initialise() {
     if (this.initialised) {
       return;
     }
-    this.loadConfig();
+
+
+    try {
+      // if local override exists, use that
+      const warnoOverride = await this.loadOverride('warno.json');
+      if (warnoOverride) {
+        this.initialiseBucket(
+          warnoOverride as UnitDivisionJsonBundle,
+          BucketFolder.WARNO
+        );
+        this.override = true;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    try {
+      const damageTableOverride = await this.loadOverride('damageTable.json');
+
+      if (damageTableOverride) {
+        this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] =
+          damageTableOverride as DamageTable;
+      }
+    } catch (err) {
+      console.error(err);
+    }
 
     try {
       const latestPatch = await PatchDatabaseAdapter.latest();
 
-      if(!latestPatch) {
+      if (!latestPatch) {
         throw new Error('No latest patch found');
       }
 
@@ -106,28 +182,28 @@ class BundleManager {
 
       const latestPatchName = latestPatch.name;
 
-      const unitDivisions = await this.getBundleFor<UnitDivisionJsonBundle>(
-        BucketFolder.WARNO,
-        BucketType.UNITS_AND_DIVISIONS,
-        latestPatchName
-      );
+      if (!this.override) {
+        const unitDivisions = await this.getBundleFor<UnitDivisionJsonBundle>(
+          BucketFolder.WARNO,
+          BucketType.UNITS_AND_DIVISIONS,
+          latestPatchName
+        );
 
-      const damageTable = await this.getBundleFor<DamageTable>(
-        BucketFolder.WARNO,
-        BucketType.DAMAGE_TABLE,
-        latestPatchName
-      );
+        const damageTable = await this.getBundleFor<DamageTable>(
+          BucketFolder.WARNO,
+          BucketType.DAMAGE_TABLE,
+          latestPatchName
+        );
 
-      this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
-      // Warno
-      this.initialiseBucket(unitDivisions, BucketFolder.WARNO);
+        this.bundles[BucketFolder.WARNO][BucketType.DAMAGE_TABLE] = damageTable;
+        // Warno
+        this.initialiseBucket(unitDivisions, BucketFolder.WARNO);
+      }
 
       this.initialised = true;
-    }
-    catch (err) {
+    } catch (err) {
       console.error(err);
     }
-
   }
 
   initialiseBucket(
@@ -183,7 +259,7 @@ class BundleManager {
     await this.initialise();
     return [
       ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
-        .units || [])
+        .units || []),
     ];
   }
 
@@ -209,7 +285,7 @@ class BundleManager {
     await this.initialise();
     return [
       ...(this.bundles[BucketFolder.WARNO][BucketType.UNITS_AND_DIVISIONS]
-        .weapons || [])
+        .weapons || []),
     ];
   }
 
@@ -223,12 +299,10 @@ class BundleManager {
     bundleType: BucketType,
     version: string
   ): Promise<T> {
-
     return await this.getJsonFromStoragePath<T>(`${version}/${bundleType}`);
   }
 
   async getJsonFromStoragePath<T>(path: string): Promise<T> {
-
     const response = await fetch(`${process.env.STATIC_URL}/${path}`);
     const jsonData = await response.json();
     return jsonData;
