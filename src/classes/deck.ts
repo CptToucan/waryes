@@ -209,8 +209,8 @@ export class Deck {
 
     for (const deckUnit of units) {
       if (deckUnit) {
-        const categoryDescriptor = this.getUnitForPack(deckUnit.pack)?.factoryDescriptor as UnitCategory;
-
+        const categoryDescriptor = this.getUnitForPack(deckUnit.pack)
+          ?.factoryDescriptor as UnitCategory;
 
         if (categoryDescriptor !== undefined) {
           groupedUnits[categoryDescriptor].push(deckUnit);
@@ -369,6 +369,10 @@ export class Deck {
     }
 
     return undefined;
+  }
+
+  public getPackAvailableWithoutTransport(pack: Pack): boolean {
+    return pack.availableWithoutTransport || false;
   }
 
   public static getDefaultVeterancyForPack(pack: Pack): number {
@@ -597,20 +601,23 @@ export class Deck {
         */
       }
 
-      const transport = pack.availableTransportList?.find((transport) => {
-        return (
-          card.transport?.descriptor?.toLowerCase() === transport.toLowerCase()
-        );
-      });
+      let transport = undefined;
+
+      try {
+        transport = pack.availableTransportList?.find((transport) => {
+          return (
+            card.transport?.descriptor?.toLowerCase() ===
+            transport.toLowerCase()
+          );
+        });
+      } catch (e) {
+        console.error(e);
+      }
 
       const transportUnit = transport ? options.unitMap[transport] : undefined;
 
       // If we have transports then availableWithoutTransport must be set to skip adding a transport
-      if (
-        pack.availableTransportList &&
-        pack.availableWithoutTransport &&
-        !transportUnit
-      ) {
+      if (!pack.availableWithoutTransport && !transportUnit) {
         throw new Error('Decoded pack unit must have transport');
       }
 

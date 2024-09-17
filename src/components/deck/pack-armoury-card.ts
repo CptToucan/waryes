@@ -55,11 +55,12 @@ export class PackArmouryCard extends LitElement {
   armouryCardSelected(veterancy: number) {
     if (this.pack && this.deck) {
       const transports = this.deck.getTransportsForPack(this.pack);
+      const availableWithoutTransports = this.deck.getPackAvailableWithoutTransport(this.pack);
 
-      if (transports && transports.length > 1) {
+      if ((transports && transports.length > 1 && !availableWithoutTransports) || availableWithoutTransports) {
         this.openTransportDialog(veterancy);
       }
-      else if(transports && transports.length === 1) {
+      else if(transports && transports.length === 1 && !availableWithoutTransports) {
         this.deck.addUnit({veterancy, pack: this.pack, transport: transports[0]})
       }
       else {

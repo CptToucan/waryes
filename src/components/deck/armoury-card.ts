@@ -37,7 +37,7 @@ export class ArmouryCard extends LitElement {
   @property()
   disabled = false;
 
-  clickedAddButton(unit: Unit, veterancy?: number) {
+  clickedAddButton(unit?: Unit, veterancy?: number) {
     this.dispatchEvent(
       new CustomEvent('add-button-clicked', {
         detail: {unit, veterancy},
@@ -141,8 +141,8 @@ export class ArmouryCard extends LitElement {
       : 'No Traits';
   }
 
-  renderButton(activeVeterancy: number, unit: Unit, _pack: Pack, _deck: Deck) {
-    if (unit) {
+  renderButton(activeVeterancy: number, unit: Unit | undefined, _pack: Pack, _deck: Deck) {
+
       return html` <vaadin-button
         class="add-button"
         ?disabled=${this.disabled}
@@ -153,8 +153,6 @@ export class ArmouryCard extends LitElement {
       >
         <vaadin-icon icon="vaadin:plus"></vaadin-icon>
       </vaadin-button>`;
-    }
-    return html`No unit found`;
   }
 
   renderCommandPoints(unit: Unit, _pack: Pack, _deck: Deck) {

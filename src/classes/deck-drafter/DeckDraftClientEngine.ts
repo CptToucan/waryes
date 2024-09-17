@@ -19,6 +19,7 @@ interface PackConfig {
   pack: string;
   unit: string;
   availableTransports?: string[];
+  availableWithoutTransports: boolean;
 }
 
 interface DivisionPhaseState {
@@ -404,11 +405,18 @@ export class DeckDraftClientEngine implements DeckDraftEngine {
 
   chooseTransport(packConfig: PackConfig) {
     let transportChoice1 = null;
+
+    let options: (string | null)[] = packConfig.availableTransports || [];
+
+    if(packConfig.availableWithoutTransports) {
+      options.push(null)
+    }
+    
     if (
       packConfig?.availableTransports &&
       packConfig?.availableTransports?.length > 0
     ) {
-      transportChoice1 = this.generateChoice(packConfig.availableTransports);
+      transportChoice1 = this.generateChoice(options);
     }
     return transportChoice1;
   }
@@ -483,6 +491,7 @@ export class DeckDraftClientEngine implements DeckDraftEngine {
         unit: pack.unitDescriptor,
         pack: pack.packDescriptor,
         availableTransports: pack.availableTransportList,
+        availableWithoutTransports: pack.availableWithoutTransport
       };
     });
   }

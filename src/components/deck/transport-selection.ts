@@ -27,6 +27,13 @@ export class TransportSelection extends LitElement {
     return []
   }
 
+  get availableWithoutTransports(): boolean {
+    if(this.deck && this.pack) {
+      return this.deck.getPackAvailableWithoutTransport(this.pack);
+    }
+    return false;
+  }
+
   public showTransportDialog() {
     this.showing = true;
   }
@@ -45,7 +52,22 @@ export class TransportSelection extends LitElement {
         @opened-changed=${(event: CustomEvent) => {if(event.detail.value === false) {this.closeTransportDialog()}}}
         ${dialogRenderer(
           () =>
-            html`<div style="display: flex; flex-direction: column; align-items: center;">${this.availableTransports?.map(
+            html`<div style="display: flex; flex-direction: column; align-items: center;">
+          
+          ${this.availableWithoutTransports ? html`<transport-card
+          .unit=${undefined}
+          .pack=${this.pack}
+          .deck=${this.deck}
+            style="margin-bottom: var(--lumo-space-s);"
+            @add-button-clicked=${() =>
+              this.dispatchEvent(
+                new CustomEvent('transport-selected', {
+                  detail: {transport: undefined},
+                })
+              )}
+          ></transport-card>` : html``}
+          
+          ${this.availableTransports?.map(
               (transport) =>
                 html`<transport-card
                 .unit=${transport}

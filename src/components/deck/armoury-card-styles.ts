@@ -27,6 +27,8 @@ export const armouryCardStyles = css`
     width: 100%;
     display: flex;
     flex-direction: row;
+    min-height: 76px;
+    min-width: 150px;
   }
 
   .veterancy {
