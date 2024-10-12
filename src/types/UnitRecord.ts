@@ -37,6 +37,7 @@ export class UnitRecord {
     this.bombStrategy = new RecordField("bombStrategy", "Bomb Strategy", unit.bombStrategy, FieldType.DEFAULT);
     this.isSellable = new RecordField("isSellable", "Is Sellable", unit.isSellable, FieldType.BOOLEAN);
     this.divisions = new RecordField("divisions", "Divisions", unit.divisions, FieldType.COMPLEX);
+    this.flyingAltitude = new RecordField("flyingAltitude", "Flying Altitude", unit.flyingAltitude, FieldType.DISTANCE);
 
     const weaponRecords = [];
     for(const weapon of unit.weapons) {
@@ -80,6 +81,7 @@ export class UnitRecord {
   readonly bombStrategy: RecordField<string>;
   readonly isSellable: RecordField<boolean>;
   readonly divisions: RecordField<string[]>;
+  readonly flyingAltitude: RecordField<number | undefined>;
 
   getFields(): RecordField<unknown>[] {
     const fields: string[] = Object.getOwnPropertyNames(this);
