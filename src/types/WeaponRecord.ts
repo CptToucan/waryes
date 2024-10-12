@@ -262,6 +262,8 @@ export class WeaponRecord {
       FieldType.DISTANCE
     );
     
+
+    this.supplyCost = new RecordField('supplyCost', 'Supply cost', weapon.supplyCost, FieldType.NUMBER);
   }
 
   showInInterface: RecordField<boolean>;
@@ -306,6 +308,8 @@ export class WeaponRecord {
   smokeRadius: RecordField<number | undefined>;
   dispersionAtMaxRange: RecordField<number| undefined>;
   dispersionAtMinRange: RecordField<number | undefined>;
+
+  supplyCost: RecordField<number | undefined>;
 
   getFields(): RecordField<unknown>[] {
     const fields: string[] = Object.getOwnPropertyNames(this);
