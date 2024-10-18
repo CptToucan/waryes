@@ -194,6 +194,25 @@ const iconTraitMap: IconTraitMap = {
         'This vehicle is equipped with smoke launchers to generate a smoke cover when attacked.'
     ]
   },
+  'trait-sigint':
+  {
+      icon: 'trait-sigint',
+      name: "SIGINT", range: 'N/A', 
+      activationCondition: 'Activated by player by pressing B or SMOKE in the order panel', 
+      effects: [
+        'SIGINT units will automatically detect enemy units within two separate detection ranges, even when lacking line of sight.',
+        'SIGINT units cannot detect enemy units feature the Special Force or False Flag trait.'
+    ]
+  },
+  'trait-fire-direction':
+  {
+      icon: 'trait-fire-direction',
+      name: "Fire Direction", range: 'N/A', 
+      activationCondition: 'N/A', 
+      effects: [
+        'Fire direction units reduce the aim time of nearby artillery units on top of granting +1 Veterancy'
+    ]
+  },
 };
 
 export function getTraitFromIconName(icon: string): Trait {

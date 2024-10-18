@@ -111,7 +111,6 @@ export class DivisionAnalysisRoute
 
       country-flag {
         margin-right: var(--lumo-space-s);
-        max-height: 24px;
         max-width: 24px;
       }
 

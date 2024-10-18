@@ -104,7 +104,6 @@ export class UnitsRoute extends LitElement implements BeforeEnterObserver {
 
       country-flag {
         overflow: hidden;
-        height: 20px;
       }
 
       mod-image {

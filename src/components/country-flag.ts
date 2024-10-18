@@ -1,14 +1,16 @@
 import {css, html, LitElement, TemplateResult} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
-import Belgium from '../../images/flags/belgium.svg';
-import EastGermany from '../../images/flags/east-germany.svg';
-import France from '../../images/flags/france.svg';
-import SovietUnion from '../../images/flags/soviet-union.svg';
-import UK from '../../images/flags/uk.svg';
-import USA from '../../images/flags/usa.svg';
-import WestGermany from '../../images/flags/west-germany.svg';
-import Poland from '../../images/flags/poland.svg';
+import Belgium from '../../images/flags/BEL_FLAG.png';
+import EastGermany from '../../images/flags/RDA_FLAG.png';
+import France from '../../images/flags/FR_FLAG.png';
+import SovietUnion from '../../images/flags/SOV_FLAG.png';
+import UK from '../../images/flags/UK_FLAG.png';
+import USA from '../../images/flags/US_FLAG.png';
+import WestGermany from '../../images/flags/RFA_FLAG.png';
+import Poland from '../../images/flags/POL_FLAG.png';
+import Netherlands from '../../images/flags/NL_FLAG.png';
+import Luxembourg from '../../images/flags/LUX_FLAG.png';
 import { Country } from '../types/deck-builder';
 
 @customElement('country-flag')
@@ -20,7 +22,6 @@ export class CountryFlag extends LitElement {
         align-items: center;
         justify-content: center;
         width: 40px;
-        max-height: 24px;
       }
 
       img {
@@ -58,6 +59,13 @@ export class CountryFlag extends LitElement {
         break;
       case Country.POL:
         image = Poland
+        break;
+      case Country.NL:
+        image = Netherlands;
+        break;
+      case Country.LUX:
+        image = Luxembourg;
+        break;
     }
     return html`<img src=${image} alt=${this.country} title=${this.country} />`;
   }
