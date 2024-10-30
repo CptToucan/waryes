@@ -198,7 +198,7 @@ const iconTraitMap: IconTraitMap = {
   {
       icon: 'trait-sigint',
       name: "SIGINT", range: 'N/A', 
-      activationCondition: 'Activated by player by pressing B or SMOKE in the order panel', 
+      activationCondition: 'Activated by enemy units moving within range', 
       effects: [
         'SIGINT units will automatically detect enemy units within two separate detection ranges, even when lacking line of sight.',
         'SIGINT units cannot detect enemy units feature the Special Force or False Flag trait.'
