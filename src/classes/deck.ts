@@ -618,7 +618,8 @@ export class Deck {
 
       // If we have transports then availableWithoutTransport must be set to skip adding a transport
       if (!pack.availableWithoutTransport && !transportUnit) {
-        throw new Error('Decoded pack unit must have transport');
+        console.error('Decoded pack unit must have transport, omitting');
+        continue;
       }
 
       builtDeck.addUnit({
