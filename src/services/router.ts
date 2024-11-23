@@ -27,6 +27,8 @@ const routes: Route[] = [
   {path: '/deck-drafter/:sessionId', component: 'deck-draft-route'},
   {path: '/damage-calculator/:unitId', component: 'damage-calculator-route'},
   {path: '/damage-calculator', component: 'damage-calculator-route'},
+  {path: '/advanced-damage-calculator/:unitId', component: 'advanced-damage-calculator-route'},
+  {path: '/advanced-damage-calculator', component: 'advanced-damage-calculator-route'},
   {path: '/defcon2', component: 'defcon2-route'},
   {path: '/upload-bundle', component: 'upload-bundle-route'},
   {path: '/game-knowledge', component: 'game-knowledge-route'},
