@@ -3,8 +3,8 @@ interface AllianceMap {
 }
 
 const map: AllianceMap = {
-  "ENationalite/Allied": "NATO",
-  "ENationalite/Axis": "PACT"
+  "ECoalition/Allied": "NATO",
+  "ECoalaiton/Axis": "PACT"
 }
 
 export function getAllianceNameFromDescriptor(descriptor: string) {
