@@ -4,7 +4,7 @@ interface AllianceMap {
 
 const map: AllianceMap = {
   "ECoalition/Allied": "NATO",
-  "ECoalaiton/Axis": "PACT"
+  "ECoalition/Axis": "PACT"
 }
 
 export function getAllianceNameFromDescriptor(descriptor: string) {
