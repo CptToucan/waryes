@@ -109,8 +109,8 @@ interface UnitType {
 }
 
 enum Alliance {
-  NATO = 'ENationalite/Allied',
-  PACT = 'ENationalite/Axis',
+  NATO = 'ECoalition/Allied',
+  PACT = 'ECoalition/Axis',
 }
 
 interface SpeedForTerrain {
