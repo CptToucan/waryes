@@ -438,8 +438,9 @@ export class DeckDraftClientEngine implements DeckDraftEngine {
       }
     );
 
+    // remove values that generate less than 1 unit
     const nonZeroMultipliersWithIndex = multipliersWithIndex.filter(
-      (multiplierWithIndex) => multiplierWithIndex.multiplier > 0
+      (multiplierWithIndex) => multiplierWithIndex.multiplier * pack.numberOfUnitsInPack >= 1
     );
     const vetPick = this.generateChoice<{multiplier: number; index: number}>(
       nonZeroMultipliersWithIndex
