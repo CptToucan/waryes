@@ -309,7 +309,13 @@ class BundleManager {
   }
 
   normalizeCharacters(text: string): string {
-    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const charMap: { [key: string]: string } = {
+      'Ł': 'L',
+      'ł': 'l',
+      // Add more mappings as needed
+    };
+
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").split('').map(char => charMap[char] || char).join('');
   }
 
   parseUnit(unit: Unit, mod: BucketFolder) {
@@ -340,15 +346,19 @@ class BundleManager {
       };
     });
 
+    let searchNameHelper = this.normalizeCharacters(unit.name)
+    .toLowerCase()
+    .replace(UNIT_SEARCH_IGNORED_CHARACTERS, '')
+
+    searchNameHelper = `${searchNameHelper} ${unit.descriptorName.toLowerCase()}`;
+
     const newUnit = {
       ...unit,
       descriptorName: newDescriptorName,
       divisions: newDivisions,
       weapons: newWeapons,
       _display: true,
-      _searchNameHelper: this.normalizeCharacters(unit.name)
-        .toLowerCase()
-        .replace(UNIT_SEARCH_IGNORED_CHARACTERS, ''),
+      _searchNameHelper: searchNameHelper,
       mod,
     };
 
