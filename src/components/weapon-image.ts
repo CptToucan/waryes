@@ -12,6 +12,8 @@ export class WeaponImage extends LitElement {
         justify-content: center;
         flex-direction: column;
         width: 150px;
+        filter: hue-rotate(305deg) brightness(200%) saturate(10000%); 
+      
       }
 
       img {
@@ -19,6 +21,8 @@ export class WeaponImage extends LitElement {
         width: 100%;
         max-height: 56px;
       }
+
+
     `;
   }
 

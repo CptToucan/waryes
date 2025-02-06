@@ -111,15 +111,16 @@ export class WeaponViewRoute extends LitElement implements BeforeEnterObserver {
         position: relative;
       }
 
-      mod-image {
-        height: 12px;
+
+      
+      country-flag {
         position: absolute;
         top: 2px;
         right: 2px;
-        background-color: rgba(0, 0, 0, 0.5);
         border-radius: var(--lumo-border-radius);
         padding: 2px;
       }
+
 
       .division-flags {
         display: flex;
@@ -192,7 +193,7 @@ export class WeaponViewRoute extends LitElement implements BeforeEnterObserver {
                 </div>
                 <div class="image-wrapper">
                   <unit-image .unit=${unit}></unit-image>
-                  <mod-image .mod=${unit.mod}></mod-image>
+                  <country-flag .country=${unit.unitType.motherCountry}></country-flag>
                 </div>
                 <div class="unit-name">${unit.name}</div>
                 </a>`;

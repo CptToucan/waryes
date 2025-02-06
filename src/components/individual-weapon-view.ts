@@ -107,6 +107,9 @@ export class IndividualWeaponView extends LitElement {
   }
 
   @property()
+  showWeaponImage: boolean = false;
+
+  @property()
   weapon?: Weapon;
 
   @property()
@@ -155,9 +158,7 @@ export class IndividualWeaponView extends LitElement {
           },
           {
             name: 'Acceleration',
-            value: displayProjectileAcceleration(
-              missileProperties.maxMissileAcceleration
-            ),
+            value: displayProjectileAcceleration(missileProperties.maxMissileAcceleration),
           },
         ],
       });
@@ -208,10 +209,7 @@ export class IndividualWeaponView extends LitElement {
         },
         {
           name: 'Armor 1-shot at Max Range',
-          value:
-            weapon.instaKillAtMaxRangeArmour > 0
-              ? weapon.instaKillAtMaxRangeArmour
-              : 'N/A',
+          value: weapon.instaKillAtMaxRangeArmour > 0 ? weapon.instaKillAtMaxRangeArmour : 'N/A',
           expert: true,
         },
       ],
@@ -354,7 +352,8 @@ export class IndividualWeaponView extends LitElement {
 
       return html`
         ${this.renderWeaponTraits(weapon.traits)}
-        ${this.renderWeaponImage(weapon)} ${this.renderWeaponLayout(layout)}
+        ${this.showWeaponImage ? this.renderWeaponImage(weapon) : html``}
+        ${this.renderWeaponLayout(layout)}
       `;
     }
 
@@ -373,10 +372,7 @@ export class IndividualWeaponView extends LitElement {
   }
 
   renderWeaponImage(weapon: Weapon) {
-    return html` <a
-      class="weapon-image-container"
-      href="/weapon/${weapon.ammoDescriptorName}"
-    >
+    return html` <a class="weapon-image-container" href="/weapon/${weapon.ammoDescriptorName}">
       <weapon-image .weapon=${weapon}></weapon-image>
     </a>`;
   }
@@ -389,11 +385,7 @@ export class IndividualWeaponView extends LitElement {
     return this.renderStat(stat.name, stat.value, stat.expert);
   }
 
-  renderStat(
-    name: string,
-    value: unknown,
-    expertStat?: boolean
-  ): TemplateResult {
+  renderStat(name: string, value: unknown, expertStat?: boolean): TemplateResult {
     if (this.shouldRenderField(expertStat)) {
       return html`
         <div class="stat-row ${expertStat && 'expert'}">
@@ -442,20 +434,14 @@ export class IndividualWeaponView extends LitElement {
 
   renderStaticAccuracyScaling(weapon: Weapon, expert?: boolean) {
     if (weapon.staticAccuracyScaling) {
-      return this.renderAccuracyScaling(
-        weapon.staticAccuracyScaling,
-        expert ?? false
-      );
+      return this.renderAccuracyScaling(weapon.staticAccuracyScaling, expert ?? false);
     }
     return html``;
   }
 
   renderMotionAccuracyScaling(weapon: Weapon, expert?: boolean) {
     if (weapon.movingAccuracyScaling) {
-      return this.renderAccuracyScaling(
-        weapon.movingAccuracyScaling,
-        expert ?? false
-      );
+      return this.renderAccuracyScaling(weapon.movingAccuracyScaling, expert ?? false);
     }
     return html``;
   }
@@ -477,10 +463,7 @@ export class IndividualWeaponView extends LitElement {
         series.push({
           name: 'Heli',
           type: 'line',
-          data: scaling.helicopter.map((scale) => [
-            scale.distance,
-            scale.accuracy,
-          ]),
+          data: scaling.helicopter.map((scale) => [scale.distance, scale.accuracy]),
         });
         legend.push('Heli');
       }
@@ -554,9 +537,7 @@ export class IndividualWeaponView extends LitElement {
   }
 }
 
-function isWeaponGroupLayout(
-  layout: WeaponGroupLayout | WeaponStat
-): layout is WeaponGroupLayout {
+function isWeaponGroupLayout(layout: WeaponGroupLayout | WeaponStat): layout is WeaponGroupLayout {
   return (layout as WeaponGroupLayout).stats !== undefined;
 }
 

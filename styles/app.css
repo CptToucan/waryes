@@ -6,6 +6,11 @@
 html {
   font-family: var(--lumo-font-family);
   --lumo-font-family: RobotoMono;
+  --lumo-border-radius-s: 0px;
+  --lumo-border-radius-m: var(--lumo-border-radius, 0px);
+  --lumo-border-radius-l: 0px;
+  --lumo-border-radius: 0px;
+
 }
 
 body {
@@ -116,5 +121,5 @@ vaadin-combo-box-item {
 .unit-search-result country-flag {
   margin-right: var(--lumo-space-s);
   width: 60px;
-  border-radius: 10px;
 }
+

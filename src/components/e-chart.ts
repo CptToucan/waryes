@@ -94,9 +94,11 @@ const theme = {
   line: {
     itemStyle: {
       borderWidth: 1,
+      stroke: '#ff1fec'
     },
     lineStyle: {
       width: 2,
+      stroke: '#ff1fec'
     },
     symbolSize: 4,
     symbol: 'circle',

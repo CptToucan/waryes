@@ -36,6 +36,27 @@ export class UnitWeaponView extends LitElement {
       vaadin-tabs [part='tabs'] {
         -webkit-overflow-scrolling: unset !important;
       }
+
+      weapon-image {
+        max-width: 100px;
+        max-height: 50px;
+        position: relative;
+      }
+
+      vaadin-tab .weapon-tab {
+        display: flex;
+        flex-direction: column-reverse;
+      }
+
+
+
+      vaadin-tab:hover:not([selected]) .weapon-tab weapon-image {
+        filter: grayscale(100%) brightness(350%);
+      }
+
+      vaadin-tab:not([selected]) .weapon-tab weapon-image {
+        filter: grayscale(100%) brightness(250%);
+      }
     `;
   }
 
@@ -61,7 +82,10 @@ export class UnitWeaponView extends LitElement {
     const tabs = (this.unit?.weapons ?? [])
       .filter((w: Weapon) => Object.keys(w).length > 0)
       .map((weapon: Weapon) => {
-        return html`<vaadin-tab >${weapon.weaponName}</vaadin-tab>`;
+        return html`<vaadin-tab
+          ><div class="weapon-tab">
+            ${weapon.weaponName}<weapon-image .weapon=${weapon}></weapon-image></div
+        ></vaadin-tab>`;
       });
 
     return tabs;

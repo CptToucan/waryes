@@ -52,6 +52,9 @@ export class UnitSearch extends LitElement {
     this._selectedUnits = value;
   }
 
+  @property()
+  public theme: string = '';
+
   // Storage for manual filtering of comboboxes
   @property()
   filteredUnits: Unit[] = [];
@@ -141,6 +144,7 @@ export class UnitSearch extends LitElement {
       .filteredItems=${this.filteredUnits}
       @filter-changed=${this.filterChanged}
       @opened-changed=${this.multiSelectComboBoxOpenChanged}
+      theme=${this.theme}
       ${comboBoxRenderer(this.renderer, [])}
     ></vaadin-multi-select-combo-box>`;
   }
@@ -164,11 +168,6 @@ export class UnitSearch extends LitElement {
           <div class="unit-name">${unit.name}</div>
         </div>
       </div>
-      <div
-        style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; flex: 1 1 100%; padding-left: var(--lumo-space-xs);"
-      >
-        <mod-image style="height: 10px;" .mod=${unit.mod}></mod-image>
-      </div>
     </div>
   `;
 
@@ -184,6 +183,7 @@ export class UnitSearch extends LitElement {
             @selected-item-changed=${this.comboBoxUnitSelected}
             .filteredItems="${this.filteredUnits}"
             @filter-changed="${this.filterChanged}"
+            theme=${this.theme}
             ${comboBoxRenderer(this.renderer, [])}
           ></vaadin-combo-box>`}
     `;

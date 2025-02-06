@@ -6,7 +6,7 @@ import WaryesImage from '../../images/waryes-transparent.png';
 import {Unit} from '../types/unit';
 import '../components/unit-armor-view';
 import '@vaadin/tabs';
-import { BundleManagerService } from '../services/bundle-manager';
+import {BundleManagerService} from '../services/bundle-manager';
 
 @customElement('unit-view-route')
 export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
@@ -112,10 +112,14 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
     if (this.unit) {
       return html`<div class="expanded-unit-card show-on-large-screens">
           <div class="unit-info">
-            <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${() => this.expert = !this.expert}></unit-card-header-view>
+            <unit-card-header-view
+              .unit=${this.unit}
+              .expert=${this.expert}
+              @mode-toggled=${() => (this.expert = !this.expert)}
+            ></unit-card-header-view>
             <div class="unit-image">
               <div class="border-radius">
-              <unit-image .unit=${this.unit}></unit-image>
+                <unit-image .unit=${this.unit}></unit-image>
               </div>
             </div>
             <unit-armor-view .unit=${this.unit}></unit-armor-view>
@@ -126,6 +130,7 @@ export class UnitViewRoute extends LitElement implements BeforeEnterObserver {
               (weapon) =>
                 html`<div class="weapon">
                   <individual-weapon-view
+                    .showWeaponImage=${true}
                     .expert=${this.expert}
                     .weapon=${weapon}
                   ></individual-weapon-view>

@@ -60,6 +60,7 @@ export const armouryCardStyles = css`
     min-height: 20px;
     justify-content: space-around;
     color: var(--lumo-contrast-60pct);
+    height: 37px;
   }
 
 

@@ -9,7 +9,6 @@ import './unit-image';
 import '@vaadin/button';
 import {Unit} from '../types/unit';
 
-
 /**
  * Component for rendering the details of a single unit
  */
@@ -80,8 +79,16 @@ export class UnitCard extends LitElement {
 
   render(): TemplateResult {
     return html` <div class="unit-card">
-      <unit-card-header-view .unit=${this.unit} .expert=${this.expert} @mode-toggled=${this.changeMode}></unit-card-header-view>
-      ${this.showImage ? html`<div class="image-container"><div class="border-radius"><unit-image .unit=${this.unit}></unit-image></div></div>` : html``}
+      <unit-card-header-view
+        .unit=${this.unit}
+        .expert=${this.expert}
+        @mode-toggled=${this.changeMode}
+      ></unit-card-header-view>
+      ${this.showImage
+        ? html`<div class="image-container">
+            <div class="border-radius"><unit-image .unit=${this.unit}></unit-image></div>
+          </div>`
+        : html``}
       <unit-armor-view .unit=${this.unit}></unit-armor-view>
       <unit-weapon-view
         style="max-width: 100%"
@@ -89,7 +96,7 @@ export class UnitCard extends LitElement {
         ?expert=${this.expert}
         .selectedWeapon=${this.selectedWeapon}
         @active-weapon-changed=${(e: CustomEvent) => {
-          this.dispatchEvent(new CustomEvent('active-weapon-changed', {detail: e.detail}))
+          this.dispatchEvent(new CustomEvent('active-weapon-changed', {detail: e.detail}));
         }}
       ></unit-weapon-view>
       <unit-info-panel-view .unit=${this.unit}></unit-info-panel-view>

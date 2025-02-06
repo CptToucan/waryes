@@ -51,7 +51,6 @@ export class PackArmouryCard extends LitElement {
   }
 
   armouryCardSelected(veterancy: number) {
-    debugger;
     if (this.pack && this.deck) {
       const transports = this.deck.getTransportsForPack(this.pack);
       const availableWithoutTransports =

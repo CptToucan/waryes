@@ -261,6 +261,8 @@ export class WeaponRecord {
       weapon.dispersionAtMaxRange,
       FieldType.DISTANCE
     );
+
+    this.noiseMalus = new RecordField("noiseMalus", "Noise Malus", weapon.noiseMalus, FieldType.NUMBER);
     
 
     this.supplyCost = new RecordField('supplyCost', 'Supply cost', weapon.supplyCost, FieldType.NUMBER);
@@ -308,6 +310,8 @@ export class WeaponRecord {
   smokeRadius: RecordField<number | undefined>;
   dispersionAtMaxRange: RecordField<number| undefined>;
   dispersionAtMinRange: RecordField<number | undefined>;
+
+  noiseMalus: RecordField<number | undefined>;
 
   supplyCost: RecordField<number | undefined>;
 

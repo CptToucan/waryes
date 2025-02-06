@@ -4,7 +4,6 @@ import './unit-armor-view';
 import './unit-weapon-view';
 import './unit-info-panel-view';
 import './trait-badge';
-import './mod-image';
 import '@vaadin/button';
 import './division-flag';
 import {Unit} from '../types/unit';
@@ -122,8 +121,6 @@ export class UnitCardHeaderView extends LitElement {
             <country-flag
               .country=${this.unit?.unitType.motherCountry}
             ></country-flag>
-
-            <mod-image .mod=${this.unit?.mod}></mod-image>
           </div>
 
           <div style="display: flex; gap: var(--lumo-space-xs);">
