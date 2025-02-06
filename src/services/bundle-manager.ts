@@ -308,6 +308,10 @@ class BundleManager {
     return jsonData;
   }
 
+  normalizeCharacters(text: string): string {
+    return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  }
+
   parseUnit(unit: Unit, mod: BucketFolder) {
     const isCommand = isSpecialtyCommand(unit.specialities[0]);
     const isRecon = isSpecialtyRecon(unit.specialities[0]);
@@ -342,7 +346,7 @@ class BundleManager {
       divisions: newDivisions,
       weapons: newWeapons,
       _display: true,
-      _searchNameHelper: unit.name
+      _searchNameHelper: this.normalizeCharacters(unit.name)
         .toLowerCase()
         .replace(UNIT_SEARCH_IGNORED_CHARACTERS, ''),
       mod,
