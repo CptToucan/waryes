@@ -350,7 +350,7 @@ class BundleManager {
     .toLowerCase()
     .replace(UNIT_SEARCH_IGNORED_CHARACTERS, '')
 
-    searchNameHelper = `${searchNameHelper} ${unit.descriptorName.toLowerCase()}`;
+    searchNameHelper = `${unit.name} ${searchNameHelper} ${unit.descriptorName.toLowerCase()}`;
 
     const newUnit = {
       ...unit,
