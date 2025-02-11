@@ -550,7 +550,7 @@ export class DamageCalculator {
     const startingHealth = _startingHealth;
 
     // find last event with remainingHp present
-    const lastEventWithHp = events.find((event): event is ShotEvent | MissileHitEvent => 
+    const lastEventWithHp = [...events].reverse().find((event): event is ShotEvent | MissileHitEvent => 
       (event.type === 'shot' || event.type === 'missile-hit') && event.remainingHp !== undefined
     );
 
@@ -563,6 +563,7 @@ export class DamageCalculator {
     const timeElapsed = endTime - startTime;
     const healthLost = startingHealth - endingHealth;
     const dps = healthLost / timeElapsed;
+
 
     return dps;
   }
