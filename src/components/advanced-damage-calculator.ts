@@ -1,19 +1,46 @@
 import {ComboBoxSelectedItemChangedEvent} from '@vaadin/combo-box';
-import {css, html, LitElement, PropertyValues} from 'lit';
+import {css, html, LitElement} from 'lit';
 import {customElement, property, state} from 'lit/decorators.js';
-import {
-  Veterancy,
-  Cohesion,
-} from '../lib/veterancies-and-cohesions';
+import {Veterancy, Cohesion} from '../lib/veterancies-and-cohesions';
 import {Unit, Weapon} from '../types/unit';
-import { DamageCalculator } from '../classes/damage-calculator/DamageCalculator';
-import { DamageTable } from '../services/bundle-manager';
-import { Motion } from '../lib/motion';
-import { Side } from '../lib/side';
+import {DamageCalculator, EventResultType, WeaponEvent} from '../classes/damage-calculator/DamageCalculator';
+import {DamageTable} from '../services/bundle-manager';
+import {Motion} from '../lib/motion';
+import {Side} from '../lib/side';
+import './event-timeline';
 
-
-
-
+export type DamageCalculatorDamageCalculated = CustomEvent<DamageCalculatorDamageCalculatedDetail>;
+export type DamageCalculatorDpsMap = {totalDps: number, [key: string]: number};
+export type DamageCalculatorDamageCalculatedDetail = {
+  optimalKillWeaponEvents: WeaponEvent[];
+  optimalDps: DamageCalculatorDpsMap;
+  killWeaponEvents: WeaponEvent[];
+  killDps: DamageCalculatorDpsMap;
+  optimalSuppressWeaponEvents: WeaponEvent[];
+  optimalSuppressDps: DamageCalculatorDpsMap;
+  suppressWeaponEvents: WeaponEvent[];
+  suppressDps: DamageCalculatorDpsMap;
+  damageProperties: {
+    weapon: Weapon;
+    damageProperty: {
+      physical: {
+        family: string;
+        damage: number;
+        multiplier: number;
+      };
+      suppression: {
+        damage: number;
+        multiplier: number;
+      };
+      simultaneousProjectiles: number;
+    };
+    accuracy: number;
+    missileProperties?: {
+      fireAndForget: boolean,
+      missileTravelTimeToTarget: number,
+    }
+  }[];
+};
 
 @customElement('advanced-damage-calculator')
 export class AdvancedDamageCalculator extends LitElement {
@@ -209,35 +236,77 @@ export class AdvancedDamageCalculator extends LitElement {
     `;
   }
 
-  @property() 
+  @property()
   damageTable?: DamageTable;
 
   @state()
-  private _weapon?: Weapon | undefined;
+  private _weapons: Weapon[] = [];
 
   @property()
-  public get weapon(): Weapon | undefined {
-    return this._weapon;
+  public get weapons(): Weapon[] {
+    return this._weapons;
   }
-  public set weapon(value: Weapon | undefined) {
-    const oldAmmoDescriptor = this._weapon?.ammoDescriptorName;
-    const newAmmoDescriptor = value?.ammoDescriptorName;
-    this._weapon = value;
+  public set weapons(value: Weapon[]) {
+    let isDifferent = false;
+    if (value) {
 
-    if (oldAmmoDescriptor !== newAmmoDescriptor) {
+      if (this._weapons?.length !== value.length) {
+        isDifferent = true;
+      }
+
+      for (let i = 0; i < value.length; i++) {
+        const oldAmmoDescriptor = this._weapons?.[i]?.ammoDescriptorName;
+        const newAmmoDescriptor = value[i]?.ammoDescriptorName;
+
+        if (oldAmmoDescriptor !== newAmmoDescriptor) {
+          isDifferent = true;
+          break;
+        }
+      }
+    }
+
+    this._weapons = value;
+
+    if (isDifferent && this.targetUnit) {
       this.motion = Motion.STATIC;
 
-      if (this.targetUnit && value) {
-        this.maxRange = DamageCalculator.getMaxRangeOfWeaponTargettingUnit(value, this.targetUnit);
-        this.minRange = DamageCalculator.getMinRangeOfWeaponTargettingUnit(value, this.targetUnit);
-        this.distance = this.maxRange;
-      }
+      let {lowestMinRange, highestMaxRange} = this.getMinMaxWeaponRanges(value, this.targetUnit);
+
+      this.minRange = lowestMinRange;
+      this.maxRange = highestMaxRange;
+      this.distance = highestMaxRange;
+
+      console.log('weapons changed');
 
       this.calculateDamage();
     }
   }
 
   private _sourceUnit?: Unit | undefined;
+
+  private getMinMaxWeaponRanges(weapons: Weapon[], targetUnit: Unit) {
+    let lowestMinRange = 0;
+    let highestMaxRange = 0;
+    for (const weapon of weapons || []) {
+      const minRangeOfWeapon = DamageCalculator.getMinRangeOfWeaponTargettingUnit(
+        weapon,
+        targetUnit
+      );
+      const maxRangeOfWeapon = DamageCalculator.getMaxRangeOfWeaponTargettingUnit(
+        weapon,
+        targetUnit
+      );
+
+      if (minRangeOfWeapon < lowestMinRange) {
+        lowestMinRange = minRangeOfWeapon;
+      }
+
+      if (maxRangeOfWeapon > highestMaxRange) {
+        highestMaxRange = maxRangeOfWeapon;
+      }
+    }
+    return {lowestMinRange, highestMaxRange};
+  }
 
   @property()
   public get sourceUnit(): Unit | undefined {
@@ -255,9 +324,7 @@ export class AdvancedDamageCalculator extends LitElement {
 
   @state({
     hasChanged: (newVal, oldVal) => {
-      return (
-        (newVal as Unit)?.descriptorName !== (oldVal as Unit)?.descriptorName
-      );
+      return (newVal as Unit)?.descriptorName !== (oldVal as Unit)?.descriptorName;
     },
   })
   public get targetUnit(): Unit | undefined {
@@ -276,8 +343,13 @@ export class AdvancedDamageCalculator extends LitElement {
 
     const oldValue = this._targetUnit;
     this._targetUnit = value;
-    this.maxRange = this.weapon ? DamageCalculator.getMaxRangeOfWeaponTargettingUnit(this.weapon, value) : 0;
-    this.minRange = this.weapon ? DamageCalculator.getMinRangeOfWeaponTargettingUnit(this.weapon, value) : 0;
+
+    if (this.weapons) {
+      let {lowestMinRange, highestMaxRange} = this.getMinMaxWeaponRanges(this.weapons, value);
+
+      this.minRange = lowestMinRange;
+      this.maxRange = highestMaxRange;
+    }
 
     if (oldValue?.descriptorName !== value?.descriptorName) {
       this.selectedTerrain = 'None';
@@ -313,50 +385,123 @@ export class AdvancedDamageCalculator extends LitElement {
   @state()
   targetVeterancy?: Veterancy;
 
-
+  /*
   protected willUpdate(_changedProperties: PropertyValues): void {
     super.willUpdate(_changedProperties);
     this.calculateDamage();
-
   }
+    */
 
   public async calculateDamage() {
-    if (!this.weapon || !this.sourceUnit || !this.targetUnit || !this.damageTable) {
+    if (!this.weapons || !this.sourceUnit || !this.targetUnit || !this.damageTable) {
       return;
     }
 
-    const damageCalculator = new DamageCalculator(
+    const allWeaponsDamageCalculator = new DamageCalculator(
       {
         unit: this.sourceUnit,
-        weapon: this.weapon,
+        weapons: this.weapons,
       },
       this.targetUnit,
       this.damageTable
     );
 
-
-    const damageProperties = damageCalculator.calculate(
+    const optimalKillSimulation = allWeaponsDamageCalculator.simulateKill(
       this.distance,
       this.armourDirection,
       this.selectedTerrain,
       this.sourceVeterancy,
       this.targetVeterancy,
       this.motion,
-      this.cohesion
+      this.cohesion,
+      EventResultType.OPTIMAL
     );
 
-    console.log(damageProperties);
+    const optimalSuppressionSimulation = allWeaponsDamageCalculator.simulateSuppression(
+      this.distance,
+      this.armourDirection,
+      this.selectedTerrain,
+      this.sourceVeterancy,
+      this.targetVeterancy,
+      this.motion,
+      this.cohesion,
+      EventResultType.OPTIMAL
+    );
 
+
+    const damageProperties = [];
+    for (const weapon of this.weapons) {
+      const damageProperty = allWeaponsDamageCalculator.getDamagePropertiesForWeaponAgainstTarget(
+        weapon,
+        this.distance,
+        this.armourDirection,
+        this.selectedTerrain,
+        this.targetVeterancy
+      );
+
+
+
+      const accuracy = allWeaponsDamageCalculator.getAccuracyWithModifiers(
+        weapon,
+        this.distance,
+        this.motion,
+        damageProperty.physical.family,
+        this.sourceVeterancy,
+        this.targetVeterancy,
+        this.cohesion
+      );
+
+      const missileProperties = allWeaponsDamageCalculator.calculateMissileProperties(weapon, this.distance);
+
+      damageProperties.push({
+        weapon: weapon,
+        damageProperty: damageProperty,
+        accuracy: accuracy,
+        missileProperties: missileProperties
+      });
+    }
+
+    const killSimulation = allWeaponsDamageCalculator.simulateKill(
+      this.distance,
+      this.armourDirection,
+      this.selectedTerrain,
+      this.sourceVeterancy,
+      this.targetVeterancy,
+      this.motion,
+      this.cohesion,
+      EventResultType.AVERAGE
+    );
+
+    const suppressSimulation = allWeaponsDamageCalculator.simulateSuppression(
+      this.distance,
+      this.armourDirection,
+      this.selectedTerrain,
+      this.sourceVeterancy,
+      this.targetVeterancy,
+      this.motion,
+      this.cohesion,
+      EventResultType.AVERAGE
+    );
+
+
+    console.log("damage calculated");
     this.dispatchEvent(
       new CustomEvent('damage-calculated', {
         detail: {
-          ...damageProperties,
+
+          optimalKillWeaponEvents: optimalKillSimulation.events,
+          optimalDps: optimalKillSimulation.dpsMap,
+          killWeaponEvents: killSimulation.events,
+          killDps: killSimulation.dpsMap,
+          optimalSuppressWeaponEvents: optimalSuppressionSimulation.events,
+          optimalSuppressDps: optimalSuppressionSimulation.dpsMap,
+          suppressWeaponEvents: suppressSimulation.events,
+          suppressDps: suppressSimulation.dpsMap,
+          damageProperties: damageProperties,
         },
       })
     );
   }
-
-
 
   renderDistanceSelect(shouldDisableOptions: boolean) {
     return html`
@@ -375,17 +520,14 @@ export class AdvancedDamageCalculator extends LitElement {
           ?disabled=${shouldDisableOptions}
           @input=${(e: InputEvent) => {
             this.distance = Number((e.target as HTMLInputElement).value);
+            console.log('distance changed');
             this.calculateDamage();
           }}
         />
       </div>
       <div class="min-max ${shouldDisableOptions ? 'disabled' : ''}">
-        <div class="end-tick">
-          <span>${this.minRange}m</span><span>Min</span>
-        </div>
-        <div class="end-tick">
-          <span>${this.maxRange}m</span><span>Max</span>
-        </div>
+        <div class="end-tick"><span>${this.minRange}m</span><span>Min</span></div>
+        <div class="end-tick"><span>${this.maxRange}m</span><span>Max</span></div>
       </div>
 
       <div class="distance-value"></div>
@@ -395,28 +537,49 @@ export class AdvancedDamageCalculator extends LitElement {
   render() {
     let selectedUnitCanBeTargetedByWeapon = false;
 
-    if(this.weapon && this.targetUnit) {
-       selectedUnitCanBeTargetedByWeapon = DamageCalculator.canWeaponTargetUnit(this.weapon, this.targetUnit);
+    if (this.weapons && this.targetUnit) {
+      for (const weapon of this.weapons) {
+        selectedUnitCanBeTargetedByWeapon = DamageCalculator.canWeaponTargetUnit(
+          weapon,
+          this.targetUnit
+        );
+        if (selectedUnitCanBeTargetedByWeapon) {
+          break;
+        }
+      }
     }
 
     const shouldDisableOptions =
-      !this.weapon || !this.targetUnit || !selectedUnitCanBeTargetedByWeapon;
+      !this.weapons || !this.targetUnit || !selectedUnitCanBeTargetedByWeapon;
 
-    const motionOptions: Motion[] = [];
+    let motionOptions: Motion[] = [];
 
-    if ((this.weapon?.maxStaticAccuracy || 0) > 0) {
-      motionOptions.push(Motion.STATIC);
+    for (const weapon of this.weapons) {
+      if ((weapon.maxStaticAccuracy || 0) > 0) {
+        motionOptions.push(Motion.STATIC);
+      }
+
+      if ((weapon.maxMovingAccuracy || 0) > 0) {
+        motionOptions.push(Motion.MOVING);
+      }
     }
 
-    if ((this.weapon?.maxMovingAccuracy || 0) > 0) {
-      motionOptions.push(Motion.MOVING);
-    }
+    // make motion options unique
+    motionOptions = [...new Set(motionOptions)];
 
-    const veterancyOptionsForSourceUnit = this.sourceUnit ? DamageCalculator.getVeterancyOptions(this.sourceUnit) : [];
-    const veterancyOptionsForTargetUnit = this.targetUnit ? DamageCalculator.getVeterancyOptions(this.targetUnit) : [];
-    const cohesionOptionForSourceUnit = this.sourceUnit ? DamageCalculator.getCohesionOptions(this.sourceUnit) : [];
+    const veterancyOptionsForSourceUnit = this.sourceUnit
+      ? DamageCalculator.getVeterancyOptions(this.sourceUnit)
+      : [];
+    const veterancyOptionsForTargetUnit = this.targetUnit
+      ? DamageCalculator.getVeterancyOptions(this.targetUnit)
+      : [];
+    const cohesionOptionForSourceUnit = this.sourceUnit
+      ? DamageCalculator.getCohesionOptions(this.sourceUnit)
+      : [];
 
-    const occupiableTerrainsForUnit = this.targetUnit ? ['None', ...DamageCalculator.getOccupiableTerrainsForUnit(this.targetUnit)] : [];
+    const occupiableTerrainsForUnit = this.targetUnit
+      ? ['None', ...DamageCalculator.getOccupiableTerrainsForUnit(this.targetUnit)]
+      : [];
 
     return html`
       ${!selectedUnitCanBeTargetedByWeapon && this.targetUnit
@@ -430,9 +593,8 @@ export class AdvancedDamageCalculator extends LitElement {
           .selectedItem=${this.sourceVeterancy}
           .clearButtonVisible=${true}
           .items=${veterancyOptionsForSourceUnit}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Veterancy>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<Veterancy>) => {
             this.sourceVeterancy = e.detail.value || undefined;
             this.calculateDamage();
           }}
@@ -444,9 +606,8 @@ export class AdvancedDamageCalculator extends LitElement {
           .selectedItem=${this.cohesion}
           .clearButtonVisible=${true}
           .items=${cohesionOptionForSourceUnit}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Cohesion>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<Cohesion>) => {
             this.cohesion = e.detail.value || undefined;
             this.calculateDamage();
           }}
@@ -457,9 +618,8 @@ export class AdvancedDamageCalculator extends LitElement {
           ?disabled=${shouldDisableOptions}
           .selectedItem=${this.motion}
           .items=${[Motion.STATIC, Motion.MOVING]}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Motion>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<Motion>) => {
             this.motion = e.detail.value || Motion.STATIC;
             this.calculateDamage();
           }}
@@ -472,9 +632,8 @@ export class AdvancedDamageCalculator extends LitElement {
           .selectedItem=${this.targetVeterancy}
           .clearButtonVisible=${true}
           .items=${veterancyOptionsForTargetUnit}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Veterancy>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<Veterancy>) => {
             this.targetVeterancy = e.detail.value || undefined;
             this.calculateDamage();
           }}
@@ -486,9 +645,8 @@ export class AdvancedDamageCalculator extends LitElement {
           .selectedItem=${this.armourDirection}
           ?disabled=${shouldDisableOptions}
           .items=${[Side.FRONT, Side.SIDE, Side.REAR, Side.TOP]}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<Side>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<Side>) => {
             this.armourDirection = e.detail.value || Side.FRONT;
             this.calculateDamage();
           }}
@@ -499,9 +657,8 @@ export class AdvancedDamageCalculator extends LitElement {
           ?disabled=${shouldDisableOptions}
           .selectedItem=${this.selectedTerrain}
           .items=${occupiableTerrainsForUnit}
-          @selected-item-changed=${(
-            e: ComboBoxSelectedItemChangedEvent<string>
-          ) => {
+          theme="small"
+          @selected-item-changed=${(e: ComboBoxSelectedItemChangedEvent<string>) => {
             this.selectedTerrain = e.detail.value || 'None';
             this.calculateDamage();
           }}
@@ -510,9 +667,6 @@ export class AdvancedDamageCalculator extends LitElement {
       <div>${this.renderDistanceSelect(shouldDisableOptions)}</div>
     `;
   }
-
-
-
 }
 
 declare global {
