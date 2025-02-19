@@ -187,15 +187,16 @@ export class DamageCalculator {
     let eventsByTime = events.sort((a, b) => a.time - b.time);
 
     let remainingHp = totalHp;
-    let i = 0;
-    let timeOfKill = 0;
+    let eventIndex = 0;
 
     if (eventsByTime.length === 0) {
       return [];
     }
 
+
+    let killIndex = 0;
     while (remainingHp > 0) {
-      const event = eventsByTime[i];
+      const event = eventsByTime[eventIndex];
       if (event.type === 'shot' || event.type === 'missile-hit') {
         if (event.hit) {
           remainingHp -= event.damage || 0;
@@ -204,16 +205,15 @@ export class DamageCalculator {
       }
 
       if (remainingHp <= 0) {
-        timeOfKill = event.time;
+        killIndex = eventIndex;
         break;
       }
 
-      i++;
+      eventIndex++;
     }
 
     // remove all events that happen after the target is dead
-    eventsByTime = eventsByTime.filter((event) => event.time <= timeOfKill);
-
+    eventsByTime = eventsByTime.slice(0, killIndex + 1);
     return eventsByTime;
   }
 
