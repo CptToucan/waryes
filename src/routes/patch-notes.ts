@@ -876,14 +876,16 @@ export class PatchNotesRoute extends LitElement {
 
 
     const isNewTransport = isNewDiff(transportChanges);
-    console.log(isNewTransport);
+    const isOldTransport = isOldDiff(transportChanges);
     
     let addedTransports: any[] = [];
     let removedTransports: any[] = [];
 
     if(isNewTransport) {
-      console.log(transportChanges)
       addedTransports = [...(transportChanges.__new as any)]
+    }
+    else if(isOldTransport) {
+      removedTransports = [...(transportChanges.__old as any)]
     }
     else {
       addedTransports = transportChanges?.filter((diff) => {
@@ -949,6 +951,13 @@ function isNewDiff(diff: unknown): diff is NewDiff {
     return false;
   }
   return '__new' in diff;
+}
+
+function isOldDiff(diff: unknown): diff is Diff {
+  if (typeof diff !== 'object' || diff === null) {
+    return false;
+  }
+  return '__old' in diff;
 }
 
 function isAnyDiffElementArray(diff: unknown): diff is AnyDiffArrayElement[] {
