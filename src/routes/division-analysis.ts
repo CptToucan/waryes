@@ -229,10 +229,12 @@ export class DivisionAnalysisRoute
 {name: '19. MOTOSTRELECKE DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_19_MSD_multi', alliance: 'ECoalition/PACT', country: Country.TCH}]
 
 let result: Division[] = [];
-
+    
+    let index = 9999; // Avoid conflicts with existing divisions
     for (const division of southagDivisions) {
+      index += 1;
       result.push({
-        id: 0, // ID being 0 doesn't seem to cause issues
+        id: index, 
         name: division.name,
         descriptor: division.descriptor,
         alliance: division.alliance,
