@@ -222,7 +222,7 @@ export class DivisionAnalysisRoute
 {name: '1. LUFTLANDE-DIVISION', descriptor: 'Descriptor_Deck_Division_RFA_1_Luftlande_multi', alliance: 'ECoalition/NATO', country: Country.RFA},
 {name: '1. CANADIAN DIVISION', descriptor: 'Descriptor_Deck_Division_CAN_1st_Canadian_multi', alliance: 'ECoalition/NATO', country: Country.CAN},
 {name: `DIVISION ACORAZADA 'BRUNETE'`, descriptor: 'Descriptor_Deck_Division_ESP_Division_Brunete_multi', alliance: 'ECoalition/NATO', country: Country.ESP},
-{name: '27-YA GV. MOTOSTRELKI. DIV.', descriptor: 'Descriptor_Deck_Division_SOV_17_Gds_Tank_multi', alliance: 'ECoalition/PACT', country: Country.SOV},
+{name: '17-YA GV. MOTOSTRELKI. DIV.', descriptor: 'Descriptor_Deck_Division_SOV_17_Gds_Tank_multi', alliance: 'ECoalition/PACT', country: Country.SOV},
 {name: '31-YA TANK. DIV.', descriptor: 'Descriptor_Deck_Division_SOV_31_Tank_multi', alliance: 'ECoalition/PACT', country: Country.SOV},
 {name: '1. TANKOVA DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_1_Tank_multi', alliance: 'ECoalition/PACT', country: Country.TCH},
 {name: '303. TANKOVA DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_303_Tank_multi', alliance: 'ECoalition/PACT', country: Country.TCH},
