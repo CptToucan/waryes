@@ -22,6 +22,9 @@ enum Country {
   POL = "POL",
   NL = "NL",
   LUX = "LUX",
+  CAN = "CAN",
+  ESP = "ESP",
+  TCH = "TCH",
 }
 
 interface CostMatrix {
