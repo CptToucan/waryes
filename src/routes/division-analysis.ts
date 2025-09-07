@@ -12,7 +12,6 @@ import {LoadUnitsAndDivisionsMixin} from '../mixins/load-units-and-divisions';
 import {Division} from '../types/deck-builder';
 import {DivisionFilterMode} from '../components/filter/division-filter';
 import { StrapiAdapter } from '../classes/StrapiAdapter';
-import { Country } from '../types/deck-builder';
 
 export type DivisonAnalysisMap = {
   [key: string]: DivisionAnalysisDivision;
@@ -173,12 +172,6 @@ export class DivisionAnalysisRoute
     const response = await StrapiAdapter.getDivisionAnalysis();
     await this.loadUnitsAndDivisions();
 
-      // Add Southag divisions to divisionsMap
-  const southagDivisions = this.getSouthagDivisions();
-  for (const division of southagDivisions) {
-    this.divisionsMap[division.descriptor] = division;
-  }
-
     this.availableDivisions = Object.values(this.divisionsMap).sort(
       alphabeticalCompare
     );
@@ -214,45 +207,6 @@ export class DivisionAnalysisRoute
 
     history.replaceState({}, '', url.toString());
   }
-
-  // TEMPORARY SOUTHAG FIX
-  protected getSouthagDivisions(): Division[] {
-    const southagDivisions = [{name: '6E DIVISION LEGERE BLINDEE', descriptor: 'Descriptor_Deck_Division_FR_6e_Blindee_Legere_multi', alliance: 'ECoalition/NATO', country: Country.FR},
-{name: 'DIVISION DU RHIN', descriptor: 'Descriptor_Deck_Division_FR_Division_du_Rhin_multi', alliance: 'ECoalition/NATO', country: Country.FR},
-{name: '1. LUFTLANDE-DIVISION', descriptor: 'Descriptor_Deck_Division_RFA_1_Luftlande_multi', alliance: 'ECoalition/NATO', country: Country.RFA},
-{name: '1. CANADIAN DIVISION', descriptor: 'Descriptor_Deck_Division_CAN_1st_Canadian_multi', alliance: 'ECoalition/NATO', country: Country.CAN},
-{name: `DIVISION ACORAZADA 'BRUNETE'`, descriptor: 'Descriptor_Deck_Division_ESP_Division_Brunete_multi', alliance: 'ECoalition/NATO', country: Country.ESP},
-{name: '17-YA GV. MOTOSTRELKI. DIV.', descriptor: 'Descriptor_Deck_Division_SOV_17_Gds_Tank_multi', alliance: 'ECoalition/PACT', country: Country.SOV},
-{name: '31-YA TANK. DIV.', descriptor: 'Descriptor_Deck_Division_SOV_31_Tank_multi', alliance: 'ECoalition/PACT', country: Country.SOV},
-{name: '1. TANKOVA DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_1_Tank_multi', alliance: 'ECoalition/PACT', country: Country.TCH},
-{name: '303. TANKOVA DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_303_Tank_multi', alliance: 'ECoalition/PACT', country: Country.TCH},
-{name: '19. MOTOSTRELECKE DIVIZE', descriptor: 'Descriptor_Deck_Division_TCH_19_MSD_multi', alliance: 'ECoalition/PACT', country: Country.TCH}]
-
-let result: Division[] = [];
-    
-    let index = 9999; // Avoid conflicts with existing divisions
-    for (const division of southagDivisions) {
-      index += 1;
-      result.push({
-        id: index, 
-        name: division.name,
-        descriptor: division.descriptor,
-        alliance: division.alliance,
-        availableForPlay: true,
-        country: division.country,
-        tags: [],
-        maxActivationPoints: 0,
-        costMatrix: {
-          name: 'Default Cost Matrix',
-          matrix: []
-        },
-        packs: []
-      })
-    }
-
-    return result;
-  }
-
 
   renderDivisionSelection(): TemplateResult {
     const divisions = [];
